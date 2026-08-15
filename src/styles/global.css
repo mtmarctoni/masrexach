@@ -5,7 +5,7 @@
 @source not "../../docs";
 
 @theme {
-  --color-surface: #faf8f4;
+  --color-surface: #faf7f1;
   --color-surface-alt: #f0ece2;
   --color-ink: #211d17;
   --color-ink-soft: #55504a;
@@ -29,10 +29,25 @@
 
 @utility font-display {
   font-family: var(--font-heading);
+  font-optical-sizing: auto;
 }
 
 @utility font-body {
   font-family: var(--font-text);
+}
+
+/* Small-caps section label used above headings and lists. */
+@utility kicker {
+  font-family: var(--font-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Tabular lining figures for year columns and counters. */
+@utility tnum {
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 @layer base {
@@ -59,6 +74,18 @@
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Editorial drop cap on the first paragraph of the biography. */
+  .dropcap::first-letter {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 3.4em;
+    line-height: 0.82;
+    float: left;
+    padding-right: 0.12em;
+    padding-top: 0.06em;
+    color: var(--color-accent-strong);
   }
 
   ::selection {

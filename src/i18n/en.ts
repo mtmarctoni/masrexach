@@ -27,6 +27,8 @@ const en: TranslationContent = {
       "Recently he has been in contact with the artist Pascual de Cabo at his studio in Alaró; from the knowledge of these painters he has drawn a compendium that he has applied to his works in an intelligent and real way, giving them his own approach, yet very Majorcan.",
       "In truth, when we look at his landscapes we are deeply immersed in the Majorcan landscape, our present landscape, the one of a lifetime.",
     ],
+    portraitAlt: "Antoni Mas Rexach, seated among his paintings at an exhibition.",
+    portraitCaption: "The artist, surrounded by his work.",
   },
   exhibitions: {
     title: "Exhibitions — Antoni Mas Rexach",

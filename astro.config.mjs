@@ -77,13 +77,13 @@ export default defineConfig({
   fonts: [
     {
       provider: fontProviders.local(),
-      name: "Roboto Slab",
+      name: "Fraunces",
       cssVariable: "--font-heading",
       fallbacks: ["Georgia", "serif"],
       options: {
         variants: [
           {
-            src: ["./src/assets/fonts/roboto-slab-latin-wght-normal.woff2"],
+            src: ["./src/assets/fonts/fraunces-latin-wght-normal.woff2"],
             weight: "100 900",
             style: "normal",
           },
@@ -92,15 +92,20 @@ export default defineConfig({
     },
     {
       provider: fontProviders.local(),
-      name: "Inter",
+      name: "Instrument Sans",
       cssVariable: "--font-text",
       fallbacks: ["system-ui", "sans-serif"],
       options: {
         variants: [
           {
-            src: ["./src/assets/fonts/inter-latin-wght-normal.woff2"],
-            weight: "100 900",
+            src: ["./src/assets/fonts/instrument-sans-latin-wght-normal.woff2"],
+            weight: "400 700",
             style: "normal",
+          },
+          {
+            src: ["./src/assets/fonts/instrument-sans-latin-wght-italic.woff2"],
+            weight: "400 700",
+            style: "italic",
           },
         ],
       },

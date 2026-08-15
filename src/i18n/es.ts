@@ -27,6 +27,8 @@ const es: TranslationContent = {
       "Últimamente ha contactado con el artista Pascual de Cabo en su taller de Alaró; de los conocimientos de estos pintores ha extraído un compendio que ha aplicado a sus obras de una manera inteligente y real, les ha dado un enfoque propio, pero muy mallorquín.",
       "En realidad, cuando miramos sus paisajes nos sumergimos profundamente en el paisaje mallorquín, nuestro paisaje actual, el de toda la vida.",
     ],
+    portraitAlt: "Antoni Mas Rexach, sentado entre sus cuadros durante una exposición.",
+    portraitCaption: "El artista, rodeado de su obra.",
   },
   exhibitions: {
     title: "Exposiciones — Antoni Mas Rexach",

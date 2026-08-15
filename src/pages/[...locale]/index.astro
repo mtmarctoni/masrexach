@@ -1,6 +1,5 @@
 ---
 import Gallery from "../../components/Gallery.astro";
-import type { Locale } from "../../i18n";
 import { getDict, localeRoutes } from "../../i18n";
 import Base from "../../layouts/Base.astro";
 
@@ -16,5 +15,17 @@ const dict = getDict(locale);
   description={dict.home.description}
   path="/"
 >
+  <section class="border-b border-border pb-10 pt-14 sm:pt-20">
+    <p class="kicker text-accent-strong">Antoni Mas Rexach</p>
+    <h1
+      class="mt-4 max-w-3xl font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl"
+    >
+      {dict.home.heading}
+    </h1>
+    <p class="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-soft">
+      {dict.home.description}
+    </p>
+  </section>
+
   <Gallery locale={locale} />
 </Base>

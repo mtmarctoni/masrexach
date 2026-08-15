@@ -36,13 +36,13 @@ const infoBlocks = [
   description={dict.contact.description}
   path="/contacto"
 >
-  <section class="py-10">
+  <section class="py-14 sm:py-20">
     <h1
-      class="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl"
+      class="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl"
     >
       {dict.contact.heading}
     </h1>
-    <p class="mt-4 max-w-2xl text-[15px] leading-relaxed text-ink-soft">
+    <p class="mt-6 max-w-2xl text-[15px] leading-relaxed text-ink-soft">
       {dict.contact.intro}
     </p>
 
@@ -54,8 +54,8 @@ const infoBlocks = [
       <aside class="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
         {
           infoBlocks.map(({ title, value, href }) => (
-            <div class="mt-8 first:mt-0">
-              <h2 class="font-display text-xs font-semibold uppercase tracking-widest text-ink-faint">
+            <div class="mt-9 first:mt-0">
+              <h2 class="kicker text-ink-faint">
                 {title}
               </h2>
               {href ? (
