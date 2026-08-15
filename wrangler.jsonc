@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "masrexach",
+  "compatibility_date": "2026-08-04",
+  "routes": [{ "pattern": "masrexach.marctonimas.com", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+  "env": {
+    "staging": {
+      "name": "masrexach-staging",
+      "routes": [{ "pattern": "masrexach-staging.marctonimas.com", "custom_domain": true }],
+      "workers_dev": true,
+      "preview_urls": true
+    }
+  }
+}
