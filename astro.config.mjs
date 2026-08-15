@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders } from "astro/config";
 
 export default defineConfig({
-  site: "https://www.masrexach.com",
+  site: "https://masrexach.marctonimas.com",
   adapter: cloudflare({ imageService: "compile" }),
   env: {
     schema: {
