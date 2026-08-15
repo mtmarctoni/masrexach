@@ -1,5 +1,7 @@
-# 2026-07-15: esbuild 0.27.7 (CVSS 2.5, low) — build tool only, not runtime.
-# astro@6.4.8 pins esbuild ^0.27; fix blocked on astro 7 major upgrade.
+# 2026-08-15: extract-zip 2.0.1 (GHSA-jmr9-qjv8-65gv, CVSS 8.6) — no fixed
+# release exists (2.0.1 is latest). Transitive dep of @puppeteer/browsers via
+# @lhci/cli: used only in CI to unzip the Lighthouse Chromium download, never
+# shipped to production. Pin accepted until an upstream fix is released.
 [[IgnoredVulns]]
-id = "GHSA-g7r4-m6w7-qqqr"
-reason = "Build tool only; astro@6.4.8 pins esbuild ^0.27, fix requires astro 7 major."
+id = "GHSA-jmr9-qjv8-65gv"
+reason = "Dev-only CI toolchain (@lhci/cli -> @puppeteer/browsers); no fixed version of extract-zip exists; not part of any deployed artifact."
