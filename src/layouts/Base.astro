@@ -1,0 +1,41 @@
+---
+import type { Locale } from "../i18n";
+import { getDict } from "../i18n";
+import "../styles/global.css";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import SEO from "../components/SEO.astro";
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  path: string;
+  ogImage?: string;
+}
+
+const { locale, title, description, path, ogImage } = Astro.props;
+const dict = getDict(locale);
+---
+
+<SEO
+  title={title}
+  description={description}
+  path={path}
+  locale={locale}
+  ogImage={ogImage}
+/>
+
+<body class="min-h-screen bg-surface font-body text-ink">
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-ink focus:px-4 focus:py-2 focus:text-paper-dark"
+  >
+    {dict.a11y.skipToContent}
+  </a>
+  <Header locale={locale} currentPath={path} />
+  <main id="main" class="mx-auto w-full max-w-6xl px-6">
+    <slot />
+  </main>
+  <Footer locale={locale} />
+</body>

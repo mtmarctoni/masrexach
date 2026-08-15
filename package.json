@@ -1,0 +1,46 @@
+{
+  "name": "masrexach",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "rm -rf node_modules/.vite && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "clean": "rm -rf node_modules/.vite dist",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "knip": "knip",
+    "depcruise": "depcruise src tests",
+    "test": "vitest run",
+    "smoke": "node scripts/smoke.mjs",
+    "prepare": "simple-git-hooks",
+    "astro": "astro"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec biome check --staged --no-errors-on-unmatched --files-ignore-unknown=true"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.2.1",
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.2.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@biomejs/biome": "^2.5.8",
+    "@lhci/cli": "^0.15.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "dependency-cruiser": "^18.2.0",
+    "knip": "^6.32.2",
+    "simple-git-hooks": "^2.13.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,0 +1,73 @@
+---
+import type { Locale } from "../i18n";
+import { getDict, localizedPath } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = getDict(locale);
+
+const nav = [
+  { href: "/", label: dict.nav.painting },
+  { href: "/biografia", label: dict.nav.biography },
+  { href: "/exposiciones", label: dict.nav.exhibitions },
+  { href: "/contacto", label: dict.nav.contact },
+];
+
+const blocks = [
+  { title: dict.contact.nextExhibitionTitle, text: dict.constants.nextExhibition },
+  { title: dict.contact.galleryTitle, text: dict.constants.permanent },
+  { title: dict.contact.studioTitle, text: dict.constants.studio },
+];
+---
+
+<footer class="mt-20 bg-ink text-paper-dark">
+  <div class="mx-auto max-w-6xl px-6 py-12">
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        blocks.map(({ title, text }) => (
+          <div>
+            <h2 class="font-display text-xs font-semibold uppercase tracking-widest text-paper-60">
+              {title}
+            </h2>
+            <p class="mt-3 text-sm leading-relaxed">{text}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-10 flex flex-col gap-6 border-t border-ink-line pt-8 md:flex-row md:items-center md:justify-between">
+      <nav aria-label={dict.a11y.footerNav}>
+        <ul class="flex flex-wrap gap-x-6 gap-y-2">
+          {
+            nav.map(({ href, label }) => (
+              <li>
+                <a
+                  href={localizedPath(locale, href)}
+                  class="text-sm text-paper-80 transition-colors hover:text-paper-dark"
+                >
+                  {label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a
+              href={localizedPath(locale, "/legal")}
+              class="text-sm text-paper-80 transition-colors hover:text-paper-dark"
+            >
+              {dict.legal.heading}
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="text-sm text-paper-70">
+        <p>{dict.constants.copyright}</p>
+        <p>{dict.constants.copyright2}</p>
+      </div>
+    </div>
+  </div>
+</footer>

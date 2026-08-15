@@ -1,0 +1,77 @@
+---
+import ContactForm from "../../components/ContactForm.astro";
+import type { Locale } from "../../i18n";
+import { getDict, localeRoutes } from "../../i18n";
+import Base from "../../layouts/Base.astro";
+
+export const getStaticPaths = localeRoutes;
+
+const { locale } = Astro.props;
+const dict = getDict(locale);
+
+const infoBlocks = [
+  {
+    title: dict.contact.phoneTitle,
+    value: "670 831 743",
+    href: "tel:+34670831743",
+  },
+  {
+    title: dict.contact.nextExhibitionTitle,
+    value: dict.constants.nextExhibition,
+  },
+  {
+    title: dict.contact.galleryTitle,
+    value: dict.constants.permanent,
+  },
+  {
+    title: dict.contact.studioTitle,
+    value: dict.constants.studio,
+  },
+];
+---
+
+<Base
+  locale={locale}
+  title={dict.contact.title}
+  description={dict.contact.description}
+  path="/contacto"
+>
+  <section class="py-10">
+    <h1
+      class="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl"
+    >
+      {dict.contact.heading}
+    </h1>
+    <p class="mt-4 max-w-2xl text-[15px] leading-relaxed text-ink-soft">
+      {dict.contact.intro}
+    </p>
+
+    <div class="mt-12 grid gap-14 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div class="max-w-2xl">
+        <ContactForm locale={locale} />
+      </div>
+
+      <aside class="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+        {
+          infoBlocks.map(({ title, value, href }) => (
+            <div class="mt-8 first:mt-0">
+              <h2 class="font-display text-xs font-semibold uppercase tracking-widest text-ink-faint">
+                {title}
+              </h2>
+              {href ? (
+                <a
+                  href={href}
+                  class="mt-2 block text-sm leading-relaxed text-accent-strong underline decoration-accent underline-offset-4"
+                >
+                  {value}
+                </a>
+              ) : (
+                <p class="mt-2 text-sm leading-relaxed text-ink-soft">{value}</p>
+              )}
+            </div>
+          ))
+        }
+      </aside>
+    </div>
+  </section>
+</Base>

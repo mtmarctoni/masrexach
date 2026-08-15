@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+
+# Wrangler local state
+.wrangler/
+
+# Environment
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# Diagnostics
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Testing
+coverage/
+.lighthouseci/
+lhci_reports/
+
+# Misc
+tmp/

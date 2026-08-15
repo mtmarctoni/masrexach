@@ -1,0 +1,31 @@
+---
+import type { Locale } from "../i18n";
+import { getDict, localizedPath } from "../i18n";
+import Base from "../layouts/Base.astro";
+
+const locale: Locale = "es";
+const dict = getDict(locale);
+---
+
+<Base
+  locale={locale}
+  title={`404 — ${dict.home.title}`}
+  description={dict.home.description}
+  path="/"
+>
+  <section class="py-24 text-center">
+    <p class="font-display text-6xl font-semibold text-accent">404</p>
+    <h1 class="mt-4 font-display text-2xl font-semibold text-ink">
+      Página no encontrada
+    </h1>
+    <p class="mx-auto mt-3 max-w-md text-sm text-ink-soft">
+      La página que buscas no existe o se ha movido. Vuelve a la obra del artista.
+    </p>
+    <a
+      href={localizedPath(locale, "/")}
+      class="mt-8 inline-flex items-center justify-center rounded-sm bg-accent px-6 py-2.5 text-sm font-medium text-surface transition-colors hover:bg-accent-strong"
+    >
+      {dict.nav.painting}
+    </a>
+  </section>
+</Base>

@@ -1,0 +1,221 @@
+---
+import { getImage } from "astro:assets";
+import { artworkImages, artworks } from "../data/artworks";
+import type { Locale } from "../i18n";
+import { getDict } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = getDict(locale);
+
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/images/artwork/*.jpg",
+  { eager: true },
+);
+
+const prepared = await Promise.all(
+  artworks.map(async (art) => {
+    const filename = artworkImages.get(art.id);
+    const module = filename ? imageModules[`../assets/images/artwork/${filename}`] : undefined;
+    const caption = art.caption[locale];
+    const alt = `${art.title} — ${caption}`;
+    if (!module) {
+      return { art, alt, grid: undefined, large: undefined };
+    }
+    const grid = await getImage({
+      src: module.default,
+      width: 720,
+      quality: 72,
+      format: "webp",
+    });
+    const large = await getImage({
+      src: module.default,
+      width: 1280,
+      quality: 72,
+      format: "webp",
+    });
+    return { art, alt, grid, large };
+  }),
+);
+---
+
+<section aria-labelledby="gallery-heading" class="py-10">
+  <h1
+    id="gallery-heading"
+    class="mb-10 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl"
+  >
+    {dict.home.heading}
+  </h1>
+
+  <div class="columns-2 gap-4 sm:columns-3 lg:gap-6 [column-fill:balance]">
+    {
+      prepared.map(({ art, alt, grid, large }, index) => (
+        <figure
+          class="mb-4 break-inside-avoid lg:mb-6"
+          data-lightbox-item={art.id}
+        >
+          <button
+            type="button"
+            data-lightbox-trigger
+            data-index={index}
+            data-large-src={large?.src}
+            data-title={art.title}
+            data-caption={art.caption[locale]}
+            data-alt={alt}
+            aria-label={`${dict.gallery.openImage}: ${art.title}`}
+            class="group block w-full cursor-zoom-in overflow-hidden rounded-sm bg-surface-alt"
+          >
+            {
+              grid ? (
+                <img
+                  src={grid.src}
+                  width={grid.attributes.width}
+                  height={grid.attributes.height}
+                  alt={alt}
+                  loading="lazy"
+                  decoding="async"
+                  class="zoom-img h-auto w-full"
+                />
+              ) : (
+                <span class="block h-48 w-full" aria-hidden="true" />
+              )
+            }
+          </button>
+          <figcaption class="mt-2 px-0.5 text-sm">
+            <p class="font-display font-medium text-ink">{art.title}</p>
+            <p class="mt-0.5 text-xs text-ink-soft">{art.caption[locale]}</p>
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<dialog
+  data-lightbox
+  aria-label={dict.gallery.openImage}
+  class="m-auto p-0"
+  style="background: transparent; border: 0; max-width: min(94vw, 64rem); max-height: 94vh;"
+>
+  <div class="relative flex flex-col items-center gap-4">
+    <img
+      data-lightbox-image
+      alt=""
+      class="max-h-[72vh] w-auto max-w-full rounded-sm object-contain lightbox-shadow"
+    />
+    <div class="text-center text-paper-dark">
+      <p data-lightbox-title class="font-display font-medium" />
+      <p data-lightbox-caption class="mt-1 text-sm text-paper-70" />
+      <p data-lightbox-counter class="mt-2 text-xs text-paper-60" />
+    </div>
+
+    <button
+      type="button"
+      data-lightbox-close
+      aria-label={dict.gallery.close}
+      class="absolute -right-2 -top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-paper-dark text-ink transition-colors hover:bg-white sm:-right-6"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      data-lightbox-prev
+      aria-label={dict.gallery.previous}
+      class="lightbox-nav lightbox-nav-prev"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+        <path d="M15 6l-6 6 6 6" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      data-lightbox-next
+      aria-label={dict.gallery.next}
+      class="lightbox-nav lightbox-nav-next"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+        <path d="M9 6l6 6-6 6" />
+      </svg>
+    </button>
+  </div>
+</dialog>
+
+<style>
+  dialog[data-lightbox]::backdrop {
+    background: rgb(22 20 16 / 0.88);
+  }
+
+  /* Scoped hover zoom: avoids Tailwind's scale/filter utility chains, which
+     ship a large @property fallback payload for one 2% zoom effect. */
+  .zoom-img {
+    transition:
+      transform 300ms ease,
+      translate 300ms ease,
+      scale 300ms ease,
+      rotate 300ms ease;
+  }
+
+  .group:hover .zoom-img {
+    transform: scale(1.02);
+  }
+
+  /* Scoped lightbox arrows: avoids Tailwind's translate/transform utility
+     chains, which unconditionally ship .transform/.filter rules and a large
+     @property fallback payload for two buttons. */
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    translate: 0 -50%;
+    border-radius: 9999px;
+    background: var(--color-paper-dark);
+    color: var(--color-ink);
+    padding: 0.5rem;
+    transition: background-color 150ms ease;
+    cursor: pointer;
+  }
+
+  .lightbox-nav:hover {
+    background: #fff;
+  }
+
+  .lightbox-nav-prev {
+    left: 0;
+  }
+
+  .lightbox-nav-next {
+    right: 0;
+  }
+
+  @media (width >= 40rem) {
+    .lightbox-nav-prev {
+      left: -1rem;
+    }
+
+    .lightbox-nav-next {
+      right: -1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lightbox-nav {
+      transition: none;
+    }
+
+    .zoom-img {
+      transition: none;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ counterTemplate: dict.gallery.counter }}>
+  import { initGallery } from "../scripts/gallery";
+
+  initGallery({ counterTemplate });
+</script>

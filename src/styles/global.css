@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+/* Plan/snapshot docs mention utility names as prose; they are not markup.
+ * Excluded so class detection never emits utilities for documentation text. */
+@source not "../../docs";
+
+@theme {
+  --color-surface: #faf8f4;
+  --color-surface-alt: #f0ece2;
+  --color-ink: #211d17;
+  --color-ink-soft: #55504a;
+  --color-ink-faint: #8b857b;
+  --color-accent: #8a5a33;
+  --color-accent-strong: #6e4728;
+  --color-accent-soft: #a9744a;
+  --color-border: #e2dccf;
+  --color-paper-dark: #efe9dc;
+  /* Precomputed alpha blends of paper-dark over the ink footer/scrim
+     backgrounds — solid tokens ship without color-mix() fallbacks. */
+  --color-paper-80: #c6c0b5;
+  --color-paper-70: #b1aca1;
+  --color-paper-60: #9d978d;
+  --color-ink-line: #403c35;
+}
+
+@utility lightbox-shadow {
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.45);
+}
+
+@utility font-display {
+  font-family: var(--font-heading);
+}
+
+@utility font-body {
+  font-family: var(--font-text);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--color-surface);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    font-family: var(--font-text);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-surface);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}

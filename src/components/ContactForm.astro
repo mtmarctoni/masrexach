@@ -1,0 +1,94 @@
+---
+import type { Locale } from "../i18n";
+import { getDict } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const f = dict.contact.form;
+---
+
+<form
+  method="POST"
+  action={Astro.url.pathname}
+  data-contact-form
+  data-contact-i18n={JSON.stringify({
+    required: f.required,
+    invalidEmail: f.invalidEmail,
+    sending: f.sending,
+    success: f.success,
+    error: f.error,
+    submit: f.submit,
+  })}
+  class="grid gap-5"
+  novalidate
+>
+  <div class="grid gap-5 sm:grid-cols-2">
+    <label class="grid gap-1.5">
+      <span class="text-sm font-medium text-ink">{f.name}</span>
+      <input
+        type="text"
+        name="name"
+        autocomplete="name"
+        placeholder={f.namePlaceholder}
+        required
+        data-contact-field="name"
+        class="w-full rounded-sm border border-border bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none"
+      />
+    </label>
+
+    <label class="grid gap-1.5">
+      <span class="text-sm font-medium text-ink">{f.email}</span>
+      <input
+        type="email"
+        name="email"
+        autocomplete="email"
+        placeholder={f.emailPlaceholder}
+        required
+        data-contact-field="email"
+        class="w-full rounded-sm border border-border bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none"
+      />
+    </label>
+  </div>
+
+  <label class="grid gap-1.5">
+    <span class="text-sm font-medium text-ink">{f.message}</span>
+    <textarea
+      name="message"
+      rows={5}
+      placeholder={f.messagePlaceholder}
+      required
+      data-contact-field="message"
+      class="w-full resize-y rounded-sm border border-border bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none"
+    />
+  </label>
+
+  <input
+    type="text"
+    name="company"
+    tabindex="-1"
+    autocomplete="off"
+    aria-hidden="true"
+    class="absolute -left-[9999px] h-px w-px opacity-0"
+  />
+
+  <div class="flex items-center gap-4">
+    <button
+      type="submit"
+      data-contact-submit
+      class="inline-flex items-center justify-center rounded-sm bg-accent px-6 py-2.5 text-sm font-medium text-surface transition-colors hover:bg-accent-strong focus:outline-none"
+    >
+      {f.submit}
+    </button>
+    <p data-contact-status role="status" aria-live="polite" class="text-sm text-ink-soft" />
+  </div>
+</form>
+
+<script>
+  import { initContactForm } from "../scripts/contact-form";
+
+  initContactForm();
+</script>

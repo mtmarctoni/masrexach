@@ -1,0 +1,4 @@
+# Copy to .dev.vars (gitignored) and fill in for local development.
+# Placeholder values — real keys are provided at deploy time (see follow-up.md).
+RESEND_API_KEY=re_YOUR_RESEND_API_KEY_PLACEHOLDER
+CONTACT_TO_EMAIL=artista@PLACEHOLDER.example

@@ -1,0 +1,20 @@
+---
+import Gallery from "../../components/Gallery.astro";
+import type { Locale } from "../../i18n";
+import { getDict, localeRoutes } from "../../i18n";
+import Base from "../../layouts/Base.astro";
+
+export const getStaticPaths = localeRoutes;
+
+const { locale } = Astro.props;
+const dict = getDict(locale);
+---
+
+<Base
+  locale={locale}
+  title={dict.home.title}
+  description={dict.home.description}
+  path="/"
+>
+  <Gallery locale={locale} />
+</Base>

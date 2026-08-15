@@ -1,0 +1,55 @@
+---
+import { Font } from "astro:assets";
+import type { Locale } from "../i18n";
+import { alternatePaths, localizedUrl, siteUrl } from "../i18n";
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  locale: Locale;
+  ogImage?: string;
+}
+
+const { title, description, path, locale, ogImage = "/og.jpg" } = Astro.props;
+
+const canonical = localizedUrl(locale, path);
+const alternates = alternatePaths(locale, path);
+const image = `${siteUrl}${ogImage}`;
+---
+
+<!doctype html>
+<html lang={locale} data-locale={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#faf8f4" />
+    <link rel="canonical" href={canonical} />
+    {
+      Object.entries(alternates).map(([key, href]) => (
+        <link
+          rel="alternate"
+          hreflang={key}
+          href={`${siteUrl}${href}`}
+        />
+      ))
+    }
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Antoni Mas Rexach" />
+    <meta property="og:locale" content={locale} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:alt" content="Pintura de Antoni Mas Rexach" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <meta name="robots" content="index, follow" />
+    <Font cssVariable="--font-heading" preload />
+    <Font cssVariable="--font-text" />
+  </head>
+</html>
