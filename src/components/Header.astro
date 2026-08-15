@@ -19,16 +19,16 @@ const links = [
 ];
 ---
 
-<header class="sticky top-0 z-40 border-b border-border bg-surface">
+<header class="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur-sm">
   <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
     <a
       href={localizedPath(locale, "/")}
-      class="font-display text-lg font-semibold tracking-tight text-ink"
+      class="font-display text-xl font-semibold tracking-tight text-ink transition-colors hover:text-accent-strong"
     >
       Antoni Mas Rexach
     </a>
 
-    <nav aria-label={dict.nav.painting} class="hidden items-center gap-7 md:flex">
+    <nav aria-label={dict.nav.painting} class="hidden items-center gap-8 md:flex">
       {
         links.map(({ href, label }) => {
           const localized = localizedPath(locale, href);
@@ -36,7 +36,8 @@ const links = [
           return (
             <a
               href={localized}
-              class={active ? "text-sm text-accent-strong underline decoration-accent underline-offset-4" : "text-sm text-ink-soft transition-colors hover:text-ink"}
+              aria-current={active ? "page" : undefined}
+              class={active ? "text-sm font-medium text-ink underline decoration-accent decoration-2 underline-offset-8" : "text-sm text-ink-soft transition-colors hover:text-ink"}
             >
               {label}
             </a>
@@ -78,7 +79,8 @@ const links = [
             <li>
               <a
                 href={localized}
-                class={active ? "block py-2 text-accent-strong" : "block py-2 text-ink-soft transition-colors hover:text-ink"}
+                aria-current={active ? "page" : undefined}
+                class={active ? "block py-2 font-medium text-accent-strong" : "block py-2 text-ink-soft transition-colors hover:text-ink"}
               >
                 {label}
               </a>

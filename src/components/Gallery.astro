@@ -42,14 +42,7 @@ const prepared = await Promise.all(
 );
 ---
 
-<section aria-labelledby="gallery-heading" class="py-10">
-  <h1
-    id="gallery-heading"
-    class="mb-10 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl"
-  >
-    {dict.home.heading}
-  </h1>
-
+<section aria-label={dict.home.heading} class="py-12">
   <div class="columns-2 gap-4 sm:columns-3 lg:gap-6 [column-fill:balance]">
     {
       prepared.map(({ art, alt, grid, large }, index) => (
@@ -84,9 +77,9 @@ const prepared = await Promise.all(
               )
             }
           </button>
-          <figcaption class="mt-2 px-0.5 text-sm">
-            <p class="font-display font-medium text-ink">{art.title}</p>
-            <p class="mt-0.5 text-xs text-ink-soft">{art.caption[locale]}</p>
+          <figcaption class="mt-2.5 px-0.5">
+            <p class="font-display text-[15px] font-medium text-ink">{art.title}</p>
+            <p class="mt-0.5 text-xs text-ink-faint">{art.caption[locale]}</p>
           </figcaption>
         </figure>
       ))

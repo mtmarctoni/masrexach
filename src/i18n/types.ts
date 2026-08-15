@@ -38,6 +38,8 @@ export interface TranslationContent {
     description: string;
     heading: string;
     paragraphs: string[];
+    portraitAlt: string;
+    portraitCaption: string;
   };
   exhibitions: {
     title: string;
