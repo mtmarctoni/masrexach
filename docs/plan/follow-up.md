@@ -14,13 +14,33 @@ names where the placeholder lives and what unblocks it.
 
 ## Deploy (Gate 3 — manual, requires the user)
 
+Architecture (live since the `fix/worker-envs-deploy` branch): **two Workers** —
+`masrexach` (production, `masrexach.marctonimas.com`) and `masrexach-staging`
+(`masrexach-staging.marctonimas.com`). Two is the minimum: a Worker's active
+deployment is global, so one Worker cannot serve different content per domain.
+PR previews are **not** separate Workers — they are non-serving *versions* of
+the staging Worker (`wrangler versions upload --preview-alias pr-<N>`), so the
+Worker count stays at two forever.
+
 - [ ] Cloudflare account: `deploy_account: "PLACEHOLDER"` in the brief. Needed for
-      `masrexach` (prod) / `masrexach-preview` (staging) targets.
-- [ ] GitHub secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `RESEND_API_KEY`,
-      `CONTACT_TO_EMAIL`; optional runtime vars via GitHub Variables (deploy.sh injects
-      non-secret vars as Worker vars).
+      the `masrexach` (prod) / `masrexach-staging` targets.
+- [ ] GitHub environments `production`, `staging`, `preview` (Settings →
+      Environments). Put `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` in each;
+      app secrets (`RESEND_API_KEY`, `CONTACT_TO_EMAIL`) and runtime vars in
+      `staging` and `production` with per-env values. Environment entries override
+      repo-level ones automatically; `deploy.sh` / `sync-secrets.sh` consume the
+      merged `vars` / `secrets` contexts and need no changes. Preview uploads
+      intentionally inherit the staging Worker's live vars/secrets via
+      `--keep-vars`, so the `preview` environment only needs the Cloudflare creds.
+- [ ] Optional: required reviewers on the `production` environment as an extra
+      gate on top of `workflow_dispatch`.
 - [ ] DNS cutover for www.masrexach.com to Cloudflare; TLS termination via Cloudflare
       (the old host's certificate expired 2026-03-15 — one of the defects this rebuild fixes).
+
+Note: workflows triggered by `dependabot[bot]` receive **no** Actions secrets
+(repo- or environment-level), so Dependabot PRs skip the Cloudflare preview and
+post an explanatory comment instead. A maintainer re-running such a run gets a
+preview, because the re-run executes under the maintainer's identity.
 
 ## Content
 
