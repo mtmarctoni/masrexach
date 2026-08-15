@@ -9,7 +9,7 @@ const locales: Locale[] = ["es", "ca", "en"];
 
 const defaultLocale: Locale = "es";
 
-export const siteUrl = "https://www.masrexach.com";
+export const siteUrl = "https://masrexach.marctonimas.com";
 
 const dictionaries: Record<Locale, TranslationContent> = { es, ca, en };
 
