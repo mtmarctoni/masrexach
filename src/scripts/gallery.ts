@@ -6,16 +6,14 @@ interface GalleryItem {
   alt: string;
 }
 
-export interface GallerySettings {
-  counterTemplate: string;
-}
-
-export function initGallery(settings: GallerySettings): void {
+export function initGallery(): void {
   const triggers = Array.from(
     document.querySelectorAll<HTMLButtonElement>("[data-lightbox-trigger]"),
   );
   const dialog = document.querySelector<HTMLDialogElement>("[data-lightbox]");
   if (!dialog || triggers.length === 0) return;
+
+  const counterTemplate = dialog.dataset.counterTemplate ?? "{current} / {total}";
 
   const image = dialog.querySelector<HTMLImageElement>("[data-lightbox-image]");
   const titleEl = dialog.querySelector<HTMLElement>("[data-lightbox-title]");
@@ -37,7 +35,7 @@ export function initGallery(settings: GallerySettings): void {
   let lastTrigger: HTMLElement | null = null;
 
   const renderCounter = (): string =>
-    settings.counterTemplate
+    counterTemplate
       .replace("{current}", String(current + 1))
       .replace("{total}", String(items.length));
 

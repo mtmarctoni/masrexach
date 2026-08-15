@@ -96,9 +96,9 @@ const prepared = await Promise.all(
 
 <dialog
   data-lightbox
+  data-counter-template={dict.gallery.counter}
   aria-label={dict.gallery.openImage}
   class="m-auto p-0"
-  style="background: transparent; border: 0; max-width: min(94vw, 64rem); max-height: 94vh;"
 >
   <div class="relative flex flex-col items-center gap-4">
     <img
@@ -148,6 +148,13 @@ const prepared = await Promise.all(
 </dialog>
 
 <style>
+  dialog[data-lightbox] {
+    background: transparent;
+    border: 0;
+    max-width: min(94vw, 64rem);
+    max-height: 94vh;
+  }
+
   dialog[data-lightbox]::backdrop {
     background: rgb(22 20 16 / 0.88);
   }
@@ -214,8 +221,8 @@ const prepared = await Promise.all(
   }
 </style>
 
-<script is:inline define:vars={{ counterTemplate: dict.gallery.counter }}>
+<script>
   import { initGallery } from "../scripts/gallery";
 
-  initGallery({ counterTemplate });
+  initGallery();
 </script>
