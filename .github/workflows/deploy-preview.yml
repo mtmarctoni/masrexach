@@ -11,6 +11,9 @@
 # Previews run with the staging Worker's existing vars/secrets. If the staging
 # Worker does not exist yet, this workflow bootstraps it with a one-time
 # deploy before returning to version uploads on later pushes.
+# Dependabot PRs are skipped (GitHub withholds Actions secrets from Dependabot
+# runs, so wrangler could not authenticate); the dependabot-notice job posts
+# the reason on the PR, and a maintainer re-run produces a preview.
 
 name: Deploy (preview)
 
@@ -29,7 +32,13 @@ jobs:
   preview:
     name: Cloudflare preview version
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    # Dependabot-triggered runs receive no Actions secrets (repo- or
+    # environment-level — GitHub treats dependency bumps as untrusted code),
+    # so wrangler could not authenticate. Skip; the dependabot-notice job
+    # below explains on the PR. A maintainer re-running the failed run gets a
+    # preview, because the re-run executes under the maintainer's identity.
+    if: github.event.pull_request.draft == false && github.actor != 'dependabot[bot]'
+    environment: preview
     permissions:
       contents: read
       pull-requests: write
@@ -145,3 +154,39 @@ jobs:
                 body,
               });
             }
+
+  # Runs only when the preview job is skipped because Dependabot triggered the
+  # workflow. Posts (once) why no Cloudflare preview appeared.
+  dependabot-notice:
+    name: Explain skipped preview
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false && github.actor == 'dependabot[bot]'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comment skip notice on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = "<!-- cloudflare-preview-skip -->";
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              marker,
+              "## Cloudflare preview skipped",
+              "",
+              "GitHub withholds all Actions secrets from workflows triggered by Dependabot, so this PR cannot deploy a preview (wrangler would have no Cloudflare credentials).",
+              "",
+              "CI and Lighthouse still validate this change. If you want a preview anyway, re-run the [preview workflow](%s) after reviewing the bump — a maintainer-triggered re-run runs with secrets and will post the preview URL here.",
+            ].join("\n").replace("%s", runUrl);
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            if (comments.some((c) => c.body && c.body.includes(marker))) return;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
