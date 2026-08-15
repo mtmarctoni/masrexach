@@ -1,0 +1,66 @@
+# Staging deploy — every merge to main (push to main), plus manual runs.
+#
+# CLOUDFLARE_ENV=staging makes the Astro adapter resolve env.staging of
+# wrangler.jsonc into the deploy config: Worker `masrexach-staging` on
+# masrexach-staging.marctonimas.com. workers.dev stays on for this Worker
+# because PR preview URLs (deploy-preview.yml) are served from its versions.
+# This is also the deploy that bootstraps the staging Worker, its SESSION KV
+# namespace, vars and secrets — previews depend on it existing.
+
+name: Deploy (staging)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy (staging)
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (staging)
+        run: pnpm build
+        env:
+          CLOUDFLARE_ENV: staging
+
+      - name: Deploy Worker
+        run: ./scripts/deploy.sh
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VARS_CONTEXT: ${{ toJSON(vars) }}
+          SECRETS_CONTEXT: ${{ toJSON(secrets) }}
+
+      - name: Sync secrets
+        run: ./scripts/sync-secrets.sh
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SECRETS_CONTEXT: ${{ toJSON(secrets) }}
+
+      # Non-blocking: on the very first deploy the custom-domain certificate
+      # can still be provisioning when this runs; later deploys are immediate.
+      - name: Smoke test
+        run: node scripts/smoke.mjs https://masrexach-staging.marctonimas.com "$GITHUB_SHA"
+        continue-on-error: true

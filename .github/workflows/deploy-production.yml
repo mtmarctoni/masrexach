@@ -1,0 +1,67 @@
+# Production deploy — manual only, from `main`.
+#
+# Builds without CLOUDFLARE_ENV so the adapter resolves the top level of
+# wrangler.jsonc: Worker `masrexach` on the custom domain
+# masrexach.marctonimas.com (the definitive masrexach.com can be added to
+# wrangler.jsonc later). workers.dev and preview URLs stay off. Staging
+# deploys automatically on every merge to main — see deploy-staging.yml.
+# PR previews live on the staging Worker — see deploy-preview.yml.
+
+name: Deploy (production)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy (production)
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Refuse to run outside main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "Production deploys must run from main (current ref: $GITHUB_REF)" >&2
+          exit 1
+
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Deploy Worker
+        run: ./scripts/deploy.sh
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VARS_CONTEXT: ${{ toJSON(vars) }}
+          SECRETS_CONTEXT: ${{ toJSON(secrets) }}
+
+      - name: Sync secrets
+        run: ./scripts/sync-secrets.sh
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SECRETS_CONTEXT: ${{ toJSON(secrets) }}
+
+      # Blocking. On the very first deploy the custom-domain certificate can
+      # still be provisioning — if smoke fails then, re-run the workflow.
+      - name: Smoke test
+        run: node scripts/smoke.mjs https://masrexach.marctonimas.com "$GITHUB_SHA"

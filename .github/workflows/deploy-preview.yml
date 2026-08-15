@@ -1,0 +1,127 @@
+# PR preview — every non-draft PR gets a Cloudflare preview URL.
+#
+# Builds with CLOUDFLARE_ENV=staging (same Worker as staging), then
+# `wrangler versions upload` uploads the build as a new version of the
+# staging Worker WITHOUT deploying it — no traffic is shifted, staging and
+# production keep serving their current versions. Each push gets a fresh
+# per-version URL:
+#   https://<version-id>-masrexach-staging.<account-subdomain>.workers.dev
+# plus a stable per-PR alias URL (via --preview-alias):
+#   https://pr-<number>-masrexach-staging.<account-subdomain>.workers.dev
+# Previews run with the staging Worker's existing vars/secrets. If this fails
+# because the staging Worker does not exist yet, merge any PR to main once
+# (deploy-staging.yml bootstraps it).
+
+name: Deploy (preview)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Cloudflare preview version
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (staging)
+        run: pnpm build
+        env:
+          CLOUDFLARE_ENV: staging
+
+      - name: Upload preview version
+        id: upload
+        run: |
+          set -euo pipefail
+          pnpm exec wrangler versions upload \
+            --config dist/server/wrangler.json \
+            --keep-vars \
+            --preview-alias "pr-${{ github.event.pull_request.number }}" \
+            --message "PR #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.sha }})" \
+            2>&1 | tee /tmp/wrangler-upload.log
+          version_url=$(grep -m1 "Version Preview URL:" /tmp/wrangler-upload.log | grep -oE "https://[a-zA-Z0-9.-]+workers\.dev" || true)
+          alias_url=$(grep -m1 "Version Preview Alias URL:" /tmp/wrangler-upload.log | grep -oE "https://[a-zA-Z0-9.-]+workers\.dev" || true)
+          if [ -z "$version_url" ] && [ -z "$alias_url" ]; then
+            echo "Could not parse preview URL from wrangler output:" >&2
+            cat /tmp/wrangler-upload.log >&2
+            exit 1
+          fi
+          echo "preview-version-url=$version_url" >> "$GITHUB_OUTPUT"
+          echo "preview-alias-url=$alias_url" >> "$GITHUB_OUTPUT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Comment preview URL on PR
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_VERSION_URL: ${{ steps.upload.outputs.preview-version-url }}
+          PREVIEW_ALIAS_URL: ${{ steps.upload.outputs.preview-alias-url }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const marker = "<!-- cloudflare-preview-url -->";
+            const versionUrl = process.env.PREVIEW_VERSION_URL;
+            const aliasUrl = process.env.PREVIEW_ALIAS_URL;
+            const sha = process.env.PR_SHA;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const lines = [
+              marker,
+              "## Cloudflare preview",
+              "",
+            ];
+            if (aliasUrl) {
+              lines.push(`Stable URL for this PR: ${aliasUrl}`, "");
+            }
+            if (versionUrl) {
+              lines.push(`URL for this push (\`${sha.slice(0, 7)}\`): ${versionUrl}`, "");
+            }
+            lines.push(
+              `[Workflow run](${runUrl})`,
+              "",
+              "Uploaded as a Workers version preview on the staging Worker — staging and production traffic are not affected. The contact form uses the staging secrets.",
+            );
+            const body = lines.join("\n");
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
