@@ -8,9 +8,9 @@
 #   https://<version-id>-masrexach-staging.<account-subdomain>.workers.dev
 # plus a stable per-PR alias URL (via --preview-alias):
 #   https://pr-<number>-masrexach-staging.<account-subdomain>.workers.dev
-# Previews run with the staging Worker's existing vars/secrets. If this fails
-# because the staging Worker does not exist yet, merge any PR to main once
-# (deploy-staging.yml bootstraps it).
+# Previews run with the staging Worker's existing vars/secrets. If the staging
+# Worker does not exist yet, this workflow bootstraps it with a one-time
+# deploy before returning to version uploads on later pushes.
 
 name: Deploy (preview)
 
@@ -51,16 +51,36 @@ jobs:
         env:
           CLOUDFLARE_ENV: staging
 
+      # `versions upload` requires the staging Worker to exist. Before the
+      # first merge to main (which deploys staging), fall back to a full
+      # deploy to bootstrap the Worker; its workers.dev URL serves this PR's
+      # build until a real staging deploy takes over.
       - name: Upload preview version
         id: upload
         run: |
           set -euo pipefail
-          pnpm exec wrangler versions upload \
-            --config dist/server/wrangler.json \
-            --keep-vars \
-            --preview-alias "pr-${{ github.event.pull_request.number }}" \
-            --message "PR #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.sha }})" \
-            2>&1 | tee /tmp/wrangler-upload.log
+          if ! pnpm exec wrangler versions upload \
+              --config dist/server/wrangler.json \
+              --keep-vars \
+              --preview-alias "pr-${{ github.event.pull_request.number }}" \
+              --message "PR #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.sha }})" \
+              2>&1 | tee /tmp/wrangler-upload.log; then
+            if ! grep -q "Worker that does not yet exist" /tmp/wrangler-upload.log; then
+              cat /tmp/wrangler-upload.log >&2
+              exit 1
+            fi
+            echo "::notice::Staging Worker does not exist yet — bootstrapping it with a deploy."
+            pnpm exec wrangler deploy --config dist/server/wrangler.json 2>&1 | tee /tmp/wrangler-deploy.log
+            deployed_url=$(grep -oE "https://[a-zA-Z0-9.-]+workers\.dev" /tmp/wrangler-deploy.log | head -1 || true)
+            if [ -z "$deployed_url" ]; then
+              echo "Could not parse deployed URL from wrangler output:" >&2
+              cat /tmp/wrangler-deploy.log >&2
+              exit 1
+            fi
+            echo "preview-version-url=$deployed_url" >> "$GITHUB_OUTPUT"
+            echo "preview-alias-url=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           version_url=$(grep -m1 "Version Preview URL:" /tmp/wrangler-upload.log | grep -oE "https://[a-zA-Z0-9.-]+workers\.dev" || true)
           alias_url=$(grep -m1 "Version Preview Alias URL:" /tmp/wrangler-upload.log | grep -oE "https://[a-zA-Z0-9.-]+workers\.dev" || true)
           if [ -z "$version_url" ] && [ -z "$alias_url" ]; then
@@ -101,7 +121,7 @@ jobs:
             lines.push(
               `[Workflow run](${runUrl})`,
               "",
-              "Uploaded as a Workers version preview on the staging Worker — staging and production traffic are not affected. The contact form uses the staging secrets.",
+              "Served from the staging Worker — production traffic is not affected. The contact form uses the staging secrets.",
             );
             const body = lines.join("\n");
             const { data: comments } = await github.rest.issues.listComments({
