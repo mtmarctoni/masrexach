@@ -31,7 +31,7 @@ const locales: Array<{ code: Locale; label: string }> = [
         <a
           href={localizedPath(code, currentPath)}
           lang={code}
-          class="inline-flex rounded-sm px-2 py-1 text-ink-soft transition-colors hover:text-accent-strong"
+          class="inline-flex rounded-sm px-2 py-1 text-ink-soft motion-safe:transition-colors hover:text-accent-strong"
         >
           {label}
         </a>
