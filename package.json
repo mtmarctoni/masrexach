@@ -20,6 +20,8 @@
     "depcruise": "depcruise src tests",
     "test": "vitest run",
     "smoke": "node scripts/smoke.mjs",
+    "format:check": "biome format .",
+    "check:all": "pnpm format && pnpm format:check && pnpm lint:fix && pnpm lint && pnpm check && pnpm knip && pnpm depcruise && pnpm test",
     "prepare": "simple-git-hooks",
     "astro": "astro"
   },
