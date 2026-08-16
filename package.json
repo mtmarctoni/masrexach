@@ -21,7 +21,8 @@
     "test": "vitest run",
     "smoke": "node scripts/smoke.mjs",
     "format:check": "biome format .",
-    "check:all": "pnpm format && pnpm format:check && pnpm lint:fix && pnpm lint && pnpm check && pnpm knip && pnpm depcruise && pnpm test",
+    "astro:doctor": "astro-doctor",
+    "check:all": "pnpm format && pnpm format:check && pnpm lint:fix && pnpm lint && pnpm astro:doctor && pnpm check && pnpm knip && pnpm depcruise && pnpm test",
     "prepare": "simple-git-hooks",
     "astro": "astro"
   },
@@ -37,6 +38,7 @@
     "@astrojs/check": "^0.9.10",
     "@biomejs/biome": "^2.5.8",
     "@lhci/cli": "^0.15.1",
+    "@santi020k/astro-doctor": "^1.2.2",
     "@tailwindcss/vite": "^4.3.3",
     "dependency-cruiser": "^18.2.0",
     "knip": "^6.32.2",
