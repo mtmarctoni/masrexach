@@ -1,0 +1,32 @@
+name: Astro Doctor
+
+on:
+  pull_request:
+    paths:
+      - '**/*.astro'
+      - 'astro.config.*'
+      - 'package.json'
+      - '.env.example'
+      - 'src/content/**'
+
+permissions:
+  contents: read
+  pull-requests: write # post sticky PR comment with scan report
+
+concurrency:
+  group: astro-doctor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # required for diff-only mode
+
+      - uses: santi020k/astro-doctor@v1
+        with:
+          diff-only: true
+          comment: true
+          fail-on: error
