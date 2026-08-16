@@ -1,9 +1,52 @@
 // @ts-check
 
+import { writeFileSync } from "node:fs";
 import cloudflare from "@astrojs/cloudflare";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField, fontProviders } from "astro/config";
+
+// Build-time environment selector, injected by CI from GitHub environment
+// variables ("Preview" | "Staging" | "Production"). Anything not exactly
+// "Production" is treated as non-indexable (fail-safe).
+const BUILD_TYPE = process.env.PUBLIC_BUILD_TYPE ?? "";
+const IS_PRODUCTION = BUILD_TYPE === "Production";
+
+// _headers is generated here rather than kept in public/ so non-production
+// builds can add X-Robots-Tag: noindex, nofollow (header-level hardening on
+// top of the robots <meta>). The static security headers stay in all envs.
+function envAwareHeaders() {
+  return {
+    name: "env-aware-headers",
+    hooks: {
+      "astro:build:done": ({ dir }) => {
+        const headers = [
+          "/*",
+          "  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload",
+          "  X-Frame-Options: DENY",
+          "  X-Content-Type-Options: nosniff",
+          "  Referrer-Policy: strict-origin-when-cross-origin",
+          "  Permissions-Policy: camera=(), microphone=(), geolocation=()",
+          "  X-XSS-Protection: 1; mode=block",
+          "  Cross-Origin-Opener-Policy: same-origin",
+          "  Cross-Origin-Resource-Policy: same-origin",
+          ...(IS_PRODUCTION ? [] : ["  X-Robots-Tag: noindex, nofollow"]),
+          "",
+          "/*",
+          "  Cache-Control: public, max-age=3600",
+          "",
+          "/_astro/*",
+          "  Cache-Control: public, max-age=31536000, immutable",
+          "",
+          "/assets/*",
+          "  Cache-Control: public, max-age=31536000, immutable",
+          "",
+        ];
+        writeFileSync(new URL("_headers", dir), headers.join("\n"));
+      },
+    },
+  };
+}
 
 export default defineConfig({
   site: "https://masrexach.marctonimas.com",
@@ -60,17 +103,26 @@ export default defineConfig({
     },
   },
   integrations: [
-    sitemap({
-      i18n: {
-        defaultLocale: "es",
-        locales: {
-          es: "es",
-          ca: "ca",
-          en: "en",
-        },
-      },
-      filter: (page) => !page.includes("/api/"),
-    }),
+    // Sitemap only exists in production: it advertises indexable pages and is
+    // referenced by robots.txt. Non-production robots.txt is Disallow: /, so no
+    // sitemap. Legal pages (and /api/) are excluded even from the production
+    // sitemap — they are noindex pages.
+    ...(IS_PRODUCTION
+      ? [
+          sitemap({
+            i18n: {
+              defaultLocale: "es",
+              locales: {
+                es: "es",
+                ca: "ca",
+                en: "en",
+              },
+            },
+            filter: (page) => !page.includes("/api/") && !page.includes("/legal"),
+          }),
+        ]
+      : []),
+    envAwareHeaders(),
   ],
   fonts: [
     {

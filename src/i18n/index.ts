@@ -9,7 +9,18 @@ const locales: Locale[] = ["es", "ca", "en"];
 
 const defaultLocale: Locale = "es";
 
-export const siteUrl = "https://masrexach.marctonimas.com";
+// Production and staging are stable custom domains. Preview builds run on
+// per-PR/per-version workers.dev URLs that are unknown at build time, so they
+// emit no origin and canonical/hreflang/OG tags are skipped (the pages are
+// noindex anyway). Anything not exactly "Production"/"Staging" → "".
+const buildType: string | undefined = import.meta.env.PUBLIC_BUILD_TYPE;
+
+export const siteUrl =
+  buildType === "Production"
+    ? "https://masrexach.marctonimas.com"
+    : buildType === "Staging"
+      ? "https://masrexach-staging.marctonimas.com"
+      : "";
 
 const dictionaries: Record<Locale, TranslationContent> = { es, ca, en };
 

@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /api/
-
-Sitemap: https://masrexach.marctonimas.com/sitemap-index.xml
