@@ -12,9 +12,10 @@ interface Props {
   description: string;
   path: string;
   ogImage?: string;
+  indexable?: boolean;
 }
 
-const { locale, title, description, path, ogImage } = Astro.props;
+const { locale, title, description, path, ogImage, indexable = true } = Astro.props;
 const dict = getDict(locale);
 ---
 
@@ -24,6 +25,7 @@ const dict = getDict(locale);
   path={path}
   locale={locale}
   ogImage={ogImage}
+  indexable={indexable}
 />
 
 <body class="min-h-screen bg-surface font-body text-ink">
