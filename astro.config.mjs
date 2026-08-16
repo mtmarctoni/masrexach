@@ -15,7 +15,9 @@ const IS_PRODUCTION = BUILD_TYPE === "Production";
 // Canonical origin for the production sitemap and generated SEO URLs. CI
 // injects PUBLIC_BASE_URL per GitHub environment (staging/production custom
 // domains); the fallback keeps local production builds valid without the var.
-const SITE_URL = process.env.PUBLIC_BASE_URL ?? "https://masrexach.marctonimas.com";
+// "" (unset env var passed through as empty by CI) must fall back too, not
+// just undefined — otherwise Astro rejects site: "" as an Invalid URL.
+const SITE_URL = process.env.PUBLIC_BASE_URL || "https://masrexach.marctonimas.com";
 
 // _headers is generated here rather than kept in public/ so non-production
 // builds can add X-Robots-Tag: noindex, nofollow (header-level hardening on

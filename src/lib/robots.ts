@@ -4,7 +4,9 @@
 const DEFAULT_SITE_URL = "https://masrexach.marctonimas.com";
 
 function siteUrl(): string {
-  return import.meta.env.PUBLIC_BASE_URL ?? DEFAULT_SITE_URL;
+  // "" (unset var passed through as empty) falls back, not just undefined —
+  // otherwise robots.txt would advertise "Sitemap: /sitemap-index.xml".
+  return import.meta.env.PUBLIC_BASE_URL || DEFAULT_SITE_URL;
 }
 
 /** True only for production builds. Anything else (unset, "Preview", "Staging", typos) is non-indexable. */
