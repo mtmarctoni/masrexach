@@ -1,5 +1,5 @@
 ---
-import { getImage } from "astro:assets";
+import { Image } from "astro:assets";
 import portraitSrc from "../../assets/images/antoni-mas-rexach.jpg";
 import { getDict, localeRoutes } from "../../i18n";
 import Base from "../../layouts/Base.astro";
@@ -8,13 +8,6 @@ export const getStaticPaths = localeRoutes;
 
 const { locale } = Astro.props;
 const dict = getDict(locale);
-
-const portrait = await getImage({
-  src: portraitSrc,
-  width: 460,
-  quality: 80,
-  format: "webp",
-});
 ---
 
 <Base
@@ -34,10 +27,11 @@ const portrait = await getImage({
       class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,21rem)_minmax(0,1fr)] lg:gap-16"
     >
       <figure class="self-start lg:sticky lg:top-24">
-        <img
-          src={portrait.src}
-          width={portrait.attributes.width}
-          height={portrait.attributes.height}
+        <Image
+          src={portraitSrc}
+          width={460}
+          quality={80}
+          format="webp"
           alt={dict.biography.portraitAlt}
           loading="eager"
           decoding="async"
