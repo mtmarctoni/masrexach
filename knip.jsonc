@@ -1,7 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  // `@lhci/cli` is invoked via `npx --yes @lhci/cli@0.15.x autorun` (see
-  // .github/workflows/lighthouse.yml and `pnpm lhci`), never imported, so knip
-  // would otherwise flag it as an unused devDependency.
-  "ignoreDependencies": ["@lhci/cli"]
+  // `osv-scanner` is invoked via `pnpm osv` (and osv-scanner-action in CI),
+  // installed as a Homebrew system binary, not an npm dependency — so knip
+  // would otherwise flag it as an unlisted binary.
+  "ignoreBinaries": ["osv-scanner"]
 }
