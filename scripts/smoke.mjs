@@ -94,6 +94,21 @@ async function main() {
     const res = await fetch(`${base}/robots.txt`);
     if (res.status !== 200) throw new Error(`status ${res.status}`);
     robotsTxtBody = await res.text();
+    // Production robots.txt always references the sitemap, whose URL is built
+    // from PUBLIC_BASE_URL at build time. Guard against a misconfigured var:
+    // a trailing slash would yield "//sitemap-index.xml" and a wrong host
+    // would advertise the staging/preview domain — both deploy silently
+    // otherwise. Staging/preview correctly have no sitemap line.
+    if (!IS_STAGING_HOST) {
+      const sitemapUrl = robotsTxtBody.match(/Sitemap:\s*(\S+)/)?.[1];
+      if (!sitemapUrl)
+        throw new Error("missing Sitemap line (is PUBLIC_BASE_URL set for production?)");
+      if (sitemapUrl.includes("//"))
+        throw new Error(`malformed sitemap URL "${sitemapUrl}" (PUBLIC_BASE_URL trailing slash?)`);
+      if (new URL(sitemapUrl).hostname !== "masrexach.marctonimas.com") {
+        throw new Error(`sitemap URL host mismatch "${sitemapUrl}"`);
+      }
+    }
   });
 
   for (const path of PATHS.slice(1)) {

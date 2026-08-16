@@ -60,6 +60,7 @@ jobs:
         env:
           CLOUDFLARE_ENV: staging
           PUBLIC_BUILD_TYPE: ${{ vars.PUBLIC_BUILD_TYPE }}
+          PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
 
       # `versions upload` requires the staging Worker to exist. Before the
       # first merge to main (which deploys staging), fall back to a full

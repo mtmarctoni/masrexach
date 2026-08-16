@@ -44,6 +44,7 @@ jobs:
         env:
           CLOUDFLARE_ENV: staging
           PUBLIC_BUILD_TYPE: ${{ vars.PUBLIC_BUILD_TYPE }}
+          PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
 
       - name: Deploy Worker
         run: ./scripts/deploy.sh

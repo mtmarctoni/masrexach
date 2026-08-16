@@ -9,18 +9,15 @@ const locales: Locale[] = ["es", "ca", "en"];
 
 const defaultLocale: Locale = "es";
 
-// Production and staging are stable custom domains. Preview builds run on
-// per-PR/per-version workers.dev URLs that are unknown at build time, so they
-// emit no origin and canonical/hreflang/OG tags are skipped (the pages are
-// noindex anyway). Anything not exactly "Production"/"Staging" → "".
+// Canonical/hreflang/OG origin. PUBLIC_BASE_URL is injected by CI from the
+// staging and production GitHub environments (their stable custom domains).
+// Preview builds leave it unset -> siteUrl is "" and absolute SEO tags are
+// skipped (those pages are noindex anyway). Only trusted for indexable build
+// types, so a stray var can never enable canonical tags on a preview build.
 const buildType: string | undefined = import.meta.env.PUBLIC_BUILD_TYPE;
+const baseUrl: string | undefined = import.meta.env.PUBLIC_BASE_URL;
 
-export const siteUrl =
-  buildType === "Production"
-    ? "https://masrexach.marctonimas.com"
-    : buildType === "Staging"
-      ? "https://masrexach-staging.marctonimas.com"
-      : "";
+export const siteUrl = buildType === "Production" || buildType === "Staging" ? (baseUrl ?? "") : "";
 
 const dictionaries: Record<Locale, TranslationContent> = { es, ca, en };
 
