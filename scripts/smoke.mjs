@@ -13,6 +13,9 @@ const base = baseArg.replace(/\/$/, "");
 // "/", "/ca/", "/en/", "/exposiciones/": comma-separated quoted paths - root, each non-default locale root, one deep route.
 // Example: "/", "/es/", "/en/", "/blog/<slug>/"
 const PATHS = ["/", "/ca/", "/en/", "/exposiciones/"];
+// Preview (workers.dev) and staging hosts both contain "staging"; production
+// (masrexach.marctonimas.com) does not. Non-production builds are noindex.
+const IS_STAGING_HOST = /staging/i.test(new URL(base).hostname);
 // Adapter-less (contact-off) builds have no Worker and no /api/health route:
 // run smoke with SMOKE_EXPECT_HEALTH=0 to skip the health check.
 const EXPECT_HEALTH = process.env.SMOKE_EXPECT_HEALTH !== "0";
@@ -72,10 +75,11 @@ async function main() {
     });
 
   let homeHtml = "";
+  let robotsTxtBody = "";
   await check("GET / (with security headers)", async () => {
     const res = await fetch(`${base}/`);
     if (res.status !== 200) throw new Error(`status ${res.status}`);
-    // Static pages get their headers from public/_headers via Workers Assets;
+    // Static pages get their headers from _headers via Workers Assets;
     // assert them here, on a real page, where they protect actual users.
     if (res.headers.get("x-content-type-options") !== "nosniff") {
       throw new Error("missing X-Content-Type-Options: nosniff");
@@ -84,6 +88,12 @@ async function main() {
       throw new Error("missing Content-Security-Policy");
     }
     homeHtml = await res.text();
+  });
+
+  await check("GET /robots.txt", async () => {
+    const res = await fetch(`${base}/robots.txt`);
+    if (res.status !== 200) throw new Error(`status ${res.status}`);
+    robotsTxtBody = await res.text();
   });
 
   for (const path of PATHS.slice(1)) {
@@ -99,12 +109,30 @@ async function main() {
   if (expectedSha && homeHtml && !homeHtml.includes(`content="${expectedSha}"`)) {
     console.log("warn / still serves a previous build (edge cache converging, not fatal)");
   }
+  if (robotsTxtBody) {
+    const expectedRobots = IS_STAGING_HOST
+      ? "Disallow: /"
+      : "Sitemap: https://masrexach.marctonimas.com/sitemap-index.xml";
+    if (!robotsTxtBody.includes(expectedRobots)) {
+      console.log(
+        `warn / robots.txt does not reflect this build yet (expected "${expectedRobots}", edge cache converging, not fatal)`,
+      );
+    }
+  }
+  if (homeHtml) {
+    const expectedMeta = IS_STAGING_HOST ? "noindex, nofollow" : "index, follow";
+    if (!homeHtml.includes(`content="${expectedMeta}"`)) {
+      console.log(
+        `warn / robots meta does not reflect this build yet (expected "${expectedMeta}", edge cache converging, not fatal)`,
+      );
+    }
+  }
 
   if (failures.length > 0) {
     console.error(`\n${failures.length} check(s) failed.`);
     process.exit(1);
   }
-  console.log(`\nAll ${PATHS.length + (EXPECT_HEALTH ? 1 : 0)} checks passed against ${base}`);
+  console.log(`\nAll ${PATHS.length + (EXPECT_HEALTH ? 1 : 0) + 1} checks passed against ${base}`);
 }
 
 main();
