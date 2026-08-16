@@ -20,6 +20,10 @@
     "depcruise": "depcruise src tests",
     "test": "vitest run",
     "smoke": "node scripts/smoke.mjs",
+    "deploy": "bash scripts/deploy.sh",
+    "sync:secrets": "bash scripts/sync-secrets.sh",
+    "lighthouse": "lhci autorun",
+    "osv": "osv-scanner --lockfile=./pnpm-lock.yaml --config=osv-scanner.toml",
     "format:check": "biome format .",
     "astro:doctor": "astro-doctor",
     "check:all": "pnpm format && pnpm format:check && pnpm lint:fix && pnpm lint && pnpm astro:doctor && pnpm check && pnpm knip && pnpm depcruise && pnpm test",
@@ -27,7 +31,8 @@
     "astro": "astro"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm exec biome check --staged --no-errors-on-unmatched --files-ignore-unknown=true"
+    "pre-commit": "pnpm exec biome check --staged --no-errors-on-unmatched --files-ignore-unknown=true && bash scripts/pre-commit-gitleaks.sh",
+    "pre-push": "pnpm check:all"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.2.1",
