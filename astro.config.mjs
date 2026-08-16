@@ -3,25 +3,23 @@
 import cloudflare from "@astrojs/cloudflare";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig, fontProviders } from "astro/config";
+import { defineConfig, envField, fontProviders } from "astro/config";
 
 export default defineConfig({
   site: "https://masrexach.marctonimas.com",
   adapter: cloudflare({ imageService: "compile" }),
   env: {
     schema: {
-      RESEND_API_KEY: {
-        type: "string",
+      RESEND_API_KEY: envField.string({
         context: "server",
         access: "secret",
         optional: true,
-      },
-      CONTACT_TO_EMAIL: {
-        type: "string",
+      }),
+      CONTACT_TO_EMAIL: envField.string({
         context: "server",
         access: "secret",
         optional: true,
-      },
+      }),
     },
   },
   security: {
