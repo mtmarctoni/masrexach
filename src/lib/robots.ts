@@ -1,4 +1,11 @@
-const PRODUCTION_SITE_URL = "https://masrexach.marctonimas.com";
+// Canonical origin for the production sitemap reference. CI injects
+// PUBLIC_BASE_URL per GitHub environment (staging/production custom domains).
+// The fallback keeps local production builds valid without the var.
+const DEFAULT_SITE_URL = "https://masrexach.marctonimas.com";
+
+function siteUrl(): string {
+  return import.meta.env.PUBLIC_BASE_URL ?? DEFAULT_SITE_URL;
+}
 
 /** True only for production builds. Anything else (unset, "Preview", "Staging", typos) is non-indexable. */
 export function isProductionBuild(): boolean {
@@ -18,7 +25,7 @@ export function robotsTxt(isProduction: boolean): string {
       "Allow: /",
       "Disallow: /api/",
       "",
-      `Sitemap: ${PRODUCTION_SITE_URL}/sitemap-index.xml`,
+      `Sitemap: ${siteUrl()}/sitemap-index.xml`,
       "",
     ].join("\n");
   }

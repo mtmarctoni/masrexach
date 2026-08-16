@@ -12,6 +12,11 @@ import { defineConfig, envField, fontProviders } from "astro/config";
 const BUILD_TYPE = process.env.PUBLIC_BUILD_TYPE ?? "";
 const IS_PRODUCTION = BUILD_TYPE === "Production";
 
+// Canonical origin for the production sitemap and generated SEO URLs. CI
+// injects PUBLIC_BASE_URL per GitHub environment (staging/production custom
+// domains); the fallback keeps local production builds valid without the var.
+const SITE_URL = process.env.PUBLIC_BASE_URL ?? "https://masrexach.marctonimas.com";
+
 // _headers is generated here rather than kept in public/ so non-production
 // builds can add X-Robots-Tag: noindex, nofollow (header-level hardening on
 // top of the robots <meta>). The static security headers stay in all envs.
@@ -49,7 +54,7 @@ function envAwareHeaders() {
 }
 
 export default defineConfig({
-  site: "https://masrexach.marctonimas.com",
+  site: SITE_URL,
   adapter: cloudflare({ imageService: "compile" }),
   env: {
     schema: {
