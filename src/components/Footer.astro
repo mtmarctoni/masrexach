@@ -50,7 +50,7 @@ const blocks = [
               <li>
                 <a
                   href={localizedPath(locale, href)}
-                  class="text-sm text-paper-80 transition-colors hover:text-paper-dark"
+                  class="text-sm text-paper-80 motion-safe:transition-colors hover:text-paper-dark"
                 >
                   {label}
                 </a>
@@ -60,7 +60,7 @@ const blocks = [
           <li>
             <a
               href={localizedPath(locale, "/legal")}
-              class="text-sm text-paper-80 transition-colors hover:text-paper-dark"
+              class="text-sm text-paper-80 motion-safe:transition-colors hover:text-paper-dark"
             >
               {dict.legal.heading}
             </a>
