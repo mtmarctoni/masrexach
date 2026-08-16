@@ -43,6 +43,7 @@ jobs:
         run: pnpm build
         env:
           CLOUDFLARE_ENV: staging
+          PUBLIC_BUILD_TYPE: ${{ vars.PUBLIC_BUILD_TYPE }}
 
       - name: Deploy Worker
         run: ./scripts/deploy.sh
