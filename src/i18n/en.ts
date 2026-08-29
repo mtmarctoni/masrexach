@@ -3,7 +3,7 @@ import type { TranslationContent } from "./types";
 const en: TranslationContent = {
   langName: "English",
   nav: {
-    catalog: "Catalogue",
+    catalog: "Paintings",
     biography: "Biography",
     exhibitions: "Exhibitions",
     contact: "Contact",
@@ -11,12 +11,12 @@ const en: TranslationContent = {
   home: {
     title: "Antoni Mas Rexach — Majorcan painter",
     description:
-      "Antoni Mas Rexach (Palma de Mallorca, 1953–2017), Majorcan painter: oils and acrylics of the island's landscape. Catalogue of original works available.",
+      "Antoni Mas Rexach (Palma de Mallorca, 1953–2017), Majorcan painter: oils and acrylics of the island's landscape. Original paintings available.",
     kicker: "Palma de Mallorca · 1953 — 2017",
     headline: "The <em>light</em> of Mallorca, turned into <em>painting</em>.",
     statement:
       "Antoni Mas Rexach devoted his life to painting his homeland: its fields, its villages, its light. Three decades of exhibitions endorse a body of work that is already part of the island's cultural landscape.",
-    ctaCatalog: "View the catalogue",
+    ctaCatalog: "View the paintings",
     ctaBio: "Meet the painter",
     legacyKicker: "His work",
     legacyParagraphs: [
@@ -27,7 +27,7 @@ const en: TranslationContent = {
     finitaQuote:
       "His work is closed: <em>he will paint no more</em>. Every available painting is a unique, unrepeatable piece. Once it finds a collector, it never returns.",
     featuredHeading: "Featured works",
-    featuredCta: "Full catalogue",
+    featuredCta: "All paintings",
     venuesLabel: "Work exhibited at",
     venues: [
       "Cartoixa de Valldemossa",
@@ -37,10 +37,10 @@ const en: TranslationContent = {
     ],
   },
   catalog: {
-    title: "Catalogue of works — Antoni Mas Rexach",
+    title: "Paintings — Antoni Mas Rexach",
     description:
-      "Catalogue of original works by Antoni Mas Rexach: Majorcan landscapes, still lifes and corners of the island. Unique pieces available for collectors.",
-    heading: "Catalogue",
+      "Original paintings by Antoni Mas Rexach: Majorcan landscapes, still lifes and corners of the island. Unique pieces available for collectors.",
+    heading: "Paintings",
     intro:
       "The painter's available work. Each piece is unique: for price and conditions, enquire from each work's page.",
     availableHeading: "Available works",
@@ -53,7 +53,7 @@ const en: TranslationContent = {
   artwork: {
     inquireCta: "Inquire about this work",
     statusLabel: "Status",
-    backToCatalog: "Back to catalogue",
+    backToCatalog: "Back to paintings",
     previousWork: "Previous work",
     nextWork: "Next work",
     workOfInterest: "Work of interest",
@@ -130,10 +130,10 @@ const en: TranslationContent = {
   contact: {
     title: "Contact — Antoni Mas Rexach",
     description:
-      "Acquire an original work by Antoni Mas Rexach or ask anything about the catalogue: contact form or telephone 670 831 743.",
+      "Acquire an original work by Antoni Mas Rexach or ask anything about the paintings: contact form or telephone 670 831 743.",
     heading: "Acquire a work",
     intro:
-      "To acquire a work or ask anything about the catalogue, write using this form or call 670 831 743.",
+      "To acquire a work or ask anything about the paintings, write using this form or call 670 831 743.",
     phoneTitle: "Telephone",
     form: {
       name: "Name",

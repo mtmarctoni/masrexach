@@ -3,7 +3,7 @@ import type { TranslationContent } from "./types";
 const es: TranslationContent = {
   langName: "Español",
   nav: {
-    catalog: "Catálogo",
+    catalog: "Pintura",
     biography: "Biografía",
     exhibitions: "Exposiciones",
     contact: "Contacto",
@@ -11,12 +11,12 @@ const es: TranslationContent = {
   home: {
     title: "Antoni Mas Rexach — Pintor mallorquín",
     description:
-      "Antoni Mas Rexach (Palma de Mallorca, 1953–2017), pintor mallorquín: óleos y acrílicos del paisaje de la isla. Catálogo de obra original disponible.",
+      "Antoni Mas Rexach (Palma de Mallorca, 1953–2017), pintor mallorquín: óleos y acrílicos del paisaje de la isla. Obra original disponible.",
     kicker: "Palma de Mallorca · 1953 — 2017",
     headline: "La <em>luz</em> de Mallorca, convertida en <em>pintura</em>.",
     statement:
       "Antoni Mas Rexach dedicó su vida a pintar su tierra: sus campos, sus pueblos, su luz. Tres décadas de exposiciones avalan una obra que ya es parte del paisaje cultural de la isla.",
-    ctaCatalog: "Ver el catálogo",
+    ctaCatalog: "Ver la pintura",
     ctaBio: "Conocer al pintor",
     legacyKicker: "Su obra",
     legacyParagraphs: [
@@ -27,7 +27,7 @@ const es: TranslationContent = {
     finitaQuote:
       "Su obra es cerrada: <em>no pintará más</em>. Cada cuadro disponible es una pieza única e irrepetible. Cuando encuentra coleccionista, no vuelve.",
     featuredHeading: "Obras destacadas",
-    featuredCta: "Todo el catálogo",
+    featuredCta: "Toda la pintura",
     venuesLabel: "Obra expuesta en",
     venues: [
       "Cartoixa de Valldemossa",
@@ -37,10 +37,10 @@ const es: TranslationContent = {
     ],
   },
   catalog: {
-    title: "Catálogo de obra — Antoni Mas Rexach",
+    title: "Pintura — Antoni Mas Rexach",
     description:
-      "Catálogo de obra original de Antoni Mas Rexach: paisajes de Mallorca, bodegones y rincones de la isla. Piezas únicas disponibles para coleccionistas.",
-    heading: "Catálogo",
+      "Pintura original de Antoni Mas Rexach: paisajes de Mallorca, bodegones y rincones de la isla. Piezas únicas disponibles para coleccionistas.",
+    heading: "Pintura",
     intro:
       "La obra disponible del pintor. Cada pieza es única: para conocer precio y condiciones, consulta desde la ficha de cada obra.",
     availableHeading: "Obra disponible",
@@ -53,7 +53,7 @@ const es: TranslationContent = {
   artwork: {
     inquireCta: "Consultar esta obra",
     statusLabel: "Estado",
-    backToCatalog: "Volver al catálogo",
+    backToCatalog: "Volver a la pintura",
     previousWork: "Obra anterior",
     nextWork: "Obra siguiente",
     workOfInterest: "Obra de interés",
@@ -130,10 +130,10 @@ const es: TranslationContent = {
   contact: {
     title: "Contacto — Antoni Mas Rexach",
     description:
-      "Adquiere una obra original de Antoni Mas Rexach o resuelve cualquier duda sobre el catálogo: formulario de contacto o teléfono 670 831 743.",
+      "Adquiere una obra original de Antoni Mas Rexach o resuelve cualquier duda sobre la obra: formulario de contacto o teléfono 670 831 743.",
     heading: "Adquirir una obra",
     intro:
-      "Para adquirir una obra o resolver cualquier duda sobre el catálogo, escribe mediante este formulario o llama al 670 831 743.",
+      "Para adquirir una obra o resolver cualquier duda sobre su pintura, escribe mediante este formulario o llama al 670 831 743.",
     phoneTitle: "Teléfono",
     form: {
       name: "Nombre",
