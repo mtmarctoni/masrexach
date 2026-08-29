@@ -1,3 +1,4 @@
+import type { ArtworkStatus } from "../data/artworks";
 import ca from "./ca";
 import en from "./en";
 import es from "./es";
@@ -38,6 +39,15 @@ export function localeRoutes(): Array<{
 
 export function getDict(locale: Locale): TranslationContent {
   return dictionaries[locale] ?? es;
+}
+
+/** Localized label for each artwork sales status. */
+export function statusLabels(dict: TranslationContent): Record<ArtworkStatus, string> {
+  return {
+    available: dict.catalog.statusAvailable,
+    sold: dict.catalog.statusSold,
+    nfs: dict.catalog.statusNfs,
+  };
 }
 
 /** Path for a locale without the host, e.g. ("ca", "/biografia") → "/ca/biografia". */

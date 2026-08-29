@@ -1,5 +1,6 @@
 ---
 import ContactForm from "../../components/ContactForm.astro";
+import { artworks } from "../../data/artworks";
 import { getDict, localeRoutes } from "../../i18n";
 import Base from "../../layouts/Base.astro";
 
@@ -14,19 +15,11 @@ const infoBlocks = [
     value: "670 831 743",
     href: "tel:+34670831743",
   },
-  {
-    title: dict.contact.nextExhibitionTitle,
-    value: dict.constants.nextExhibition,
-  },
-  {
-    title: dict.contact.galleryTitle,
-    value: dict.constants.permanent,
-  },
-  {
-    title: dict.contact.studioTitle,
-    value: dict.constants.studio,
-  },
 ];
+
+const artworkIndex = Object.fromEntries(
+  artworks.map((art) => [art.slug, { title: art.title, caption: art.caption[locale] }]),
+);
 ---
 
 <Base
@@ -47,7 +40,7 @@ const infoBlocks = [
 
     <div class="mt-12 grid gap-14 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <div class="max-w-2xl">
-        <ContactForm locale={locale} />
+        <ContactForm locale={locale} artworkIndex={artworkIndex} />
       </div>
 
       <aside class="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">

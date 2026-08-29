@@ -23,7 +23,7 @@ interface LegalSection {
 export interface TranslationContent {
   langName: string;
   nav: {
-    painting: string;
+    catalog: string;
     biography: string;
     exhibitions: string;
     contact: string;
@@ -31,15 +31,51 @@ export interface TranslationContent {
   home: {
     title: string;
     description: string;
-    heading: string;
+    kicker: string;
+    /** Headline with optional <em> markup, rendered via set:html. */
+    headline: string;
+    statement: string;
+    ctaCatalog: string;
+    ctaBio: string;
+    legacyKicker: string;
+    legacyParagraphs: string[];
+    finitaKicker: string;
+    /** Quote with optional <em> markup, rendered via set:html. */
+    finitaQuote: string;
+    featuredHeading: string;
+    featuredCta: string;
+    venuesLabel: string;
+    venues: string[];
   };
   biography: {
     title: string;
     description: string;
     heading: string;
+    dates: string;
     paragraphs: string[];
     portraitAlt: string;
     portraitCaption: string;
+  };
+  catalog: {
+    title: string;
+    description: string;
+    heading: string;
+    intro: string;
+    availableHeading: string;
+    soldHeading: string;
+    statusAvailable: string;
+    statusSold: string;
+    statusNfs: string;
+    viewWork: string;
+  };
+  artwork: {
+    inquireCta: string;
+    statusLabel: string;
+    backToCatalog: string;
+    previousWork: string;
+    nextWork: string;
+    workOfInterest: string;
+    ogAlt: string;
   };
   exhibitions: {
     title: string;
@@ -56,9 +92,6 @@ export interface TranslationContent {
     heading: string;
     intro: string;
     phoneTitle: string;
-    studioTitle: string;
-    galleryTitle: string;
-    nextExhibitionTitle: string;
     form: ContactFormStrings;
   };
   legal: {
@@ -68,19 +101,8 @@ export interface TranslationContent {
     sections: LegalSection[];
   };
   constants: {
-    nextExhibition: string;
-    permanent: string;
-    studio: string;
     copyright: string;
     copyright2: string;
-  };
-  gallery: {
-    openImage: string;
-    close: string;
-    previous: string;
-    next: string;
-    counter: string;
-    loading: string;
   };
   a11y: {
     skipToContent: string;

@@ -67,6 +67,9 @@
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Allows full-bleed sections inside the constrained main column without
+       creating horizontal scroll (clip, not hidden, avoids a scroll container). */
+    overflow-x: clip;
   }
 
   /* Editorial drop cap on the first paragraph of the biography. */

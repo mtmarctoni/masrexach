@@ -6,7 +6,8 @@
         "http://localhost/",
         "http://localhost/ca/",
         "http://localhost/en/",
-        "http://localhost/exposiciones/"
+        "http://localhost/catalogo/",
+        "http://localhost/catalogo/07-albufera/"
       ],
       "numberOfRuns": 1
     },

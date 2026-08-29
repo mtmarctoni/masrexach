@@ -15,6 +15,7 @@
       "**",
       "!**/.astro",
       "!docs/plan/source-snapshot",
+      "!design-variants",
       "!comparison.html",
       "!lighthouse-old",
       "!lighthouse-new",

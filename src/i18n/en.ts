@@ -3,21 +3,68 @@ import type { TranslationContent } from "./types";
 const en: TranslationContent = {
   langName: "English",
   nav: {
-    painting: "Painting",
+    catalog: "Catalogue",
     biography: "Biography",
     exhibitions: "Exhibitions",
     contact: "Contact",
   },
   home: {
-    title: "Painting — Antoni Mas Rexach",
+    title: "Antoni Mas Rexach — Majorcan painter",
     description:
-      "Paintings by the Majorcan artist Antoni Mas Rexach. Oils and acrylics: Majorcan landscapes, still lifes and corners of the island.",
-    heading: "Painting",
+      "Antoni Mas Rexach (Palma de Mallorca, 1953–2017), Majorcan painter: oils and acrylics of the island's landscape. Catalogue of original works available.",
+    kicker: "Palma de Mallorca · 1953 — 2017",
+    headline: "The <em>light</em> of Mallorca, turned into <em>painting</em>.",
+    statement:
+      "Antoni Mas Rexach devoted his life to painting his homeland: its fields, its villages, its light. Three decades of exhibitions endorse a body of work that is already part of the island's cultural landscape.",
+    ctaCatalog: "View the catalogue",
+    ctaBio: "Meet the painter",
+    legacyKicker: "His work",
+    legacyParagraphs: [
+      "A disciple of the Escola Lliure del Mediterrani, trained alongside Joaquim Torrens Lladó, Mas Rexach found in the Majorcan landscape his one true subject: the Albufera at dusk, the olive trees of Orient, the farmhouses of Esporlas, the corners of Valldemossa.",
+      "To look at his landscapes is to step into the island's timeless landscape — the one of a lifetime — painted with an approach of his own, yet deeply Majorcan.",
+    ],
+    finitaKicker: "A finite body of work",
+    finitaQuote:
+      "His work is closed: <em>he will paint no more</em>. Every available painting is a unique, unrepeatable piece. Once it finds a collector, it never returns.",
+    featuredHeading: "Featured works",
+    featuredCta: "Full catalogue",
+    venuesLabel: "Work exhibited at",
+    venues: [
+      "Cartoixa de Valldemossa",
+      "Banca March",
+      "Casal Solleric",
+      "Galeria Baldo's & Franc's",
+    ],
+  },
+  catalog: {
+    title: "Catalogue of works — Antoni Mas Rexach",
+    description:
+      "Catalogue of original works by Antoni Mas Rexach: Majorcan landscapes, still lifes and corners of the island. Unique pieces available for collectors.",
+    heading: "Catalogue",
+    intro:
+      "The painter's available work. Each piece is unique: for price and conditions, enquire from each work's page.",
+    availableHeading: "Available works",
+    soldHeading: "Sold works",
+    statusAvailable: "Available",
+    statusSold: "Sold",
+    statusNfs: "Not available",
+    viewWork: "View work",
+  },
+  artwork: {
+    inquireCta: "Inquire about this work",
+    statusLabel: "Status",
+    backToCatalog: "Back to catalogue",
+    previousWork: "Previous work",
+    nextWork: "Next work",
+    workOfInterest: "Work of interest",
+    ogAlt: "Work by Antoni Mas Rexach",
   },
   biography: {
     title: "Biography — Antoni Mas Rexach",
-    description: "Life and artistic career of the Majorcan painter Antoni Mas Rexach.",
+    description:
+      "Antoni Mas Rexach (Palma de Mallorca, 1953–2017), Majorcan landscape painter: his life and artistic career.",
     heading: "Biography",
+    dates: "Palma de Mallorca, September 6, 1953 – March 13, 2017",
     paragraphs: [
       "Born in Palma de Mallorca. He begins his painting studies with J.M. Ferrer.",
       "Later he continues studying at the School of Arts and Crafts of Palma de Mallorca, directed by T. Horrach.",
@@ -83,13 +130,11 @@ const en: TranslationContent = {
   contact: {
     title: "Contact — Antoni Mas Rexach",
     description:
-      "Get in touch with the artist Antoni Mas Rexach: contact form or telephone 670 831 743.",
-    heading: "Contact",
-    intro: "To contact the artist you can fill in this form or call 670 831 743.",
+      "Acquire an original work by Antoni Mas Rexach or ask anything about the catalogue: contact form or telephone 670 831 743.",
+    heading: "Acquire a work",
+    intro:
+      "To acquire a work or ask anything about the catalogue, write using this form or call 670 831 743.",
     phoneTitle: "Telephone",
-    studioTitle: "Studio",
-    galleryTitle: "Permanent exhibition",
-    nextExhibitionTitle: "Next exhibition",
     form: {
       name: "Name",
       namePlaceholder: "Your name",
@@ -113,39 +158,28 @@ const en: TranslationContent = {
       {
         heading: "Intellectual property",
         paragraphs: [
-          "This website is dedicated to the dissemination of the work of the painter Antoni Mas Rexach. All contents (texts, images and paintings) are the property of their author and are protected by intellectual property law. They may not be reproduced, under any circumstances, without his express consent.",
+          "This website is dedicated to the dissemination and sale of the work of the painter Antoni Mas Rexach (1953–2017). All contents (texts, images and paintings) are the property of his heirs and are protected by intellectual property law. They may not be reproduced, under any circumstances, without their express consent.",
         ],
       },
       {
         heading: "Liability",
         paragraphs: [
-          "The purpose of this site is purely informational. The information is provided as is, without warranties, and the owner is not liable for damages arising from its use.",
+          "The purpose of this site is to make the painter's work known and to facilitate the acquisition of his works. The information is provided as is, without warranties, and the owner is not liable for damages arising from its use.",
         ],
       },
       {
         heading: "Privacy",
         paragraphs: [
           "This site does not use tracking cookies or analytics tools. No personal data is collected other than what is voluntarily provided through the contact form.",
-          "The data provided is used solely to reply to your enquiry, is kept for as long as necessary and is not shared with third parties, except for the email provider in charge of sending the messages.",
-          "You may exercise your rights of access, rectification, erasure, objection, restriction and portability by contacting the artist through the contact form on this site.",
+          "The data provided is used solely to reply to your enquiry — including purchase enquiries, which include the reference of the work of interest —, is kept for as long as necessary and is not shared with third parties, except for the email provider in charge of sending the messages.",
+          "You may exercise your rights of access, rectification, erasure, objection, restriction and portability by contacting the site owner through the contact form on this site.",
         ],
       },
     ],
   },
   constants: {
-    nextExhibition: "CLAUSTRE DE SANT ANTONIET — Palma de Mallorca — Dates to be confirmed",
-    permanent: "GALERIA BALDO & FRANC'S — Plaça d'es Mercat, 8 — Palma",
-    studio: "Carrer Roselles, 62 — Palmanyola",
     copyright: "All works are © of the artist Antoni Mas Rexach.",
     copyright2: "They may not be reproduced, under any circumstances, without his express consent.",
-  },
-  gallery: {
-    openImage: "Open image",
-    close: "Close",
-    previous: "Previous",
-    next: "Next",
-    counter: "{current} of {total}",
-    loading: "Loading image…",
   },
   a11y: {
     skipToContent: "Skip to content",

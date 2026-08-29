@@ -1,31 +1,174 @@
 ---
-import Gallery from "../../components/Gallery.astro";
-import { getDict, localeRoutes } from "../../i18n";
+import { getImage } from "astro:assets";
+import heroImageSrc from "../../assets/images/artwork/07-albufera.jpg";
+import PersonJsonLd from "../../components/PersonJsonLd.astro";
+import { featuredArtworks, getArtwork } from "../../data/artworks";
+import { getDict, localeRoutes, localizedPath, statusLabels } from "../../i18n";
 import Base from "../../layouts/Base.astro";
 
 export const getStaticPaths = localeRoutes;
 
 const { locale } = Astro.props;
 const dict = getDict(locale);
----
+const labels = statusLabels(dict);
 
+const heroArt = getArtwork("07-albufera");
+
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  "../../assets/images/artwork/*.jpg",
+  { eager: true },
+);
+
+const hero = await getImage({
+  src: heroImageSrc,
+  width: 460,
+  quality: 80,
+  format: "webp",
+});
+
+const featured = await Promise.all(
+  featuredArtworks().map(async (art) => {
+    const module = imageModules[`../../assets/images/artwork/${art.image}`];
+    const image = module
+      ? await getImage({ src: module.default, width: 720, quality: 72, format: "webp" })
+      : undefined;
+    return { art, image };
+  }),
+);
+---
 <Base
   locale={locale}
   title={dict.home.title}
   description={dict.home.description}
   path="/"
 >
-  <section class="border-b border-border pb-10 pt-14 sm:pt-20">
-    <p class="kicker text-accent-strong">Antoni Mas Rexach</p>
-    <h1
-      class="mt-4 max-w-3xl font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl"
+  <PersonJsonLd />
+  <section
+    class="grid items-center gap-14 pb-20 pt-16 sm:pt-24 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20"
+  >
+    <div>
+      <p class="kicker text-accent-strong">{dict.home.kicker}</p>
+      <h1
+        class="mt-6 max-w-2xl font-display text-5xl font-semibold leading-[1.04] tracking-tight text-ink sm:text-6xl [&_em]:font-medium [&_em]:italic [&_em]:text-accent-strong"
+        set:html={dict.home.headline}
+      />
+      <p class="mt-7 max-w-xl text-[15px] leading-relaxed text-ink-soft">
+        {dict.home.statement}
+      </p>
+      <div class="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
+        <a
+          href={localizedPath(locale, "/catalogo")}
+          class="inline-flex items-center rounded-sm bg-accent px-7 py-3 text-sm font-semibold text-surface motion-safe:transition-colors hover:bg-accent-strong"
+        >
+          {dict.home.ctaCatalog}
+        </a>
+        <a
+          href={localizedPath(locale, "/biografia")}
+          class="text-sm font-medium text-ink underline decoration-accent decoration-2 underline-offset-[6px] motion-safe:transition-colors hover:text-accent-strong"
+        >
+          {dict.home.ctaBio}
+        </a>
+      </div>
+    </div>
+
+    <figure
+      class="rounded-sm border border-border bg-white p-4 pb-0 shadow-[0_24px_48px_-24px_rgb(33_29_23/0.28)]"
     >
-      {dict.home.heading}
-    </h1>
-    <p class="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-soft">
-      {dict.home.description}
-    </p>
+      <img
+        src={hero.src}
+        width={hero.attributes.width}
+        height={hero.attributes.height}
+        alt={heroArt ? `${heroArt.title} — ${heroArt.caption[locale]}` : dict.artwork.ogAlt}
+        class="h-auto w-full"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <figcaption
+        class="flex items-baseline justify-between gap-3 px-0.5 py-3.5 text-xs text-ink-faint"
+      >
+        <span class="font-display text-sm font-semibold italic text-ink">
+          {heroArt?.title}
+        </span>
+        <span>{heroArt?.caption[locale]}</span>
+      </figcaption>
+    </figure>
   </section>
 
-  <Gallery locale={locale} />
+  <section
+    class="grid gap-10 border-t border-border py-16 sm:py-20 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-20"
+  >
+    <p class="kicker text-ink-faint">{dict.home.legacyKicker}</p>
+    <div class="max-w-2xl text-[16.5px] leading-[1.8] text-ink-soft">
+      {
+        dict.home.legacyParagraphs.map((paragraph, index) => (
+          <p class={index === 0 ? "dropcap" : "mt-5"}>{paragraph}</p>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-surface-alt">
+    <div class="mx-auto max-w-3xl px-6 py-20 text-center sm:py-24">
+      <p class="kicker text-accent-strong">{dict.home.finitaKicker}</p>
+      <blockquote
+        class="mt-6 font-display text-2xl font-medium leading-[1.3] tracking-tight text-ink sm:text-[2rem] [&_em]:italic [&_em]:text-accent-strong"
+        set:html={dict.home.finitaQuote}
+      />
+    </div>
+  </section>
+
+  <section class="py-16 sm:py-20">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+      <h2 class="font-display text-3xl font-semibold tracking-tight text-ink">
+        {dict.home.featuredHeading}
+      </h2>
+      <a
+        href={localizedPath(locale, "/catalogo")}
+        class="text-sm font-medium text-ink underline decoration-accent underline-offset-[6px] motion-safe:transition-colors hover:text-accent-strong"
+      >
+        {dict.home.featuredCta}
+      </a>
+    </div>
+
+    <ul class="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        featured.map(({ art, image }) => (
+          <li>
+            <a href={localizedPath(locale, `/catalogo/${art.slug}`)} class="group block">
+              <div class="rounded-sm border border-border bg-white p-3 motion-safe:transition-[transform,box-shadow] motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:shadow-[0_20px_36px_-20px_rgb(33_29_23/0.35)]">
+                {image ? (
+                  <img
+                    src={image.src}
+                    width={image.attributes.width}
+                    height={image.attributes.height}
+                    alt={`${art.title} — ${art.caption[locale]}`}
+                    class="h-60 w-full object-contain"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <span class="block h-60" aria-hidden="true" />
+                )}
+              </div>
+              <div class="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                <p class="font-display text-[15.5px] font-semibold text-ink">{art.title}</p>
+                <p class="text-xs text-ink-faint">{art.caption[locale]}</p>
+              </div>
+              <p class="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-accent-strong">
+                {labels[art.status]}
+              </p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="border-t border-border py-9 text-center">
+    <p class="text-xs uppercase tracking-[0.18em] text-ink-faint">
+      {dict.home.venuesLabel}
+      <span class="mx-2 font-semibold text-ink-soft">{dict.home.venues.join(" · ")}</span>
+    </p>
+  </section>
 </Base>

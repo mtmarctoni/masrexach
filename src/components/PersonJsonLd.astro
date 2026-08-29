@@ -1,0 +1,24 @@
+---
+import { siteUrl } from "../i18n";
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Antoni Mas Rexach",
+  url: siteUrl || undefined,
+  birthDate: "1953-09-06",
+  deathDate: "2017-03-13",
+  birthPlace: {
+    "@type": "Place",
+    name: "Palma de Mallorca",
+  },
+  nationality: {
+    "@type": "Country",
+    name: "ES",
+  },
+  jobTitle: "Painter",
+  knowsAbout: "Mallorcan landscape painting",
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />

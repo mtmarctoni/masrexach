@@ -1,0 +1,171 @@
+---
+import { getImage } from "astro:assets";
+import type { Artwork } from "../../../data/artworks";
+import { adjacentArtworks, artworks } from "../../../data/artworks";
+import type { Locale } from "../../../i18n";
+import { getDict, localeRoutes, localizedPath, siteUrl, statusLabels } from "../../../i18n";
+import Base from "../../../layouts/Base.astro";
+
+export function getStaticPaths() {
+  return artworks.flatMap((art) =>
+    localeRoutes().map((route) => ({
+      params: { locale: route.params.locale, slug: art.slug },
+      props: { locale: route.props.locale, art },
+    })),
+  );
+}
+
+interface Props {
+  locale: Locale;
+  art: Artwork;
+}
+
+const { locale, art } = Astro.props;
+const dict = getDict(locale);
+const labels = statusLabels(dict);
+const adjacent = adjacentArtworks(art.slug);
+
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  "../../../assets/images/artwork/*.jpg",
+  { eager: true },
+);
+
+const module = imageModules[`../../../assets/images/artwork/${art.image}`];
+const image = module
+  ? await getImage({
+      src: module.default,
+      width: Math.min(module.default.width, 960),
+      quality: 80,
+      format: "webp",
+    })
+  : undefined;
+
+const alt = `${art.title} — ${art.caption[locale]}`;
+const description = `${art.title} — ${art.caption[locale]}. ${labels[art.status]}.`;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "VisualArtwork",
+  name: art.title,
+  image: image ? `${siteUrl}${image.src}` : undefined,
+  artform: "Painting",
+  text: art.caption[locale],
+  creator: {
+    "@type": "Person",
+    name: "Antoni Mas Rexach",
+    birthDate: "1953-09-06",
+    deathDate: "2017-03-13",
+    birthPlace: {
+      "@type": "Place",
+      name: "Palma de Mallorca",
+    },
+  },
+};
+---
+
+<Base
+  locale={locale}
+  title={`${art.title} — Antoni Mas Rexach`}
+  description={description}
+  path={`/catalogo/${art.slug}`}
+  ogImage={image?.src}
+>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+  <nav class="flex items-center justify-between gap-4 border-b border-border pb-6 pt-10">
+    <a
+      href={localizedPath(locale, "/catalogo")}
+      class="inline-flex items-center gap-2 text-sm font-medium text-ink-soft motion-safe:transition-colors hover:text-accent-strong"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+      {dict.artwork.backToCatalog}
+    </a>
+    <p class="kicker text-ink-faint">Antoni Mas Rexach</p>
+  </nav>
+
+  <figure class="mx-auto mt-14 w-full max-w-[500px]">
+    <div class="rounded-sm border border-border bg-white p-5 pb-0 shadow-[0_24px_48px_-24px_rgb(33_29_23/0.28)]">
+      {
+        image ? (
+          <img
+            src={image.src}
+            width={image.attributes.width}
+            height={image.attributes.height}
+            alt={alt}
+            class="h-auto w-full"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+        ) : (
+          <span class="block aspect-square w-full" aria-hidden="true" />
+        )
+      }
+    </div>
+
+    <figcaption class="mx-auto mt-7 max-w-md text-center">
+      <h1 class="font-display text-3xl font-semibold tracking-tight text-ink">
+        {art.title}
+      </h1>
+      <p class="mt-2 text-sm leading-relaxed text-ink-soft">{art.caption[locale]}</p>
+      <p class="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-accent-strong">
+        {labels[art.status]}
+      </p>
+
+      {
+        art.status === "available" && (
+          <a
+            href={`${localizedPath(locale, "/contacto")}?obra=${art.slug}`}
+            class="mt-7 inline-flex items-center rounded-sm bg-accent px-8 py-3 text-sm font-semibold text-surface motion-safe:transition-colors hover:bg-accent-strong"
+          >
+            {dict.artwork.inquireCta}
+          </a>
+        )
+      }
+    </figcaption>
+  </figure>
+
+  {
+    adjacent && (
+      <nav
+        class="mt-20 grid grid-cols-2 gap-4 border-t border-border pt-8"
+        aria-label={dict.catalog.heading}
+      >
+        <a
+          href={localizedPath(locale, `/catalogo/${adjacent.prev.slug}`)}
+          class="group flex items-center gap-3 pr-4"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-ink-faint motion-safe:transition-colors group-hover:text-accent-strong" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          <span>
+            <span class="block text-xs font-bold uppercase tracking-[0.14em] text-ink-faint">
+              {dict.artwork.previousWork}
+            </span>
+            <span class="mt-0.5 block font-display text-[15px] font-semibold text-ink motion-safe:transition-colors group-hover:text-accent-strong">
+              {adjacent.prev.title}
+            </span>
+          </span>
+        </a>
+        <a
+          href={localizedPath(locale, `/catalogo/${adjacent.next.slug}`)}
+          class="group flex items-center justify-end gap-3 pl-4 text-right"
+        >
+          <span>
+            <span class="block text-xs font-bold uppercase tracking-[0.14em] text-ink-faint">
+              {dict.artwork.nextWork}
+            </span>
+            <span class="mt-0.5 block font-display text-[15px] font-semibold text-ink motion-safe:transition-colors group-hover:text-accent-strong">
+              {adjacent.next.title}
+            </span>
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-ink-faint motion-safe:transition-colors group-hover:text-accent-strong" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </nav>
+    )
+  }
+</Base>
