@@ -55,21 +55,19 @@ const sold = await Promise.all(soldArtworks().map(prepare));
         available.map(({ art, image }) => (
           <li class="mb-7 break-inside-avoid">
             <a href={localizedPath(locale, `/catalogo/${art.slug}`)} class="group block">
-              <div class="rounded-sm border border-border bg-white p-3 motion-safe:transition-[transform,box-shadow] motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:shadow-[0_20px_36px_-20px_rgb(33_29_23/0.35)]">
-                {image ? (
-                  <img
-                    src={image.src}
-                    width={image.attributes.width}
-                    height={image.attributes.height}
-                    alt={`${art.title} — ${art.caption[locale]}`}
-                    class="h-auto w-full"
-                    loading={art.featured ? "eager" : "lazy"}
-                    decoding="async"
-                  />
-                ) : (
-                  <span class="block aspect-square" aria-hidden="true" />
-                )}
-              </div>
+              {image ? (
+                <img
+                  src={image.src}
+                  width={image.attributes.width}
+                  height={image.attributes.height}
+                  alt={`${art.title} — ${art.caption[locale]}`}
+                  class="h-auto w-full shadow-[0_10px_24px_-14px_rgb(33_29_23/0.45)] motion-safe:transition-shadow motion-safe:duration-300 motion-safe:group-hover:shadow-[0_18px_36px_-16px_rgb(33_29_23/0.55)]"
+                  loading={art.featured ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              ) : (
+                <span class="block aspect-square" aria-hidden="true" />
+              )}
               <div class="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                 <p class="font-display text-[15.5px] font-semibold text-ink">{art.title}</p>
                 <p class="text-xs text-ink-faint">{art.caption[locale]}</p>
@@ -97,21 +95,19 @@ const sold = await Promise.all(soldArtworks().map(prepare));
                 href={localizedPath(locale, `/catalogo/${art.slug}`)}
                 class="block opacity-75"
               >
-                <div class="rounded-sm border border-border bg-white p-3">
-                  {image ? (
-                    <img
-                      src={image.src}
-                      width={image.attributes.width}
-                      height={image.attributes.height}
-                      alt={`${art.title} — ${art.caption[locale]}`}
-                      class="h-auto w-full"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <span class="block aspect-square" aria-hidden="true" />
-                  )}
-                </div>
+                {image ? (
+                  <img
+                    src={image.src}
+                    width={image.attributes.width}
+                    height={image.attributes.height}
+                    alt={`${art.title} — ${art.caption[locale]}`}
+                    class="h-auto w-full shadow-[0_10px_24px_-14px_rgb(33_29_23/0.45)]"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <span class="block aspect-square" aria-hidden="true" />
+                )}
                 <div class="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <p class="font-display text-[15.5px] font-semibold text-ink">{art.title}</p>
                   <p class="text-xs text-ink-faint">{art.caption[locale]}</p>
