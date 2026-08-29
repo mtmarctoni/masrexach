@@ -1,8 +1,20 @@
+export type ArtworkStatus = "available" | "sold" | "nfs";
+
 export interface Artwork {
   id: number;
+  /** Unique URL slug, derived from the image basename, e.g. "07-albufera". */
+  slug: string;
   title: string;
   caption: { es: string; ca: string; en: string };
+  /** Filename under src/assets/images/artwork/. */
+  image: string;
+  /** Sales status. "nfs" = not for sale (family keepsake). */
+  status: ArtworkStatus;
+  /** Shown in the home page's featured section. */
+  featured: boolean;
 }
+
+type ArtworkBase = Omit<Artwork, "slug" | "image" | "status" | "featured">;
 
 const a = (
   id: number,
@@ -10,9 +22,41 @@ const a = (
   captionEs: string,
   captionCa: string,
   captionEn: string,
-): Artwork => ({ id, title, caption: { es: captionEs, ca: captionCa, en: captionEn } });
+): ArtworkBase => ({ id, title, caption: { es: captionEs, ca: captionCa, en: captionEn } });
 
-export const artworks: Artwork[] = [
+const artworkImages = new Map<number, string>([
+  [1, "01-tiestos.jpg"],
+  [2, "02-orient-60x60.jpg"],
+  [3, "03-botellas.jpg"],
+  [4, "04-fonollasa.jpg"],
+  [5, "05-orient-100x40.jpg"],
+  [6, "06-tronco-olivera.jpg"],
+  [7, "07-albufera.jpg"],
+  [8, "08-paisaje-mallorquin.jpg"],
+  [9, "09-rincon-casa.jpg"],
+  [10, "10-tiesto-en-estanque.jpg"],
+  [11, "11-fuente-y-canal.jpg"],
+  [12, "12-son-angelats-soller.jpg"],
+  [13, "13-silla-y-granadas.jpg"],
+  [14, "14-granja-esporlas.jpg"],
+  [15, "15-iglesia-valldemossa.jpg"],
+  [16, "16-tiestos-acrilico.jpg"],
+  [17, "17-nenufares.jpg"],
+  [18, "18-amapolas.jpg"],
+  [19, "19-trastos-granja-esporlas.jpg"],
+  [20, "20-esporlas.jpg"],
+  [21, "21-rincon-jardin.jpg"],
+  [22, "22-cipreses-en-el-lago.jpg"],
+  [23, "23-casa-y-bugambilia.jpg"],
+  [24, "24-badaluc.jpg"],
+  [25, "25-atardecer.jpg"],
+]);
+
+/** Home page featured works (id order): Tronco olivera, Albufera, Granja
+ *  Esporlas, Nenúfares, Cipreses en el lago, Atardecer. */
+const FEATURED_IDS = new Set([6, 7, 14, 17, 22, 25]);
+
+const base: ArtworkBase[] = [
   a(
     1,
     "Tiestos",
@@ -190,30 +234,44 @@ export const artworks: Artwork[] = [
   ),
 ];
 
-export const artworkImages = new Map<number, string>([
-  [1, "01-tiestos.jpg"],
-  [2, "02-orient-60x60.jpg"],
-  [3, "03-botellas.jpg"],
-  [4, "04-fonollasa.jpg"],
-  [5, "05-orient-100x40.jpg"],
-  [6, "06-tronco-olivera.jpg"],
-  [7, "07-albufera.jpg"],
-  [8, "08-paisaje-mallorquin.jpg"],
-  [9, "09-rincon-casa.jpg"],
-  [10, "10-tiesto-en-estanque.jpg"],
-  [11, "11-fuente-y-canal.jpg"],
-  [12, "12-son-angelats-soller.jpg"],
-  [13, "13-silla-y-granadas.jpg"],
-  [14, "14-granja-esporlas.jpg"],
-  [15, "15-iglesia-valldemossa.jpg"],
-  [16, "16-tiestos-acrilico.jpg"],
-  [17, "17-nenufares.jpg"],
-  [18, "18-amapolas.jpg"],
-  [19, "19-trastos-granja-esporlas.jpg"],
-  [20, "20-esporlas.jpg"],
-  [21, "21-rincon-jardin.jpg"],
-  [22, "22-cipreses-en-el-lago.jpg"],
-  [23, "23-casa-y-bugambilia.jpg"],
-  [24, "24-badaluc.jpg"],
-  [25, "25-atardecer.jpg"],
-]);
+export const artworks: Artwork[] = base.map((art) => {
+  const image = artworkImages.get(art.id);
+  if (!image) {
+    throw new Error(`Missing image for artwork ${art.id}`);
+  }
+  return {
+    ...art,
+    image,
+    slug: image.replace(/\.jpg$/, ""),
+    status: "available",
+    featured: FEATURED_IDS.has(art.id),
+  };
+});
+
+export function getArtwork(slug: string): Artwork | undefined {
+  return artworks.find((art) => art.slug === slug);
+}
+
+export function availableArtworks(): Artwork[] {
+  return artworks.filter((art) => art.status === "available");
+}
+
+export function soldArtworks(): Artwork[] {
+  return artworks.filter((art) => art.status === "sold");
+}
+
+export function featuredArtworks(): Artwork[] {
+  return artworks.filter((art) => art.featured);
+}
+
+/** Previous/next artwork in id order, wrapping around the catalog. */
+export function adjacentArtworks(slug: string): { prev: Artwork; next: Artwork } | undefined {
+  const index = artworks.findIndex((art) => art.slug === slug);
+  if (index === -1) {
+    return undefined;
+  }
+  return {
+    prev: artworks[(index - 1 + artworks.length) % artworks.length],
+    next: artworks[(index + 1) % artworks.length],
+  };
+}

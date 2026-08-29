@@ -10,6 +10,7 @@ export const server = {
       email: z.email().trim().max(320),
       message: z.string().trim().min(1).max(4000),
       company: z.string().max(0).optional(),
+      artwork: z.string().trim().max(100).optional(),
     }),
     handler: async (input) => {
       if (input.company) {
@@ -20,6 +21,7 @@ export const server = {
         throw new ActionError({ code: "UNPROCESSABLE_CONTENT" });
       }
 
+      const artworkReference = input.artwork ? `Obra: ${input.artwork}\n\n` : "";
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -30,8 +32,10 @@ export const server = {
           from: "Antoni Mas Rexach <contacto@masrexach.com>",
           to: [CONTACT_TO_EMAIL],
           reply_to: [input.email],
-          subject: `Mensaje de ${input.name} — masrexach.com`,
-          text: `${input.name} (${input.email})\n\n${input.message}`,
+          subject: input.artwork
+            ? `Consulta obra ${input.artwork} — ${input.name} — masrexach.com`
+            : `Mensaje de ${input.name} — masrexach.com`,
+          text: `${input.name} (${input.email})\n\n${artworkReference}${input.message}`,
         }),
       });
 

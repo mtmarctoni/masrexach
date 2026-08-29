@@ -1,0 +1,129 @@
+---
+import { getImage } from "astro:assets";
+import type { Artwork } from "../../data/artworks";
+import { availableArtworks, soldArtworks } from "../../data/artworks";
+import { getDict, localeRoutes, localizedPath, statusLabels } from "../../i18n";
+import Base from "../../layouts/Base.astro";
+
+export const getStaticPaths = localeRoutes;
+
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const labels = statusLabels(dict);
+
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  "../../assets/images/artwork/*.jpg",
+  { eager: true },
+);
+
+async function prepare(art: Artwork) {
+  const module = imageModules[`../../assets/images/artwork/${art.image}`];
+  const image = module
+    ? await getImage({ src: module.default, width: 720, quality: 72, format: "webp" })
+    : undefined;
+  return { art, image };
+}
+
+const available = await Promise.all(availableArtworks().map(prepare));
+const sold = await Promise.all(soldArtworks().map(prepare));
+---
+
+<Base
+  locale={locale}
+  title={dict.catalog.title}
+  description={dict.catalog.description}
+  path="/catalogo"
+>
+  <section class="border-b border-border pb-10 pt-14 sm:pt-20">
+    <p class="kicker text-accent-strong">Antoni Mas Rexach</p>
+    <h1
+      class="mt-4 font-display text-5xl font-semibold tracking-tight text-ink sm:text-6xl"
+    >
+      {dict.catalog.heading}
+    </h1>
+    <p class="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-soft">
+      {dict.catalog.intro}
+    </p>
+  </section>
+
+  <section class="py-12">
+    <h2 class="font-display text-2xl font-semibold tracking-tight text-ink">
+      {dict.catalog.availableHeading}
+    </h2>
+    <ul class="mt-8 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        available.map(({ art, image }) => (
+          <li>
+            <a href={localizedPath(locale, `/catalogo/${art.slug}`)} class="group block">
+              <div class="rounded-sm border border-border bg-white p-3 motion-safe:transition-[transform,box-shadow] motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:shadow-[0_20px_36px_-20px_rgb(33_29_23/0.35)]">
+                {image ? (
+                  <img
+                    src={image.src}
+                    width={image.attributes.width}
+                    height={image.attributes.height}
+                    alt={`${art.title} — ${art.caption[locale]}`}
+                    class="h-60 w-full object-contain"
+                    loading={art.featured ? "eager" : "lazy"}
+                    decoding="async"
+                  />
+                ) : (
+                  <span class="block h-60" aria-hidden="true" />
+                )}
+              </div>
+              <div class="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                <p class="font-display text-[15.5px] font-semibold text-ink">{art.title}</p>
+                <p class="text-xs text-ink-faint">{art.caption[locale]}</p>
+              </div>
+              <p class="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-accent-strong">
+                {labels[art.status]}
+              </p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    sold.length > 0 && (
+      <section class="border-t border-border py-12">
+        <h2 class="font-display text-2xl font-semibold tracking-tight text-ink">
+          {dict.catalog.soldHeading}
+        </h2>
+        <ul class="mt-8 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          {sold.map(({ art, image }) => (
+            <li>
+              <a
+                href={localizedPath(locale, `/catalogo/${art.slug}`)}
+                class="block opacity-75"
+              >
+                <div class="rounded-sm border border-border bg-white p-3">
+                  {image ? (
+                    <img
+                      src={image.src}
+                      width={image.attributes.width}
+                      height={image.attributes.height}
+                      alt={`${art.title} — ${art.caption[locale]}`}
+                      class="h-60 w-full object-contain"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span class="block h-60" aria-hidden="true" />
+                  )}
+                </div>
+                <div class="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <p class="font-display text-[15.5px] font-semibold text-ink">{art.title}</p>
+                  <p class="text-xs text-ink-faint">{art.caption[locale]}</p>
+                </div>
+                <p class="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-ink-faint">
+                  {labels[art.status]}
+                </p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</Base>

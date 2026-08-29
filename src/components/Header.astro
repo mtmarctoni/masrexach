@@ -12,7 +12,7 @@ const { locale, currentPath } = Astro.props;
 const dict = getDict(locale);
 
 const links = [
-  { href: "/", label: dict.nav.painting },
+  { href: "/catalogo", label: dict.nav.catalog },
   { href: "/biografia", label: dict.nav.biography },
   { href: "/exposiciones", label: dict.nav.exhibitions },
   { href: "/contacto", label: dict.nav.contact },
@@ -28,11 +28,11 @@ const links = [
       Antoni Mas Rexach
     </a>
 
-    <nav aria-label={dict.nav.painting} class="hidden items-center gap-8 md:flex">
+    <nav aria-label={dict.nav.catalog} class="hidden items-center gap-8 md:flex">
       {
         links.map(({ href, label }) => {
           const localized = localizedPath(locale, href);
-          const active = currentPath === href;
+          const active = currentPath === href || (href === "/catalogo" && currentPath.startsWith("/catalogo/"));
           return (
             <a
               href={localized}
@@ -67,14 +67,14 @@ const links = [
   <nav
     id="site-nav"
     data-menu-panel
-    aria-label={dict.nav.painting}
+      aria-label={dict.nav.catalog}
     class="hidden border-t border-border bg-surface px-6 pb-4 pt-2 md:hidden"
   >
     <ul class="flex flex-col gap-1">
       {
         links.map(({ href, label }) => {
           const localized = localizedPath(locale, href);
-          const active = currentPath === href;
+          const active = currentPath === href || (href === "/catalogo" && currentPath.startsWith("/catalogo/"));
           return (
             <li>
               <a

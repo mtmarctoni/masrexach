@@ -2,11 +2,18 @@
 import type { Locale } from "../i18n";
 import { getDict } from "../i18n";
 
-interface Props {
-  locale: Locale;
+interface ArtworkIndexEntry {
+  title: string;
+  caption: string;
 }
 
-const { locale } = Astro.props;
+interface Props {
+  locale: Locale;
+  /** slug -> { title, caption } for the ?obra= prefill (current locale). */
+  artworkIndex: Record<string, ArtworkIndexEntry>;
+}
+
+const { locale, artworkIndex } = Astro.props;
 const dict = getDict(locale);
 const f = dict.contact.form;
 ---
@@ -23,9 +30,22 @@ const f = dict.contact.form;
     error: f.error,
     submit: f.submit,
   })}
+  data-contact-artworks={JSON.stringify(artworkIndex)}
   class="grid gap-5"
   novalidate
 >
+  <div
+    data-contact-artwork-box
+    hidden
+    class="rounded-sm border border-accent/40 bg-surface-alt px-4 py-3.5"
+  >
+    <span class="kicker text-accent-strong">{dict.artwork.workOfInterest}</span>
+    <p data-contact-artwork-title class="mt-2 font-display text-[15px] font-semibold text-ink" />
+    <p data-contact-artwork-caption class="mt-0.5 text-xs text-ink-soft" />
+  </div>
+
+  <input type="hidden" name="artwork" value="" data-contact-artwork-input />
+
   <div class="grid gap-5 sm:grid-cols-2">
     <label class="grid gap-1.5">
       <span class="text-sm font-medium text-ink">{f.name}</span>

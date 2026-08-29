@@ -28,6 +28,40 @@ export function initContactForm(): void {
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+  // ?obra=<slug> prefill: resolve the slug against the inline artwork index
+  // and surface the work of interest above the form.
+  const artworkInput = form.querySelector<HTMLInputElement>("[data-contact-artwork-input]");
+  const artworkBox = form.querySelector<HTMLElement>("[data-contact-artwork-box]");
+  const artworkTitle = form.querySelector<HTMLElement>("[data-contact-artwork-title]");
+  const artworkCaption = form.querySelector<HTMLElement>("[data-contact-artwork-caption]");
+
+  let prefillSlug = "";
+  if (artworkInput) {
+    try {
+      const slug = new URLSearchParams(window.location.search).get("obra") ?? "";
+      const index = JSON.parse(form.dataset.contactArtworks ?? "{}") as Record<
+        string,
+        { title?: string; caption?: string }
+      >;
+      const entry = slug ? index[slug] : undefined;
+      if (slug && entry) {
+        prefillSlug = slug;
+        artworkInput.value = slug;
+        if (artworkBox) {
+          artworkBox.hidden = false;
+        }
+        if (artworkTitle) {
+          artworkTitle.textContent = entry.title ?? slug;
+        }
+        if (artworkCaption) {
+          artworkCaption.textContent = entry.caption ?? "";
+        }
+      }
+    } catch {
+      // Malformed index or params: the form still works without the prefill.
+    }
+  }
+
   const validate = (): boolean => {
     let valid = true;
     const name = fields.name;
@@ -92,6 +126,11 @@ export function initContactForm(): void {
       if (actionError) throw new Error("send failed");
       setStatus("success");
       form.reset();
+      // form.reset() clears the hidden input back to its default; keep the
+      // artwork reference so a follow-up message still carries it.
+      if (prefillSlug && artworkInput) {
+        artworkInput.value = prefillSlug;
+      }
     } catch {
       setStatus("error");
     }
