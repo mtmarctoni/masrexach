@@ -27,7 +27,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
+        # LHCI's SEO audit grades crawlable output (robots meta "index", a valid
+        # robots.txt, a sitemap). The build's fail-safe default is noindex, so
+        # the production build type must be set here or the SEO category can
+        # never reach 1.0. PUBLIC_BASE_URL mirrors what production serves.
         run: pnpm build
+        env:
+          PUBLIC_BUILD_TYPE: Production
+          PUBLIC_BASE_URL: https://masrexach.marctonimas.com
 
       - name: Lighthouse CI (mobile emulation)
         run: npx --yes @lhci/cli@0.15.x autorun
