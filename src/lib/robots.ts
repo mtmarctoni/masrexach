@@ -1,3 +1,5 @@
+import { NOINDEX_PREFIXES } from "./seo";
+
 // Canonical origin for the production sitemap reference. CI injects
 // PUBLIC_BASE_URL per GitHub environment (staging/production custom domains).
 // The fallback keeps local production builds valid without the var.
@@ -25,7 +27,10 @@ export function robotsTxt(isProduction: boolean): string {
     return [
       "User-agent: *",
       "Allow: /",
-      "Disallow: /api/",
+      // Non-indexable prefixes from the centralized registry (src/lib/seo.ts).
+      // Noindex *pages* stay crawlable so crawlers can read their noindex meta;
+      // only prefix routes (API) are disallowed outright.
+      ...NOINDEX_PREFIXES.map((prefix) => `Disallow: ${prefix}/`),
       "",
       `Sitemap: ${siteUrl()}/sitemap-index.xml`,
       "",

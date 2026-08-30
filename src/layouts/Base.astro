@@ -15,7 +15,7 @@ interface Props {
   indexable?: boolean;
 }
 
-const { locale, title, description, path, ogImage, indexable = true } = Astro.props;
+const { locale, title, description, path, ogImage, indexable } = Astro.props;
 const dict = getDict(locale);
 ---
 
