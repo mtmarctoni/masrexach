@@ -3,6 +3,7 @@ import { Font } from "astro:assets";
 import type { Locale } from "../i18n";
 import { alternatePaths, localizedUrl, siteUrl } from "../i18n";
 import { robotsDirective } from "../lib/robots";
+import { isIndexablePath } from "../lib/seo";
 
 interface Props {
   title: string;
@@ -13,7 +14,11 @@ interface Props {
   indexable?: boolean;
 }
 
-const { title, description, path, locale, ogImage = "/og.jpg", indexable = true } = Astro.props;
+const { title, description, path, locale, ogImage = "/og.jpg", indexable } = Astro.props;
+
+// Indexability defaults to the centralized noindex list (src/lib/seo.ts); a
+// page opts out explicitly only when it has no stable path (error pages).
+const canIndex = indexable ?? isIndexablePath(path);
 
 // siteUrl is empty for preview builds (host unknown at build time), so
 // canonical/hreflang/OG absolute-URL tags are skipped there — the pages are
@@ -30,7 +35,7 @@ const image = siteUrl ? `${siteUrl}${ogImage}` : undefined;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content={robotsDirective(indexable)} />
+    <meta name="robots" content={robotsDirective(canIndex)} />
     <meta name="theme-color" content="#faf7f1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     {canonical && <link rel="canonical" href={canonical} />}

@@ -5,6 +5,7 @@ import cloudflare from "@astrojs/cloudflare";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField, fontProviders } from "astro/config";
+import { isIndexableUrl } from "./src/lib/seo.ts";
 
 // Build-time environment selector, injected by CI from GitHub environment
 // variables ("Preview" | "Staging" | "Production"). Anything not exactly
@@ -112,8 +113,8 @@ export default defineConfig({
   integrations: [
     // Sitemap only exists in production: it advertises indexable pages and is
     // referenced by robots.txt. Non-production robots.txt is Disallow: /, so no
-    // sitemap. Legal pages (and /api/) are excluded even from the production
-    // sitemap — they are noindex pages.
+    // sitemap. The filter drops every URL in the centralized noindex registry
+    // (src/lib/seo.ts) — legal pages, error pages, /api/ — even from production.
     ...(IS_PRODUCTION
       ? [
           sitemap({
@@ -125,7 +126,7 @@ export default defineConfig({
                 en: "en",
               },
             },
-            filter: (page) => !page.includes("/api/") && !page.includes("/legal"),
+            filter: (page) => isIndexableUrl(page),
           }),
         ]
       : []),

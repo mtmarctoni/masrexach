@@ -10,9 +10,9 @@ if (!baseArg) {
 }
 
 const base = baseArg.replace(/\/$/, "");
-// "/", "/ca/", "/en/", "/exposiciones/": comma-separated quoted paths - root, each non-default locale root, one deep route.
+// "/", "/ca/", "/en/", "/exposiciones/", "/legal/": comma-separated quoted paths - root, each non-default locale root, one deep route, one noindex route.
 // Example: "/", "/es/", "/en/", "/blog/<slug>/"
-const PATHS = ["/", "/ca/", "/en/", "/exposiciones/"];
+const PATHS = ["/", "/ca/", "/en/", "/exposiciones/", "/legal/"];
 // Preview (workers.dev) and staging hosts both contain "staging"; production
 // (masrexach.marctonimas.com) does not. Non-production builds are noindex.
 const IS_STAGING_HOST = /staging/i.test(new URL(base).hostname);
