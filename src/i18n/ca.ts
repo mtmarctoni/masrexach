@@ -148,6 +148,11 @@ const ca: TranslationContent = {
       error: "No s'ha pogut enviar el missatge. Torna-ho a provar.",
       invalidEmail: "Introdueix un correu electrònic vàlid.",
       required: "Aquest camp és obligatori.",
+      confirmationSubject: "Hem rebut la vostra consulta — masrexach.com",
+      confirmationHeading: "El vostre missatge ha estat enviat",
+      confirmationBody:
+        "Gràcies per contactar-nos. Hem rebut la vostra consulta i us respondrem aviat.",
+      confirmationSignature: "— Antoni Mas Rexach",
     },
   },
   legal: {

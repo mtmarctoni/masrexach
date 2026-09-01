@@ -13,6 +13,10 @@ interface ContactFormStrings {
   error: string;
   invalidEmail: string;
   required: string;
+  confirmationSubject: string;
+  confirmationHeading: string;
+  confirmationBody: string;
+  confirmationSignature: string;
 }
 
 interface LegalSection {

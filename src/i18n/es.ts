@@ -148,6 +148,11 @@ const es: TranslationContent = {
       error: "No se ha podido enviar el mensaje. Inténtalo de nuevo.",
       invalidEmail: "Introduce un correo electrónico válido.",
       required: "Este campo es obligatorio.",
+      confirmationSubject: "Hemos recibido tu consulta — masrexach.com",
+      confirmationHeading: "Tu mensaje ha sido enviado",
+      confirmationBody:
+        "Gracias por contactarnos. Hemos recibido tu consulta y te responderemos pronto.",
+      confirmationSignature: "— Antoni Mas Rexach",
     },
   },
   legal: {

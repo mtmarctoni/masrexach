@@ -1,6 +1,10 @@
 import { ActionError, defineAction } from "astro:actions";
-import { CONTACT_TO_EMAIL, RESEND_API_KEY } from "astro:env/server";
+import { CONTACT_FROM_EMAIL, CONTACT_TO_EMAIL, RESEND_API_KEY } from "astro:env/server";
 import { z } from "astro/zod";
+import { getDict, type Locale } from "../i18n";
+import { type ContactLead, sendContactConfirmation, sendContactNotification } from "../lib/email";
+
+const DEFAULT_FROM = "Antoni Mas Rexach <masrexach@marctonimas.com>";
 
 export const server = {
   sendContact: defineAction({
@@ -11,6 +15,7 @@ export const server = {
       message: z.string().trim().min(1).max(4000),
       company: z.string().max(0).optional(),
       artwork: z.string().trim().max(100).optional(),
+      lang: z.enum(["es", "ca", "en"]).optional(),
     }),
     handler: async (input) => {
       if (input.company) {
@@ -21,26 +26,33 @@ export const server = {
         throw new ActionError({ code: "UNPROCESSABLE_CONTENT" });
       }
 
-      const artworkReference = input.artwork ? `Obra: ${input.artwork}\n\n` : "";
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "Antoni Mas Rexach <contacto@masrexach.com>",
-          to: [CONTACT_TO_EMAIL],
-          reply_to: [input.email],
-          subject: input.artwork
-            ? `Consulta obra ${input.artwork} — ${input.name} — masrexach.com`
-            : `Mensaje de ${input.name} — masrexach.com`,
-          text: `${input.name} (${input.email})\n\n${artworkReference}${input.message}`,
-        }),
-      });
+      const config = {
+        apiKey: RESEND_API_KEY,
+        from: CONTACT_FROM_EMAIL || DEFAULT_FROM,
+        to: CONTACT_TO_EMAIL,
+      };
 
-      if (!response.ok) {
-        throw new ActionError({ code: "UNPROCESSABLE_CONTENT" });
+      const lead: ContactLead = {
+        name: input.name,
+        email: input.email,
+        message: input.message,
+        artwork: input.artwork || undefined,
+      };
+
+      await sendContactNotification(config, lead);
+
+      const locale: Locale = input.lang ?? "es";
+      const f = getDict(locale).contact.form;
+
+      try {
+        await sendContactConfirmation(config, lead, {
+          subject: f.confirmationSubject,
+          heading: f.confirmationHeading,
+          body: f.confirmationBody,
+          signature: f.confirmationSignature,
+        });
+      } catch {
+        // Best-effort: do not fail the action if the confirmation email bounces.
       }
 
       return { ok: true };
