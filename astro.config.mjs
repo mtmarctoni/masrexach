@@ -66,9 +66,17 @@ export default defineConfig({
         access: "secret",
         optional: true,
       }),
+      // Non-secret runtime config (email addresses): read as Worker var
+      // bindings, injected per deployment by scripts/deploy.sh from GitHub
+      // Variables (--var). Only RESEND_API_KEY above is a secret.
       CONTACT_TO_EMAIL: envField.string({
         context: "server",
-        access: "secret",
+        access: "public",
+        optional: true,
+      }),
+      CONTACT_FROM_EMAIL: envField.string({
+        context: "server",
+        access: "public",
         optional: true,
       }),
     },
@@ -79,7 +87,7 @@ export default defineConfig({
         "default-src 'self'",
         "img-src 'self' data: https:",
         "font-src 'self'",
-        "connect-src 'self' https://api.resend.com",
+        "connect-src 'self'",
         "form-action 'self'",
         "base-uri 'self'",
         "object-src 'none'",

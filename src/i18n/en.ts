@@ -148,6 +148,11 @@ const en: TranslationContent = {
       error: "The message could not be sent. Please try again.",
       invalidEmail: "Please enter a valid email address.",
       required: "This field is required.",
+      confirmationSubject: "We received your inquiry — masrexach.com",
+      confirmationHeading: "Your message has been sent",
+      confirmationBody:
+        "Thank you for contacting us. We have received your inquiry and will respond soon.",
+      confirmationSignature: "— Antoni Mas Rexach",
     },
   },
   legal: {
