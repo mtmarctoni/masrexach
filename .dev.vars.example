@@ -1,4 +1,22 @@
-# Copy to .dev.vars (gitignored) and fill in for local development.
-# Placeholder values — real keys are provided at deploy time (see follow-up.md).
-RESEND_API_KEY=re_YOUR_RESEND_API_KEY_PLACEHOLDER
-CONTACT_TO_EMAIL=artista@PLACEHOLDER.example
+# Local Cloudflare Worker runtime settings.
+# Copy to .dev.vars (gitignored), fill in the values, then restart pnpm dev.
+# Keep these settings out of .env.local; do not commit your filled-in file.
+# All three are required to send contact emails.
+
+# Secret: Resend API key. Prefer a separate key for local testing.
+RESEND_API_KEY=re_REPLACE_WITH_YOUR_RESEND_API_KEY
+
+# Non-secret: sender for both owner notifications and visitor confirmations.
+# masrexach.com is verified in Resend. Sending does not create an inbox.
+CONTACT_FROM_EMAIL="Antoni Mas Rexach <info@masrexach.com>"
+
+# Non-secret: inbox receiving enquiries. Use your own inbox for local testing.
+# Gmail is allowed here. info@masrexach.com needs a mailbox or forwarding
+# before it can receive mail. Confirmations go to the visitor's entered address.
+CONTACT_TO_EMAIL="your-test-inbox@example.com"
+
+# Deployment is separate: these local values are not uploaded automatically.
+# In each GitHub deployment environment, configure:
+#   Secret:    RESEND_API_KEY
+#   Variables: CONTACT_FROM_EMAIL, CONTACT_TO_EMAIL
+# The deployment scripts forward them to the Cloudflare Worker.

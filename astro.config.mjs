@@ -64,17 +64,23 @@ export default defineConfig({
         access: "secret",
         optional: true,
       }),
-      // Non-secret runtime config (email addresses): read as Worker var
-      // bindings, injected per deployment by scripts/deploy.sh from GitHub
-      // Variables (--var). Only RESEND_API_KEY above is a secret.
+      // The CONTACT_* addresses are NOT secrets — they ship as Worker `var`
+      // bindings injected per deployment by scripts/deploy.sh from GitHub
+      // Variables (--var). They are still declared `access: "secret"` here
+      // because that is Astro's only runtime-resolved access level: "public"
+      // INLINES the value into the bundle at build time (see
+      // astro/dist/env/vite-plugin-env.js), and CI builds before it deploys,
+      // so a "public" field would bake `undefined` and ignore the var binding
+      // entirely. "secret" compiles to a lookup against the adapter env, which
+      // on Cloudflare reads plain vars and secrets alike.
       CONTACT_TO_EMAIL: envField.string({
         context: "server",
-        access: "public",
+        access: "secret",
         optional: true,
       }),
       CONTACT_FROM_EMAIL: envField.string({
         context: "server",
-        access: "public",
+        access: "secret",
         optional: true,
       }),
     },

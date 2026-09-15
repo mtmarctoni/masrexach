@@ -3,12 +3,12 @@ set -euo pipefail
 
 # Deploy the Worker, injecting GitHub Variables as runtime `var` bindings.
 #
-# Non-secret runtime config (read via `cloudflare:workers` env, e.g. RESEND_FROM)
-# is passed with `wrangler deploy --var KEY:VALUE`. This is atomic with the
-# deploy and reconciles deletions for free: `keep_vars` defaults to false, so a
-# variable removed from GitHub is simply not passed and disappears from the
-# Worker on the next deploy. Secrets are inherited across deploys and handled
-# separately by sync-secrets.sh — never touched here.
+# Non-secret runtime config (read at runtime through the adapter env, e.g.
+# CONTACT_FROM_EMAIL) is passed with `wrangler deploy --var KEY:VALUE`. This
+# is atomic with the deploy and reconciles deletions for free: `keep_vars`
+# defaults to false, so a variable removed from GitHub is simply not passed and
+# disappears from the Worker on the next deploy. Secrets are inherited across
+# deploys and handled separately by sync-secrets.sh — never touched here.
 #
 # PUBLIC_* variables are excluded: those are build-time (baked into the static
 # output via .env / import.meta.env), not runtime Worker vars. CLOUDFLARE_* and
