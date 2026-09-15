@@ -150,8 +150,11 @@ const en: TranslationContent = {
       required: "This field is required.",
       confirmationSubject: "We received your inquiry — masrexach.com",
       confirmationHeading: "Your message has been sent",
+      confirmationGreeting: "Hello {name},",
       confirmationBody:
         "Thank you for contacting us. We have received your inquiry and will respond soon.",
+      confirmationArtworkLabel: "Artwork of interest:",
+      confirmationMessageLabel: "Your message:",
       confirmationSignature: "— Antoni Mas Rexach",
     },
   },

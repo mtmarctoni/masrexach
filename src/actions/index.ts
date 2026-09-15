@@ -3,9 +3,7 @@ import { CONTACT_FROM_EMAIL, CONTACT_TO_EMAIL, RESEND_API_KEY } from "astro:env/
 import { env } from "cloudflare:workers";
 import { z } from "astro/zod";
 import { getDict, type Locale } from "../i18n";
-import { type ContactLead, sendContactConfirmation, sendContactNotification } from "../lib/email";
-
-const DEFAULT_FROM = "Antoni Mas Rexach <masrexach@marctonimas.com>";
+import { type ContactLead, sendContactEmails } from "../lib/email";
 
 /**
  * Per-IP throttle for the contact action: it relays email to a caller-supplied
@@ -53,13 +51,16 @@ export const server = {
 
       await enforceRateLimit(context.request);
 
-      if (!RESEND_API_KEY || !CONTACT_TO_EMAIL) {
+      // All three are required to send. They are deliberately optional in the
+      // env schema so builds and previews work unconfigured; the form reports
+      // an error at submit time instead of failing the build.
+      if (!RESEND_API_KEY || !CONTACT_TO_EMAIL || !CONTACT_FROM_EMAIL) {
         throw new ActionError({ code: "UNPROCESSABLE_CONTENT" });
       }
 
       const config = {
         apiKey: RESEND_API_KEY,
-        from: CONTACT_FROM_EMAIL || DEFAULT_FROM,
+        from: CONTACT_FROM_EMAIL,
         to: CONTACT_TO_EMAIL,
       };
 
@@ -70,21 +71,29 @@ export const server = {
         artwork: input.artwork || undefined,
       };
 
-      await sendContactNotification(config, lead);
-
       const locale: Locale = input.lang ?? "es";
       const f = getDict(locale).contact.form;
 
-      try {
-        await sendContactConfirmation(config, lead, {
+      // Cloudflare's ExecutionContext: lets the courtesy confirmation finish
+      // after the response is sent. Absent outside workerd, where the helper
+      // falls back to awaiting it inline.
+      const { cfContext } = context.locals;
+      const waitUntil = cfContext ? cfContext.waitUntil.bind(cfContext) : undefined;
+
+      await sendContactEmails(
+        config,
+        lead,
+        {
           subject: f.confirmationSubject,
           heading: f.confirmationHeading,
+          greeting: f.confirmationGreeting,
           body: f.confirmationBody,
+          artworkLabel: f.confirmationArtworkLabel,
+          messageLabel: f.confirmationMessageLabel,
           signature: f.confirmationSignature,
-        });
-      } catch {
-        // Best-effort: do not fail the action if the confirmation email bounces.
-      }
+        },
+        waitUntil,
+      );
 
       return { ok: true };
     },

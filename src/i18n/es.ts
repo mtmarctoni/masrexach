@@ -150,8 +150,11 @@ const es: TranslationContent = {
       required: "Este campo es obligatorio.",
       confirmationSubject: "Hemos recibido tu consulta — masrexach.com",
       confirmationHeading: "Tu mensaje ha sido enviado",
+      confirmationGreeting: "Hola {name},",
       confirmationBody:
         "Gracias por contactarnos. Hemos recibido tu consulta y te responderemos pronto.",
+      confirmationArtworkLabel: "Obra de interés:",
+      confirmationMessageLabel: "Tu mensaje:",
       confirmationSignature: "— Antoni Mas Rexach",
     },
   },
