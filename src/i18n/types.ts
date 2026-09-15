@@ -15,7 +15,11 @@ interface ContactFormStrings {
   required: string;
   confirmationSubject: string;
   confirmationHeading: string;
+  /** Contains a {name} placeholder. */
+  confirmationGreeting: string;
   confirmationBody: string;
+  confirmationArtworkLabel: string;
+  confirmationMessageLabel: string;
   confirmationSignature: string;
 }
 
