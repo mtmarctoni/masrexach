@@ -49,6 +49,14 @@ jobs:
       - name: Typecheck (astro check)
         run: pnpm check
 
+      # The deploy scripts run only on deploy, where a syntax error would break
+      # a release rather than a pull request. Parse them here instead.
+      - name: Shell syntax (bash -n)
+        run: |
+          for script in scripts/*.sh; do
+            bash -n "$script"
+          done
+
       - name: Unit tests (Vitest)
         run: pnpm test
 

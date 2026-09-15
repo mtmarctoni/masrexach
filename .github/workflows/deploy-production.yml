@@ -64,6 +64,15 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           SECRETS_CONTEXT: ${{ toJSON(secrets) }}
 
+      # Volume cap on contact-form submissions. Runs after the deploy so the
+      # rule is never applied on behalf of a Worker that failed to ship. Skips
+      # itself with a warning when CLOUDFLARE_ZONE_ID is not configured.
+      - name: Sync rate-limit rules
+        run: ./scripts/sync-waf-rules.sh
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+
       # Blocking. On the very first deploy the custom-domain certificate can
       # still be provisioning — if smoke fails then, re-run the workflow.
       - name: Smoke test
