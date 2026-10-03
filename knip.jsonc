@@ -3,5 +3,9 @@
   // `osv-scanner` is invoked via `pnpm osv` (and osv-scanner-action in CI),
   // installed as a Homebrew system binary, not an npm dependency — so knip
   // would otherwise flag it as an unlisted binary.
-  "ignoreBinaries": ["osv-scanner"]
+  "ignoreBinaries": ["osv-scanner"],
+  // `cloudflare:workers` is a Workers platform module resolved by
+  // @cloudflare/vite-plugin at build time, not an npm package — knip reads the
+  // bare specifier as a dependency on a package named "cloudflare".
+  "ignoreDependencies": ["cloudflare"]
 }
