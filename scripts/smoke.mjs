@@ -42,6 +42,10 @@ async function check(label, fn) {
 // /api/health is served by the Worker script (never prerendered, never
 // edge-cached), so its commit SHA flips atomically with the deploy. Retries
 // only cover the seconds-scale global propagation of a new Worker version.
+// The endpoint discloses the short SHA only (see src/pages/api/health.ts), so
+// compare against the same prefix of the full commit.
+const EXPECTED_COMMIT = expectedSha ? expectedSha.slice(0, 7) : undefined;
+
 async function assertHealth() {
   const res = await fetch(`${base}/api/health`);
   if (res.status !== 200) throw new Error(`status ${res.status}`);
@@ -50,8 +54,8 @@ async function assertHealth() {
   }
   const body = await res.json();
   if (body.status !== "ok") throw new Error(`status field "${body.status}"`);
-  if (expectedSha && body.commit !== expectedSha) {
-    throw new Error(`commit ${body.commit} != expected ${expectedSha} (stale deploy?)`);
+  if (EXPECTED_COMMIT && body.commit !== EXPECTED_COMMIT) {
+    throw new Error(`commit ${body.commit} != expected ${EXPECTED_COMMIT} (stale deploy?)`);
   }
 }
 
