@@ -37,7 +37,8 @@ jobs:
           PUBLIC_BASE_URL: https://masrexach.marctonimas.com
 
       - name: Lighthouse CI (mobile emulation)
-        run: npx --yes @lhci/cli@0.15.x autorun
+        # Use the audited lockfile, including the patched Lighthouse engine.
+        run: pnpm lighthouse
 
       - name: Internal link check (non-blocking)
         uses: lycheeverse/lychee-action@v2.9.0
