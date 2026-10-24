@@ -19,6 +19,7 @@
     "knip": "knip",
     "depcruise": "depcruise src tests",
     "test": "vitest run",
+    "test:worker": "node scripts/test-worker.mjs",
     "smoke": "node scripts/smoke.mjs",
     "deploy": "bash scripts/deploy.sh",
     "sync:secrets": "bash scripts/sync-secrets.sh",

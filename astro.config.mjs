@@ -39,8 +39,6 @@ function envAwareHeaders() {
           "  Cross-Origin-Opener-Policy: same-origin",
           "  Cross-Origin-Resource-Policy: same-origin",
           ...(IS_PRODUCTION ? [] : ["  X-Robots-Tag: noindex, nofollow"]),
-          "",
-          "/*",
           "  Cache-Control: public, max-age=3600",
           "",
           "/_astro/*",
