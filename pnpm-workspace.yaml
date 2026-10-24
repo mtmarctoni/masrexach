@@ -14,6 +14,18 @@ overrides:
   uuid: ^11.1.1
   qs: ^6.16.1
   undici@7: ^7.30.1
+  # Lighthouse CI 0.15.1 pins Lighthouse 12.6.1. Lighthouse 13 brings
+  # Puppeteer 25 / browsers 3 (no extract-zip) and chromium-bidi using Zod 4.
+  # Keep both LHCI consumers on the same tested engine until LHCI updates.
+  lighthouse@12.6.1: ^13.5.0
+  # get-uri still requests basic-ftp 5; 6 preserves its CommonJS Client API
+  # and fixes GHSA-c475-qrg2-pj4r (>=6.2.1).
+  get-uri>basic-ftp: ^6.2.3
+  # browsers 3 optionally peers on proxy-agent >=8.0.1; LHCI uses the same
+  # ProxyAgent constructor (require(ESM) is supported by our Node floor).
+  "@lhci/cli>proxy-agent": ^8.0.1
+  # Sentry's OpenTelemetry SDK 2.12 peers require API <1.10.0.
+  "@opentelemetry/api": 1.9.0
 
 allowBuilds:
   esbuild: true

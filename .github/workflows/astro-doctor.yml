@@ -3,11 +3,11 @@ name: Astro Doctor
 on:
   pull_request:
     paths:
-      - '**/*.astro'
-      - 'astro.config.*'
-      - 'package.json'
-      - '.env.example'
-      - 'src/content/**'
+      - "**/*.astro"
+      - "astro.config.*"
+      - "package.json"
+      - ".env.example"
+      - "src/content/**"
 
 permissions:
   contents: read
