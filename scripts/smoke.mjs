@@ -88,10 +88,15 @@ async function main() {
     if (res.headers.get("x-content-type-options") !== "nosniff") {
       throw new Error("missing X-Content-Type-Options: nosniff");
     }
-    if (!res.headers.get("content-security-policy")) {
+    homeHtml = await res.text();
+    // Astro's static CSP is emitted as a meta tag with per-page hashes.
+    const hasMetaCsp =
+      /<meta\b(?=[^>]*\bhttp-equiv=["']Content-Security-Policy["'])(?=[^>]*\bcontent=["'][^"']+)[^>]*>/i.test(
+        homeHtml,
+      );
+    if (!res.headers.get("content-security-policy") && !hasMetaCsp) {
       throw new Error("missing Content-Security-Policy");
     }
-    homeHtml = await res.text();
   });
 
   await check("GET /robots.txt", async () => {
@@ -107,9 +112,10 @@ async function main() {
       const sitemapUrl = robotsTxtBody.match(/Sitemap:\s*(\S+)/)?.[1];
       if (!sitemapUrl)
         throw new Error("missing Sitemap line (is PUBLIC_BASE_URL set for production?)");
-      if (sitemapUrl.includes("//"))
+      const parsedSitemap = new URL(sitemapUrl);
+      if (parsedSitemap.pathname.includes("//"))
         throw new Error(`malformed sitemap URL "${sitemapUrl}" (PUBLIC_BASE_URL trailing slash?)`);
-      if (new URL(sitemapUrl).hostname !== "masrexach.marctonimas.com") {
+      if (parsedSitemap.hostname !== "masrexach.marctonimas.com") {
         throw new Error(`sitemap URL host mismatch "${sitemapUrl}"`);
       }
     }
