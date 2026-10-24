@@ -58,7 +58,7 @@
 - [x] Run repository local checks (`pnpm check:all`), CI-equivalent Biome, production build and Lighthouse where available.
 - [x] Review the full diff for unintended changes, dependency downgrades, incompatible overrides and hidden security findings; rerun checks after fixes.
 - [x] Record exact passing checks, limitations and any unavoidable CVEs in the PR description.
-- [ ] Commit only reviewed files on the feature branch, push and open one PR referencing #19 and #20 as superseded; do not close or merge other PRs.
+- [x] Commit only reviewed files on the feature branch, push and open one PR referencing #19 and #20 as superseded; do not close or merge other PRs.
 
 ## Verification and decisions
 
@@ -70,7 +70,8 @@
 - Actual loopback FTP download through get-uri/basic-ftp 6 and LHCI HTTP fetch through ProxyAgent 8 passed.
 - Independent whole-change review found no critical, important or minor issues.
 - Local Gitleaks scan passes using a checksum-verified release in temporary tooling storage; no global tool installation was needed.
-- Verification used the already-installed Node 24.21.0. The required Node floor is now 22.23.4, matching Astro; `.nvmrc` continues to select the latest Node 22.
+- Initial verification used the already-installed Node 24.21.0. The required Node floor is now 22.23.4, matching Astro. After CI reused cached Node 22.23.3 for the broad `22` selector, `.nvmrc` was pinned to `22.23.4` so every CI/deployment workflow selects a supported patch version.
+- Follow-up verification on a checksum-verified Node 22.23.4 release passes frozen installation, `pnpm check:all` (24 tests), the production build and pnpm audit. The `.nvmrc`/Astro engine compatibility check failed before the pin and passes afterward.
 - TypeScript stays on 6.0.3 because Astro's checker does not accept TypeScript 7 yet. There is no known vulnerability outstanding in that version.
 - Prefer Lighthouse 13's upstream Puppeteer/BiDi updates over forcing Zod 4 underneath a Zod 3 consumer. Both LHCI engine consumers are overridden together; basic-ftp and ProxyAgent retain the consumer APIs exercised above.
 - Dependency-only work uses security scans and existing application/consumer tests instead of adding artificial version-string unit tests.
