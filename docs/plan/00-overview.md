@@ -40,7 +40,6 @@ Astro Fonts API (local provider), Astro Actions + Zod (`astro/zod`), Resend API,
 - Verify before claiming done: each task ends with an executable verification step with stated expected output.
 
 Deviation notes (recorded, deliberate):
-
 - The first branch of this repo is `main` by explicit user instruction (fresh private repo,
   no prior history); the initial landing commit goes there and all later work uses feature
   branches and PRs.
@@ -49,23 +48,22 @@ Deviation notes (recorded, deliberate):
 
 ## Phase table
 
-| File | Phase | Contents |
-|---|---|---|
-| [01-scaffold.md](01-scaffold.md) | scaffold | repo skeleton, configs, ops tooling, Tailwind + fonts wiring |
-| [02-content-i18n.md](02-content-i18n.md) | content/i18n | typed dictionaries from the copy files, i18n helpers, parity test |
-| [03-shell.md](03-shell.md) | shell | SEO component, Base layout, header/nav/lang switcher, footer, locale routing |
-| [04-sections.md](04-sections.md) | sections | artwork data + images, gallery grid, lightbox |
-| [05-contact.md](05-contact.md) | contact | Zod schema, Astro Action, form component, integration verification |
-| [06-hardening.md](06-hardening.md) | hardening | security headers, CSP, sitemap, robots.txt, og.jpg, health endpoint, DoD audit |
-| [07-deploy-ops.md](07-deploy-ops.md) | deploy + ops | CI, Dependabot, LHCI, smoke test, deploy scripts, manual deploy (Gate 3) |
-| [08-final-audit.md](08-final-audit.md) | final audit / comparison | post-deploy smoke, Lighthouse re-run, site-comparison.md |
+| File                                     | Phase                    | Contents                                                                       |
+| ---------------------------------------- | ------------------------ | ------------------------------------------------------------------------------ |
+| [01-scaffold.md](01-scaffold.md)         | scaffold                 | repo skeleton, configs, ops tooling, Tailwind + fonts wiring                   |
+| [02-content-i18n.md](02-content-i18n.md) | content/i18n             | typed dictionaries from the copy files, i18n helpers, parity test              |
+| [03-shell.md](03-shell.md)               | shell                    | SEO component, Base layout, header/nav/lang switcher, footer, locale routing   |
+| [04-sections.md](04-sections.md)         | sections                 | artwork data + images, gallery grid, lightbox                                  |
+| [05-contact.md](05-contact.md)           | contact                  | Zod schema, Astro Action, form component, integration verification             |
+| [06-hardening.md](06-hardening.md)       | hardening                | security headers, CSP, sitemap, robots.txt, og.jpg, health endpoint, DoD audit |
+| [07-deploy-ops.md](07-deploy-ops.md)     | deploy + ops             | CI, Dependabot, LHCI, smoke test, deploy scripts, manual deploy (Gate 3)       |
+| [08-final-audit.md](08-final-audit.md)   | final audit / comparison | post-deploy smoke, Lighthouse re-run, site-comparison.md                       |
 
 ## Definition of Done
 
 Path convention: the `@astrojs/cloudflare` adapter is configured (contact module on), so
 the build emits static output under `dist/client/` and the server bundle under
 `dist/server/`.
-
 - **Type check**
 
   ```bash

@@ -1,21 +1,22 @@
 ---
+
 mode: "recreate"
 site_slug: "masrexach"
 site_url: "https://www.masrexach.com"
-prod_host: "masrexach"                # Cloudflare Pages project (deploy later — placeholder)
-staging_host: "masrexach-preview"     # Cloudflare Pages preview (deploy later — placeholder)
+prod_host: "masrexach" # Cloudflare Pages project (deploy later — placeholder)
+staging_host: "masrexach-preview" # Cloudflare Pages preview (deploy later — placeholder)
 locales: ["es", "ca", "en"]
 default_locale: "es"
-deploy_account: "PLACEHOLDER"         # user's Cloudflare account — TBD, see follow-up.md
+deploy_account: "PLACEHOLDER" # user's Cloudflare account — TBD, see follow-up.md
 css_budget_kb: 17
 modules:
-  i18n: true
-  blog: false
-  contact: true
-  gallery: true
-  legal: true
-  analytics: false
-  ops: true
+i18n: true
+blog: false
+contact: true
+gallery: true
+legal: true
+analytics: false
+ops: true
 ---
 
 # Mas Rexach — intake brief
