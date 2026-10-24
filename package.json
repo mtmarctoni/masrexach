@@ -35,9 +35,9 @@
     "pre-push": "pnpm check:all"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.2.3",
+    "@astrojs/cloudflare": "~14.3.4",
     "@astrojs/sitemap": "^3.7.3",
-    "astro": "^7.2.4"
+    "astro": "~7.3.8"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
@@ -50,7 +50,7 @@
     "simple-git-hooks": "^2.13.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.11",
-    "wrangler": "^4.125.0"
+    "vitest": "^4.1.12",
+    "wrangler": "^4.151.2"
   }
 }
