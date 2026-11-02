@@ -36,22 +36,22 @@
     "pre-push": "pnpm check:all"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "~14.4.2",
+    "@astrojs/cloudflare": "~14.4.3",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "~7.4.2"
+    "astro": "~7.4.4"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "@biomejs/biome": "^2.6.2",
+    "@biomejs/biome": "^2.6.4",
     "@lhci/cli": "^0.15.1",
-    "@santi020k/astro-doctor": "^1.5.0",
+    "@santi020k/astro-doctor": "^1.7.0",
     "@tailwindcss/vite": "^4.3.3",
     "dependency-cruiser": "^18.7.0",
-    "knip": "^6.42.1",
+    "knip": "^6.44.0",
     "simple-git-hooks": "^2.14.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5",
-    "wrangler": "^4.152.0"
+    "wrangler": "^4.156.0"
   }
 }
