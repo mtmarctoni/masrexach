@@ -54,7 +54,9 @@ export function resolveOgCard(locale: Locale, path: string): OgCard {
           ? "biography"
           : "home";
   const subtitle =
-    section === "home" ? dict.home.headline.replace(/<\/?em>/g, "") : dict.nav[section];
+    section === "home"
+      ? dict.home.headline.map((part) => (typeof part === "string" ? part : part.em)).join("")
+      : dict.nav[section];
   return {
     key: `${locale}/${section}`,
     locale,
