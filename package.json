@@ -19,6 +19,7 @@
     "knip": "knip",
     "depcruise": "depcruise src tests",
     "test": "vitest run",
+    "test:og": "OG_VERIFY_BUILD=1 vitest run tests/og-output.test.ts",
     "test:worker": "node scripts/test-worker.mjs",
     "smoke": "node scripts/smoke.mjs",
     "sync:secrets": "bash scripts/sync-secrets.sh",

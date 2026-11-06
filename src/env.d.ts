@@ -1,6 +1,11 @@
 /// <reference types="astro/client" />
 /// <reference types="@astrojs/cloudflare" />
 
+declare module "virtual:og-manifest" {
+  const manifest: Record<string, import("./lib/og").OgImage>;
+  export default manifest;
+}
+
 // The Cloudflare adapter resolves Worker bindings through the `cloudflare:workers`
 // module (the same import its own server entry uses). The worker types are not
 // part of this project, so declare the bindings this app reads instead of
