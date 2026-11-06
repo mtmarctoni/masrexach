@@ -1,29 +1,60 @@
-# Production deploy — manual only, from `main`.
+# Production deploy — of a release tag only.
+#
+# Two ways in, both deploying a published vX.Y.Z release that is on main:
+#   - release-please.yml calls this when a release PR is merged and Release
+#     Please creates the release (release_tag + the commit it tagged).
+#   - Manual dispatch from main with an existing release_tag, to retry a
+#     failed deploy or roll back to an earlier release.
+# Ordinary pushes to main never deploy production. See docs/releases.md.
+#
+# The `resolve` job validates the tag (scripts/resolve-release.sh) before any
+# install, build or deploy. The `deploy` job builds the resolved commit, but
+# runs the deploy tooling (deploy.sh, sync-secrets.sh, smoke.mjs) from the
+# triggering commit on main, so a rollback to an old release still gets the
+# current secret and var safeguards.
 #
 # Builds without CLOUDFLARE_ENV so the adapter resolves the top level of
-# wrangler.jsonc: Worker `masrexach` on the custom domain
-# masrexach.com (retaining masrexach.marctonimas.com during validation).
-# workers.dev and preview URLs stay off. Staging
-# deploys automatically on every merge to main — see deploy-staging.yml.
-# PR previews live on the staging Worker — see deploy-preview.yml.
+# wrangler.jsonc: Worker `masrexach` on the custom domain masrexach.com
+# (retaining masrexach.marctonimas.com during validation). workers.dev and
+# preview URLs stay off. Staging deploys on every merge to main — see
+# deploy-staging.yml. PR previews live on the staging Worker — see
+# deploy-preview.yml.
 
 name: Deploy (production)
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag to deploy (vX.Y.Z), for a retry or rollback
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      release_tag:
+        required: true
+        type: string
+      release_sha:
+        required: true
+        type: string
+    # A called workflow sees only the secrets passed here plus the production
+    # environment's own secrets. Never `secrets: inherit` — that would hand
+    # the release App key to the deploy.
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      RESEND_API_KEY:
+        required: false
 
 permissions:
   contents: read
 
-concurrency:
-  group: deploy-production
-  cancel-in-progress: false
-
 jobs:
-  deploy:
-    name: Build and deploy (production)
+  resolve:
+    name: Resolve release
     runs-on: ubuntu-latest
-    environment: production
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
     steps:
       - name: Refuse to run outside main
         if: github.ref != 'refs/heads/main'
@@ -31,11 +62,49 @@ jobs:
           echo "Production deploys must run from main (current ref: $GITHUB_REF)" >&2
           exit 1
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
 
-      - uses: pnpm/action-setup@v6
+      - name: Validate release tag
+        id: resolve
+        run: ./scripts/resolve-release.sh
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          # Empty on manual dispatch: the tag alone decides the commit.
+          EXPECTED_SHA: ${{ inputs.release_sha }}
+          GH_TOKEN: ${{ github.token }}
 
-      - uses: actions/setup-node@v7
+  deploy:
+    name: Build and deploy (production)
+    needs: resolve
+    runs-on: ubuntu-latest
+    environment: production
+    # Job-level so a release run's PR maintenance never waits on it. Queued
+    # deploys are not cancelled, but Actions keeps only one pending run per
+    # group and does not guarantee FIFO: avoid overlapping releases.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Check out the release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+
+      - name: Check out deploy tooling (triggering commit on main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: .deploy-tools
+          sparse-checkout: scripts
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -46,11 +115,12 @@ jobs:
       - name: Build
         run: pnpm build
         env:
+          BUILD_SHA: ${{ needs.resolve.outputs.sha }}
           PUBLIC_BUILD_TYPE: ${{ vars.PUBLIC_BUILD_TYPE }}
           PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
 
       - name: Deploy Worker
-        run: ./scripts/deploy.sh
+        run: .deploy-tools/scripts/deploy.sh
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
@@ -60,7 +130,7 @@ jobs:
       # deploy.sh uploads the managed secrets with the deploy; this only deletes
       # managed secrets that were removed from GitHub (no write otherwise).
       - name: Remove stale secrets
-        run: ./scripts/sync-secrets.sh --prune
+        run: .deploy-tools/scripts/sync-secrets.sh --prune
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
@@ -69,4 +139,6 @@ jobs:
       # Blocking. On the very first deploy the custom-domain certificate can
       # still be provisioning — if smoke fails then, re-run the workflow.
       - name: Smoke test
-        run: node scripts/smoke.mjs https://masrexach.com "$GITHUB_SHA"
+        run: node .deploy-tools/scripts/smoke.mjs https://masrexach.com "$RELEASE_SHA"
+        env:
+          RELEASE_SHA: ${{ needs.resolve.outputs.sha }}

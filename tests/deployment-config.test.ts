@@ -1,3 +1,4 @@
+// biome-ignore-all lint/suspicious/noTemplateCurlyInString: GitHub Actions expressions are literal strings here
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
@@ -9,7 +10,6 @@ describe("release configuration", () => {
     "%s reads the account ID from GitHub variables",
     (environment) => {
       const workflow = read(`.github/workflows/deploy-${environment}.yml`);
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: literal GitHub Actions expression
       expect(workflow).toContain("CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}");
       expect(workflow).not.toContain("secrets.CLOUDFLARE_ACCOUNT_ID");
     },
@@ -17,7 +17,7 @@ describe("release configuration", () => {
 
   it("targets the apex in production smoke and CI builds", () => {
     expect(read(".github/workflows/deploy-production.yml")).toContain(
-      "node scripts/smoke.mjs https://masrexach.com",
+      "scripts/smoke.mjs https://masrexach.com",
     );
     expect(read(".github/workflows/ci.yml")).toContain("PUBLIC_BASE_URL: https://masrexach.com");
   });
@@ -62,9 +62,14 @@ describe("release please workflow", () => {
     expect(wf().permissions).toEqual({ contents: "read" });
   });
 
-  it("serializes release maintenance in its own concurrency group", () => {
-    expect(wf().concurrency.group).not.toBe("deploy-production");
-    expect(wf().concurrency["cancel-in-progress"]).toBe(false);
+  it("serializes release maintenance in its own job-level concurrency group", () => {
+    // Job-level, so a production deploy (or its approval wait) in the same run
+    // never holds up release-PR maintenance, and vice versa.
+    expect(wf().concurrency).toBeUndefined();
+    expect(wf().jobs.release.concurrency).toEqual({
+      group: "release-please",
+      "cancel-in-progress": false,
+    });
   });
 
   it("authenticates with a repository-scoped App token from RELEASE_APP_*", () => {
@@ -105,5 +110,123 @@ describe("release please workflow", () => {
         "${{ needs.release.outputs.release_created == 'true' }}",
       );
     }
+  });
+});
+
+describe("release to production wiring", () => {
+  const wf = () => workflow("release-please");
+  const caller = () =>
+    Object.values(wf().jobs).filter((j: Workflow) =>
+      String(j.uses ?? "").includes("deploy-production.yml"),
+    ) as Workflow[];
+
+  it("calls the production workflow exactly once, guarded on release_created", () => {
+    expect(caller()).toHaveLength(1);
+    expect(caller()[0].uses).toBe("./.github/workflows/deploy-production.yml");
+    expect(caller()[0].needs).toBe("release");
+    expect(caller()[0].if).toBe("${{ needs.release.outputs.release_created == 'true' }}");
+  });
+
+  it("passes the released tag and commit", () => {
+    expect(caller()[0].with).toEqual({
+      release_tag: "${{ needs.release.outputs.tag_name }}",
+      release_sha: "${{ needs.release.outputs.sha }}",
+    });
+  });
+
+  it("passes only the deploy secrets, never inherit (keeps the App key out)", () => {
+    expect(caller()[0].secrets).toEqual({
+      CLOUDFLARE_API_TOKEN: "${{ secrets.CLOUDFLARE_API_TOKEN }}",
+      RESEND_API_KEY: "${{ secrets.RESEND_API_KEY }}",
+    });
+  });
+});
+
+describe("production deploy workflow", () => {
+  const wf = () => workflow("deploy-production");
+  const raw = () => read(".github/workflows/deploy-production.yml");
+  const steps = (job: string): Workflow[] => wf().jobs[job].steps;
+  const step = (job: string, pred: (s: Workflow) => boolean) => steps(job).find(pred);
+  const SHA = "${{ needs.resolve.outputs.sha }}";
+
+  it("is triggered only manually (by tag) or by the release workflow", () => {
+    const on = wf().on;
+    expect(Object.keys(on).sort()).toEqual(["workflow_call", "workflow_dispatch"]);
+    expect(on.workflow_dispatch.inputs).toEqual({
+      release_tag: expect.objectContaining({ required: true, type: "string" }),
+    });
+    expect(on.workflow_call.inputs).toEqual({
+      release_tag: expect.objectContaining({ required: true, type: "string" }),
+      release_sha: expect.objectContaining({ required: true, type: "string" }),
+    });
+    expect(on.workflow_call.secrets.CLOUDFLARE_API_TOKEN.required).toBe(true);
+  });
+
+  it("resolves the tag with the resolver, passing inputs only through env", () => {
+    const resolve = step("resolve", (s) => s.run === "./scripts/resolve-release.sh");
+    expect(resolve.env).toEqual(
+      expect.objectContaining({
+        RELEASE_TAG: "${{ inputs.release_tag }}",
+        EXPECTED_SHA: "${{ inputs.release_sha }}",
+      }),
+    );
+    expect(wf().jobs.resolve.outputs.sha).toBe(`\${{ steps.${resolve.id}.outputs.sha }}`);
+    for (const job of Object.values(wf().jobs) as Workflow[]) {
+      for (const s of job.steps) expect(String(s.run ?? "")).not.toMatch(/\$\{\{\s*inputs\./);
+    }
+  });
+
+  it("refuses to run outside main before resolving", () => {
+    const first = steps("resolve")[0];
+    expect(first.if).toBe("github.ref != 'refs/heads/main'");
+  });
+
+  it("never persists checkout credentials", () => {
+    for (const job of Object.values(wf().jobs) as Workflow[]) {
+      for (const s of job.steps.filter((x: Workflow) =>
+        String(x.uses).startsWith("actions/checkout@"),
+      )) {
+        expect(s.with?.["persist-credentials"]).toBe(false);
+      }
+    }
+  });
+
+  it("deploys in the production environment, serialized without cancellation", () => {
+    const deploy = wf().jobs.deploy;
+    expect(deploy.needs).toBe("resolve");
+    expect(deploy.environment).toBe("production");
+    expect(deploy.concurrency).toEqual({ group: "deploy-production", "cancel-in-progress": false });
+  });
+
+  it("builds the resolved release commit and stamps it into the build", () => {
+    const checkout = step(
+      "deploy",
+      (s) => String(s.uses).startsWith("actions/checkout@") && !s.with?.path,
+    );
+    expect(checkout.with.ref).toBe(SHA);
+    expect(step("deploy", (s) => s.name === "Build").env.BUILD_SHA).toBe(SHA);
+    expect(read("astro.config.mjs")).toContain("process.env.BUILD_SHA ?? process.env.GITHUB_SHA");
+  });
+
+  it("runs deploy tooling from the trusted triggering commit, not the release", () => {
+    const tools = step(
+      "deploy",
+      (s) => String(s.uses).startsWith("actions/checkout@") && s.with?.path,
+    );
+    expect(tools.with.ref).toBe("${{ github.sha }}");
+    const dir = tools.with.path;
+    expect(step("deploy", (s) => s.name === "Deploy Worker").run).toBe(`${dir}/scripts/deploy.sh`);
+    expect(step("deploy", (s) => s.name === "Remove stale secrets").run).toBe(
+      `${dir}/scripts/sync-secrets.sh --prune`,
+    );
+  });
+
+  it("smoke-tests against the resolved release commit", () => {
+    const smoke = step("deploy", (s) => s.name === "Smoke test");
+    expect(smoke.env.RELEASE_SHA).toBe(SHA);
+    expect(smoke.run).toContain('"$RELEASE_SHA"');
+    expect(smoke.run).not.toContain("GITHUB_SHA");
+    expect(smoke["continue-on-error"]).toBeUndefined();
+    expect(raw()).toContain("scripts/smoke.mjs https://masrexach.com");
   });
 });

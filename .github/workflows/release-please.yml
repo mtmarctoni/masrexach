@@ -20,17 +20,16 @@ on:
 permissions:
   contents: read
 
-# Release metadata only. Production deploys serialize separately on the
-# deploy-production group inside the called workflow, so a later push here
-# can never cancel a running or queued production deployment.
-concurrency:
-  group: release-please
-  cancel-in-progress: false
-
 jobs:
   release:
     name: Maintain release PR
     runs-on: ubuntu-latest
+    # Job-level, release metadata only: the production deploy below serializes
+    # on its own deploy-production group, so release-PR maintenance never
+    # waits on (or cancels) a deploy or its approval.
+    concurrency:
+      group: release-please
+      cancel-in-progress: false
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
@@ -53,3 +52,16 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  deploy-production:
+    name: Deploy release to production
+    needs: release
+    if: ${{ needs.release.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/deploy-production.yml
+    with:
+      release_tag: ${{ needs.release.outputs.tag_name }}
+      release_sha: ${{ needs.release.outputs.sha }}
+    # Explicit, never `inherit`: the release App key must not reach the deploy.
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
