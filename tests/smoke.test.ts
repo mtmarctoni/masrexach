@@ -58,8 +58,38 @@ async function smoke({
 }
 
 describe("deployment smoke CLI", () => {
+  it("accepts the apex production sitemap", async () => {
+    expect(
+      await smoke({
+        base: "https://masrexach.com",
+        sitemap: "https://masrexach.com/sitemap-index.xml",
+      }),
+    ).toEqual({ exitCode: 0, errors: "" });
+  });
+
+  it.each([
+    "https://masrexach.marctonimas.com/sitemap-index.xml",
+    "http://masrexach.com/sitemap-index.xml",
+    "https://masrexach.com:8443/sitemap-index.xml",
+    "https://masrexach.com//sitemap-index.xml",
+    "https://masrexach.com/wrong.xml",
+    "https://masrexach.com/prefix/sitemap-index.xml",
+    "https://masrexach.com/sitemap-index.xml?wrong=1",
+    "https://masrexach.com/sitemap-index.xml#wrong",
+    "",
+  ])("rejects an invalid apex sitemap: %s", async (sitemap) => {
+    expect((await smoke({ base: "https://masrexach.com", sitemap })).exitCode).toBe(1);
+  });
+
   it("accepts an HTTPS production sitemap and a short commit matching the full build SHA", async () => {
     expect(await smoke()).toEqual({ exitCode: 0, errors: "" });
+  });
+
+  it.each([
+    "http://masrexach.marctonimas.com/sitemap-index.xml",
+    "https://masrexach.marctonimas.com:8443/sitemap-index.xml",
+  ])("rejects a sitemap with a different protocol or port: %s", async (sitemap) => {
+    expect((await smoke({ sitemap })).exitCode).toBe(1);
   });
 
   it("rejects duplicate slashes in the sitemap path", async () => {

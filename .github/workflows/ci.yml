@@ -62,7 +62,7 @@ jobs:
         run: pnpm build
         env:
           PUBLIC_BUILD_TYPE: Production
-          PUBLIC_BASE_URL: https://masrexach.marctonimas.com
+          PUBLIC_BASE_URL: https://masrexach.com
 
       - name: Built Worker integration and production smoke tests
         run: pnpm test:worker

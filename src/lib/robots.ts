@@ -3,7 +3,7 @@ import { NOINDEX_PREFIXES } from "./seo";
 // Canonical origin for the production sitemap reference. CI injects
 // PUBLIC_BASE_URL per GitHub environment (staging/production custom domains).
 // The fallback keeps local production builds valid without the var.
-const DEFAULT_SITE_URL = "https://masrexach.marctonimas.com";
+const DEFAULT_SITE_URL = "https://masrexach.com";
 
 function siteUrl(): string {
   // "" (unset var passed through as empty) falls back, not just undefined —
