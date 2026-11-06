@@ -26,8 +26,12 @@ npm-debug.log*
 
 # Testing
 coverage/
+.playwright-cli/
 .lighthouseci/
 lhci_reports/
 
 # Misc
 tmp/
+
+# Local agent output
+.agents/autopilot/

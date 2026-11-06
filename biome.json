@@ -15,6 +15,7 @@
       "**",
       "!**/.astro",
       "!CHANGELOG.md",
+      "!.agents/skills",
       "!docs/plan/source-snapshot",
       "!design-variants",
       "!comparison.html",
