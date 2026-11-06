@@ -1,5 +1,5 @@
 ---
-import { getImage } from "astro:assets";
+import { Image } from "astro:assets";
 import heroImageSrc from "../../assets/images/artwork/07-albufera.jpg";
 import PersonJsonLd from "../../components/PersonJsonLd.astro";
 import { featuredArtworks, getArtwork } from "../../data/artworks";
@@ -19,22 +19,10 @@ const imageModules = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true },
 );
 
-const hero = await getImage({
-  src: heroImageSrc,
-  width: 460,
-  quality: 80,
-  format: "webp",
-});
-
-const featured = await Promise.all(
-  featuredArtworks().map(async (art) => {
-    const module = imageModules[`../../assets/images/artwork/${art.image}`];
-    const image = module
-      ? await getImage({ src: module.default, width: 720, quality: 72, format: "webp" })
-      : undefined;
-    return { art, image };
-  }),
-);
+const featured = featuredArtworks().map((art) => ({
+  art,
+  image: imageModules[`../../assets/images/artwork/${art.image}`]?.default,
+}));
 ---
 <Base
   locale={locale}
@@ -50,8 +38,7 @@ const featured = await Promise.all(
       <p class="kicker text-accent-strong">{dict.home.kicker}</p>
       <h1
         class="mt-6 max-w-2xl font-display text-5xl font-semibold leading-[1.04] tracking-tight text-ink sm:text-6xl [&_em]:font-medium [&_em]:italic [&_em]:text-accent-strong"
-        set:html={dict.home.headline}
-      />
+      >{dict.home.headline.map((part) => typeof part === "string" ? part : <em>{part.em}</em>)}</h1>
       <p class="mt-7 max-w-xl text-[15px] leading-relaxed text-ink-soft">
         {dict.home.statement}
       </p>
@@ -74,10 +61,11 @@ const featured = await Promise.all(
     <figure
       class="rounded-sm border border-border bg-white p-4 pb-0 shadow-[0_24px_48px_-24px_rgb(33_29_23/0.28)]"
     >
-      <img
-        src={hero.src}
-        width={hero.attributes.width}
-        height={hero.attributes.height}
+      <Image
+        src={heroImageSrc}
+        width={460}
+        quality={80}
+        format="webp"
         alt={heroArt ? `${heroArt.title} — ${heroArt.caption[locale]}` : dict.artwork.ogAlt}
         class="h-auto w-full"
         loading="eager"
@@ -113,8 +101,7 @@ const featured = await Promise.all(
       <p class="kicker text-accent-strong">{dict.home.finitaKicker}</p>
       <blockquote
         class="mt-6 font-display text-2xl font-medium leading-[1.3] tracking-tight text-ink sm:text-[2rem] [&_em]:italic [&_em]:text-accent-strong"
-        set:html={dict.home.finitaQuote}
-      />
+      >{dict.home.finitaQuote.map((part) => typeof part === "string" ? part : <em>{part.em}</em>)}</blockquote>
     </div>
   </section>
 
@@ -138,10 +125,11 @@ const featured = await Promise.all(
             <a href={localizedPath(locale, `/catalogo/${art.slug}`)} class="group block">
               <div class="rounded-sm border border-border bg-white p-3 motion-safe:transition-[transform,box-shadow] motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:shadow-[0_20px_36px_-20px_rgb(33_29_23/0.35)]">
                 {image ? (
-                  <img
-                    src={image.src}
-                    width={image.attributes.width}
-                    height={image.attributes.height}
+                  <Image
+                    src={image}
+                    width={720}
+                    quality={72}
+                    format="webp"
                     alt={`${art.title} — ${art.caption[locale]}`}
                     class="h-60 w-full object-contain"
                     loading="lazy"

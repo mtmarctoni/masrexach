@@ -1,5 +1,8 @@
 export type Locale = "es" | "ca" | "en";
 
+/** Plain text with explicit emphasis; never interpreted as HTML. */
+type EmphasizedText = Array<string | { em: string }>;
+
 interface ContactFormStrings {
   name: string;
   namePlaceholder: string;
@@ -40,16 +43,14 @@ export interface TranslationContent {
     title: string;
     description: string;
     kicker: string;
-    /** Headline with optional <em> markup, rendered via set:html. */
-    headline: string;
+    headline: EmphasizedText;
     statement: string;
     ctaCatalog: string;
     ctaBio: string;
     legacyKicker: string;
     legacyParagraphs: string[];
     finitaKicker: string;
-    /** Quote with optional <em> markup, rendered via set:html. */
-    finitaQuote: string;
+    finitaQuote: EmphasizedText;
     featuredHeading: string;
     featuredCta: string;
     venuesLabel: string;
