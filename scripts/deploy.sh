@@ -16,8 +16,9 @@ set -euo pipefail
 # Secrets not passed are inherited from the previous deployment.
 #
 # PUBLIC_* variables are excluded: those are build-time (baked into the static
-# output via .env / import.meta.env), not runtime Worker vars. CLOUDFLARE_* and
-# GITHUB_TOKEN are workflow infrastructure, never app config.
+# output via .env / import.meta.env), not runtime Worker vars. CLOUDFLARE_*,
+# RELEASE_APP_* (the release GitHub App) and GITHUB_TOKEN are workflow
+# infrastructure, never app config.
 #
 # Any variable whose name collides with a secret is dropped. Verified live:
 # `wrangler deploy --var NAME:x` silently overwrites — destroys — an existing
@@ -58,7 +59,7 @@ SECRETS_JSON="${SECRETS_CONTEXT:-}"
 [ -n "$SECRETS_JSON" ] || SECRETS_JSON='{}'
 SECRET_NAMES=$(echo "$SECRETS_JSON" | jq -r '
   to_entries
-  | map(select(.key | ascii_upcase | (startswith("CLOUDFLARE_") or . == "GITHUB_TOKEN") | not))
+  | map(select(.key | ascii_upcase | (startswith("CLOUDFLARE_") or startswith("RELEASE_APP_") or . == "GITHUB_TOKEN") | not))
   | map(select(.value | length > 0))
   | .[].key
 ')
@@ -75,7 +76,7 @@ if [ -n "${VARS_CONTEXT:-}" ]; then
     VAR_ARGS+=("--var" "$line")
   done < <(echo "$VARS_CONTEXT" | jq -r '
     to_entries[]
-    | select(.key | ascii_upcase | (startswith("CLOUDFLARE_") or . == "GITHUB_TOKEN" or startswith("PUBLIC_")) | not)
+    | select(.key | ascii_upcase | (startswith("CLOUDFLARE_") or startswith("RELEASE_APP_") or . == "GITHUB_TOKEN" or startswith("PUBLIC_")) | not)
     # --var uses KEY:VALUE and the deploy command is one shell line, so skip
     # multi-line values (none expected for runtime config like email addresses).
     | select(.value | type == "string" and length > 0 and (contains("\n") | not))
