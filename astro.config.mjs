@@ -119,7 +119,9 @@ export default defineConfig({
     define: {
       // Baked into the bundle at build time so the deployed Worker can report
       // the exact commit it was built from (src/pages/api/health.ts).
-      __BUILD_SHA__: JSON.stringify(process.env.GITHUB_SHA ?? "unknown"),
+      // BUILD_SHA wins: a production deploy of a release tag builds a commit
+      // other than the run's GITHUB_SHA, which a step cannot reliably override.
+      __BUILD_SHA__: JSON.stringify(process.env.BUILD_SHA ?? process.env.GITHUB_SHA ?? "unknown"),
     },
   },
   integrations: [
