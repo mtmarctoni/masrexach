@@ -7,8 +7,13 @@ set -euo pipefail
 # CONTACT_FROM_EMAIL) is passed with `wrangler deploy --var KEY:VALUE`. This
 # is atomic with the deploy and reconciles deletions for free: `keep_vars`
 # defaults to false, so a variable removed from GitHub is simply not passed and
-# disappears from the Worker on the next deploy. Secrets are inherited across
-# deploys and handled separately by sync-secrets.sh — never touched here.
+# disappears from the Worker on the next deploy.
+#
+# Managed secrets (scripts/managed-secrets.sh) that have a value in GitHub are
+# uploaded with the same deploy via --secrets-file, so new code never runs
+# against old secrets. --secrets-file only adds and updates; deleting a stale
+# managed secret is left to `sync-secrets.sh --prune`, which CI runs after this.
+# Secrets not passed are inherited from the previous deployment.
 #
 # PUBLIC_* variables are excluded: those are build-time (baked into the static
 # output via .env / import.meta.env), not runtime Worker vars. CLOUDFLARE_* and
@@ -21,17 +26,19 @@ set -euo pipefail
 #
 # Env:
 #   VARS_CONTEXT    — ${{ toJSON(vars) }} (JSON object of all GitHub Variables)
-#   SECRETS_CONTEXT — ${{ toJSON(secrets) }} (used only to build the collision
-#                     exclusion list above; secrets are never set here —
-#                     that's sync-secrets.sh's job)
+#   SECRETS_CONTEXT — ${{ toJSON(secrets) }} (builds the collision exclusion
+#                     list above, and supplies the managed secrets' values)
 #   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 # Optional:
 #   WRANGLER_BIN  — wrangler invocation (default: "pnpm exec wrangler")
 #
 # Extra args ("$@") are forwarded to `wrangler deploy`.
 
+# shellcheck source=scripts/managed-secrets.sh
+source "$(dirname "${BASH_SOURCE[0]}")/managed-secrets.sh"
+
 run_wrangler() {
-  # shellcheck disable=SC2086 — WRANGLER_BIN is intentionally word-split.
+  # shellcheck disable=SC2086 # WRANGLER_BIN is intentionally word-split.
   ${WRANGLER_BIN:-pnpm exec wrangler} --config dist/server/wrangler.json "$@"
 }
 
@@ -69,5 +76,19 @@ if [ "${#VAR_ARGS[@]}" -gt 0 ]; then
   printf '  - %s\n' "${VAR_ARGS[@]}" | grep -v -- '--var' || true
 fi
 
+# Managed secrets go in a private temp file (JSON, so no $VAR expansion),
+# removed on exit. Wrangler lets process env values override file values; CI
+# sets no env var named after a managed secret, so the file is what applies.
+SECRET_ARGS=()
+MANAGED_VALUES=$(echo "$SECRETS_JSON" | managed_secrets_from_context)
+if [ "$MANAGED_VALUES" != "{}" ]; then
+  SECRETS_FILE=$(umask 077 && mktemp "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/worker-secrets.XXXXXX")
+  trap 'rm -f "$SECRETS_FILE"' EXIT
+  printf '%s' "$MANAGED_VALUES" >"$SECRETS_FILE"
+  SECRET_ARGS=(--secrets-file "$SECRETS_FILE")
+  echo "Uploading managed secrets with the deploy:"
+  echo "$MANAGED_VALUES" | jq -r 'keys[] | "  - \(.)"'
+fi
+
 # Empty-array expansion is unsafe under `set -u` on bash 3.x (macOS local runs).
-run_wrangler deploy ${VAR_ARGS[@]+"${VAR_ARGS[@]}"} "$@"
+run_wrangler deploy ${VAR_ARGS[@]+"${VAR_ARGS[@]}"} ${SECRET_ARGS[@]+"${SECRET_ARGS[@]}"} "$@"

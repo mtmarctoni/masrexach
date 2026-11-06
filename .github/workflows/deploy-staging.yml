@@ -54,8 +54,10 @@ jobs:
           VARS_CONTEXT: ${{ toJSON(vars) }}
           SECRETS_CONTEXT: ${{ toJSON(secrets) }}
 
-      - name: Sync secrets
-        run: ./scripts/sync-secrets.sh
+      # deploy.sh uploads the managed secrets with the deploy; this only deletes
+      # managed secrets that were removed from GitHub (no write otherwise).
+      - name: Remove stale secrets
+        run: ./scripts/sync-secrets.sh --prune
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
