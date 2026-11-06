@@ -149,8 +149,12 @@ async function main() {
     }
   }
   if (homeHtml) {
-    const expectedMeta = IS_STAGING_HOST ? "noindex, nofollow" : "index, follow";
-    if (!homeHtml.includes(`content="${expectedMeta}"`)) {
+    const expectedMeta = IS_STAGING_HOST
+      ? "noindex, nofollow"
+      : "index, follow, max-image-preview:large";
+    // Release-tag rollbacks can serve pages predating the large-image directive.
+    const legacyProductionMeta = !IS_STAGING_HOST && homeHtml.includes('content="index, follow"');
+    if (!homeHtml.includes(`content="${expectedMeta}"`) && !legacyProductionMeta) {
       console.log(
         `warn / robots meta does not reflect this build yet (expected "${expectedMeta}", edge cache converging, not fatal)`,
       );

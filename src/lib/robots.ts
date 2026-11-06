@@ -16,9 +16,11 @@ export function isProductionBuild(): boolean {
   return import.meta.env.PUBLIC_BUILD_TYPE === "Production";
 }
 
-/** robots <meta> content. Indexable pages are only "index, follow" in production. */
+/** Allow large artwork previews only for production indexable pages. */
 export function robotsDirective(indexable: boolean): string {
-  return isProductionBuild() && indexable ? "index, follow" : "noindex, nofollow";
+  return isProductionBuild() && indexable
+    ? "index, follow, max-image-preview:large"
+    : "noindex, nofollow";
 }
 
 /** robots.txt body. Non-production blocks all crawling and omits the sitemap reference. */
