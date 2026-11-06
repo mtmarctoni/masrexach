@@ -1,12 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { robotsDirective, robotsTxt } from "../src/lib/robots";
+import { isIndexablePath } from "../src/lib/seo";
 
 afterEach(() => vi.unstubAllEnvs());
 
 describe("robotsDirective", () => {
   it("indexes indexable pages only in production", () => {
     vi.stubEnv("PUBLIC_BUILD_TYPE", "Production");
-    expect(robotsDirective(true)).toBe("index, follow");
+    expect(robotsDirective(true)).toBe("index, follow, max-image-preview:large");
   });
 
   it("noindexes non-indexable pages even in production", () => {
@@ -14,13 +15,18 @@ describe("robotsDirective", () => {
     expect(robotsDirective(false)).toBe("noindex, nofollow");
   });
 
-  it.each(["Preview", "Staging", undefined])(
+  it.each(["Preview", "Staging", "production", "", undefined])(
     "noindexes everything outside production (%s)",
     (buildType) => {
       if (buildType !== undefined) vi.stubEnv("PUBLIC_BUILD_TYPE", buildType);
       expect(robotsDirective(true)).toBe("noindex, nofollow");
     },
   );
+
+  it.each(["/legal", "/ca/legal/", "/404", "/500"])("keeps %s noindex in production", (path) => {
+    vi.stubEnv("PUBLIC_BUILD_TYPE", "Production");
+    expect(robotsDirective(isIndexablePath(path))).toBe("noindex, nofollow");
+  });
 });
 
 describe("robotsTxt", () => {

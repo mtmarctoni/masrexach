@@ -39,7 +39,9 @@ describe.runIf(process.env.OG_VERIFY_BUILD === "1")("built sharing cards", () =>
         const meta = metadata(html);
         expect(meta["og:locale"]).toBe({ es: "es_ES", ca: "ca_ES", en: "en_GB" }[locale]);
         expect(meta.robots).toBe(
-          buildType === "Production" && path !== "legal" ? "index, follow" : "noindex, nofollow",
+          buildType === "Production" && path !== "legal"
+            ? "index, follow, max-image-preview:large"
+            : "noindex, nofollow",
         );
         if (!absoluteTags) {
           expect(meta["og:image"]).toBeUndefined();

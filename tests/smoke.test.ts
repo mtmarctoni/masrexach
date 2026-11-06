@@ -14,12 +14,17 @@ async function smoke({
   cacheControl = "no-store",
   cspHeader = true,
   cspMeta = false,
+  robotsMeta = "",
+  logs = [] as string[],
 } = {}) {
   const errors: string[] = [];
   let exitCode = 0;
   await runInNewContext(source, {
     URL,
-    console: { log() {}, error: (message: string) => errors.push(message) },
+    console: {
+      log: (message: string) => logs.push(message),
+      error: (message: string) => errors.push(message),
+    },
     process: {
       argv: ["node", "scripts/smoke.mjs", base, sha],
       env: {},
@@ -41,9 +46,10 @@ async function smoke({
           );
         default:
           return new Response(
-            cspMeta
+            (cspMeta
               ? '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'"></head></html>'
-              : "<html></html>",
+              : "<html></html>"
+            ).replace("</html>", `<meta name="robots" content="${robotsMeta}"></html>`),
             {
               headers: {
                 "X-Content-Type-Options": "nosniff",
@@ -58,6 +64,20 @@ async function smoke({
 }
 
 describe("deployment smoke CLI", () => {
+  it.each(["index, follow", "index, follow, max-image-preview:large"])(
+    "accepts production robots metadata %s without a stale warning",
+    async (robotsMeta) => {
+      const logs: string[] = [];
+      expect((await smoke({ robotsMeta, logs })).exitCode).toBe(0);
+      expect(logs.some((line) => line.includes("warn / robots meta"))).toBe(false);
+    },
+  );
+
+  it("still warns about noindex metadata on production", async () => {
+    const logs: string[] = [];
+    await smoke({ robotsMeta: "noindex, nofollow", logs });
+    expect(logs.some((line) => line.includes("warn / robots meta"))).toBe(true);
+  });
   it("accepts the apex production sitemap", async () => {
     expect(
       await smoke({
