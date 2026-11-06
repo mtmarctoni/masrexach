@@ -82,7 +82,8 @@ const es: TranslationContent = {
   },
   exhibitions: {
     title: "Exposiciones — Antoni Mas Rexach",
-    description: "Exposiciones colectivas e individuales del pintor mallorquín Antoni Mas Rexach.",
+    description:
+      "Exposiciones de Antoni Mas Rexach en Mallorca: muestras colectivas e individuales en Casal Solleric, Banca March y la Cartoixa de Valldemossa.",
     heading: "Exposiciones",
     collectiveHeading: "Exposiciones colectivas",
     individualHeading: "Exposiciones individuales",

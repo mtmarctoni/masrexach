@@ -5,6 +5,7 @@ import { adjacentArtworks, artworks } from "../../../data/artworks";
 import type { Locale } from "../../../i18n";
 import { getDict, localeRoutes, localizedPath, siteUrl, statusLabels } from "../../../i18n";
 import Base from "../../../layouts/Base.astro";
+import { artworkDescription } from "../../../lib/artwork-seo";
 
 export function getStaticPaths() {
   return artworks.flatMap((art) =>
@@ -41,7 +42,7 @@ const image = module
   : undefined;
 
 const alt = `${art.title} — ${art.caption[locale]}`;
-const description = `${art.title} — ${art.caption[locale]}. ${labels[art.status]}.`;
+const description = artworkDescription(art, locale);
 
 const schema = {
   "@context": "https://schema.org",
