@@ -82,7 +82,8 @@ const en: TranslationContent = {
   },
   exhibitions: {
     title: "Exhibitions — Antoni Mas Rexach",
-    description: "Group and solo exhibitions of the Majorcan painter Antoni Mas Rexach.",
+    description:
+      "Explore Antoni Mas Rexach's group and solo exhibitions in Mallorca, including Casal Solleric, Banca March and the Cartoixa de Valldemossa.",
     heading: "Exhibitions",
     collectiveHeading: "Group exhibitions",
     individualHeading: "Solo exhibitions",
