@@ -26,8 +26,14 @@ function run(
   {
     github,
     worker = [],
+    vars = {},
     env = { GITHUB_ACTIONS: "true" },
-  }: { github: Record<string, string>; worker?: string[]; env?: Record<string, string> },
+  }: {
+    github: Record<string, string>;
+    worker?: string[];
+    vars?: Record<string, string>;
+    env?: Record<string, string>;
+  },
 ) {
   const dir = mkdtempSync(join(tmpdir(), "worker-secrets-test-"));
   dirs.push(dir);
@@ -59,7 +65,7 @@ esac
       TMPDIR: dir,
       RUNNER_TEMP: "",
       SECRETS_CONTEXT: JSON.stringify(github),
-      VARS_CONTEXT: "{}",
+      VARS_CONTEXT: JSON.stringify(vars),
     },
   });
   const deployArgsPath = join(dir, "deploy-args");
@@ -170,5 +176,30 @@ describe("outside GitHub Actions", () => {
     });
     expect(status).toBe(0);
     expect(deployArgs).toContain("--secrets-file");
+  });
+});
+
+// The release GitHub App's credentials (RELEASE_APP_ID variable,
+// RELEASE_APP_PRIVATE_KEY secret) are workflow infrastructure and must never
+// reach the Worker, as a secret or as a var.
+describe("release automation credentials", () => {
+  const github = { ...allSecrets, RELEASE_APP_PRIVATE_KEY: "-----BEGIN KEY-----" };
+  const vars = { CONTACT_TO_EMAIL: "to@example.com", RELEASE_APP_ID: "123", release_app_x: "y" };
+
+  it("deploy.sh passes app vars but not RELEASE_APP_* vars", () => {
+    const { status, deployArgs } = run("deploy.sh", [], { github, vars });
+    expect(status).toBe(0);
+    expect(deployArgs).toContain("CONTACT_TO_EMAIL:to@example.com");
+    expect(deployArgs).not.toMatch(/release_app/i);
+  });
+
+  it("deploy.sh never uploads the App key as a secret", () => {
+    const { uploaded } = run("deploy.sh", [], { github, vars });
+    expect(uploaded).toEqual({ RESEND_API_KEY: "re_123" });
+  });
+
+  it("sync-secrets.sh never sends the App key", () => {
+    const { bulk } = run("sync-secrets.sh", [], { github, worker: ["RESEND_API_KEY"] });
+    expect(bulk).toEqual({ RESEND_API_KEY: "re_123" });
   });
 });
