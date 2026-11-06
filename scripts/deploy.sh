@@ -30,9 +30,21 @@ set -euo pipefail
 #                     list above, and supplies the managed secrets' values)
 #   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 # Optional:
-#   WRANGLER_BIN  — wrangler invocation (default: "pnpm exec wrangler")
+#   WRANGLER_BIN       — wrangler invocation (default: "pnpm exec wrangler")
+#   ALLOW_LOCAL_DEPLOY — set to 1 to run outside GitHub Actions (emergencies only)
 #
 # Extra args ("$@") are forwarded to `wrangler deploy`.
+
+# CI only. A local run has no VARS_CONTEXT, and wrangler drops every var not
+# passed on deploy (keep_vars is false), so it would silently strip the
+# CONTACT_* vars and break the contact form. Deploy with the GitHub workflows;
+# to undo a bad deploy, use `wrangler rollback`. ALLOW_LOCAL_DEPLOY=1 overrides
+# this for a real emergency, with VARS_CONTEXT/SECRETS_CONTEXT set by hand.
+if [ "${GITHUB_ACTIONS:-}" != "true" ] && [ "${ALLOW_LOCAL_DEPLOY:-}" != "1" ]; then
+  echo "ERROR: deploy.sh only runs in GitHub Actions. Trigger the deploy workflow instead," >&2
+  echo "       or roll back with 'wrangler rollback'. Set ALLOW_LOCAL_DEPLOY=1 to override." >&2
+  exit 1
+fi
 
 # shellcheck source=scripts/managed-secrets.sh
 source "$(dirname "${BASH_SOURCE[0]}")/managed-secrets.sh"

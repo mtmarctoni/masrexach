@@ -23,7 +23,11 @@ const readJson = (path: string) =>
 function run(
   script: string,
   args: string[],
-  { github, worker = [] }: { github: Record<string, string>; worker?: string[] },
+  {
+    github,
+    worker = [],
+    env = { GITHUB_ACTIONS: "true" },
+  }: { github: Record<string, string>; worker?: string[]; env?: Record<string, string> },
 ) {
   const dir = mkdtempSync(join(tmpdir(), "worker-secrets-test-"));
   dirs.push(dir);
@@ -48,6 +52,9 @@ esac
     encoding: "utf8",
     env: {
       ...process.env,
+      GITHUB_ACTIONS: "",
+      ALLOW_LOCAL_DEPLOY: "",
+      ...env,
       WRANGLER_BIN: fake,
       TMPDIR: dir,
       RUNNER_TEMP: "",
@@ -125,5 +132,43 @@ describe("deploy.sh", () => {
     const { status, deployArgs } = run("deploy.sh", [], { github: { NPM_TOKEN: "npm" } });
     expect(status).toBe(0);
     expect(deployArgs).not.toContain("--secrets-file");
+  });
+});
+
+describe("outside GitHub Actions", () => {
+  const local = { GITHUB_ACTIONS: "" };
+
+  it("deploy.sh refuses to deploy", () => {
+    const { status, deployArgs, stderr } = run("deploy.sh", [], {
+      github: allSecrets,
+      env: local,
+    });
+    expect(status).toBe(1);
+    expect(deployArgs).toBeUndefined();
+    expect(stderr).toContain("only runs in GitHub Actions");
+  });
+
+  it("sync-secrets.sh refuses a full sync", () => {
+    const { status, bulk } = run("sync-secrets.sh", [], { github: allSecrets, env: local });
+    expect(status).toBe(1);
+    expect(bulk).toBeUndefined();
+  });
+
+  it("sync-secrets.sh still allows --prune", () => {
+    const { status } = run("sync-secrets.sh", ["--prune"], {
+      github: { RESEND_API_KEY: "re_123" },
+      worker: ["RESEND_API_KEY"],
+      env: local,
+    });
+    expect(status).toBe(0);
+  });
+
+  it("ALLOW_LOCAL_DEPLOY=1 overrides the check", () => {
+    const { status, deployArgs } = run("deploy.sh", [], {
+      github: allSecrets,
+      env: { ...local, ALLOW_LOCAL_DEPLOY: "1" },
+    });
+    expect(status).toBe(0);
+    expect(deployArgs).toContain("--secrets-file");
   });
 });

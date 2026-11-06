@@ -21,7 +21,6 @@
     "test": "vitest run",
     "test:worker": "node scripts/test-worker.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "deploy": "bash scripts/deploy.sh",
     "sync:secrets": "bash scripts/sync-secrets.sh",
     "lighthouse": "lhci autorun",
     "osv": "osv-scanner scan source --lockfile=./pnpm-lock.yaml --config=osv-scanner.toml",

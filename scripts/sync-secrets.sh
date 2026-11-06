@@ -19,8 +19,9 @@ set -euo pipefail
 #   CLOUDFLARE_ACCOUNT_ID
 #
 # Optional env:
-#   WRANGLER_BIN — wrangler invocation (default: "pnpm exec wrangler";
-#                  node_modules/.bin is not on PATH in CI run steps)
+#   WRANGLER_BIN       — wrangler invocation (default: "pnpm exec wrangler";
+#                        node_modules/.bin is not on PATH in CI run steps)
+#   ALLOW_LOCAL_DEPLOY — set to 1 to run a full sync outside GitHub Actions
 #
 # Usage:
 #   SECRETS_CONTEXT='{"KEY":"val",...}' ./scripts/sync-secrets.sh [--prune] [--env staging]
@@ -42,6 +43,13 @@ while [ $# -gt 0 ]; do
     *) shift ;;
   esac
 done
+# A full sync writes secret values, so it runs in CI only unless overridden.
+# --prune only deletes stale managed secrets and is allowed anywhere.
+if [ "$PRUNE" != true ] && [ "${GITHUB_ACTIONS:-}" != "true" ] && [ "${ALLOW_LOCAL_DEPLOY:-}" != "1" ]; then
+  echo "ERROR: a full secret sync only runs in GitHub Actions; secrets are uploaded by" >&2
+  echo "       the deploy workflow. Set ALLOW_LOCAL_DEPLOY=1 to override." >&2
+  exit 1
+fi
 # Empty-array expansion under `set -u` breaks on bash 3.x (macOS); this form is safe.
 ENV_ARGS=(${ENV_ARGS[@]+"${ENV_ARGS[@]}"})
 
