@@ -2,8 +2,8 @@
 #
 # Builds without CLOUDFLARE_ENV so the adapter resolves the top level of
 # wrangler.jsonc: Worker `masrexach` on the custom domain
-# masrexach.marctonimas.com (the definitive masrexach.com can be added to
-# wrangler.jsonc later). workers.dev and preview URLs stay off. Staging
+# masrexach.com (retaining masrexach.marctonimas.com during validation).
+# workers.dev and preview URLs stay off. Staging
 # deploys automatically on every merge to main — see deploy-staging.yml.
 # PR previews live on the staging Worker — see deploy-preview.yml.
 
@@ -67,4 +67,4 @@ jobs:
       # Blocking. On the very first deploy the custom-domain certificate can
       # still be provisioning — if smoke fails then, re-run the workflow.
       - name: Smoke test
-        run: node scripts/smoke.mjs https://masrexach.marctonimas.com "$GITHUB_SHA"
+        run: node scripts/smoke.mjs https://masrexach.com "$GITHUB_SHA"

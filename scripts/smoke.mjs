@@ -14,7 +14,7 @@ const base = baseArg.replace(/\/$/, "");
 // Example: "/", "/es/", "/en/", "/blog/<slug>/"
 const PATHS = ["/", "/ca/", "/en/", "/exposiciones/", "/legal/"];
 // Preview (workers.dev) and staging hosts both contain "staging"; production
-// (masrexach.marctonimas.com) does not. Non-production builds are noindex.
+// (masrexach.com) does not. Non-production builds are noindex.
 const IS_STAGING_HOST = /staging/i.test(new URL(base).hostname);
 // Adapter-less (contact-off) builds have no Worker and no /api/health route:
 // run smoke with SMOKE_EXPECT_HEALTH=0 to skip the health check.
@@ -113,9 +113,13 @@ async function main() {
       if (!sitemapUrl)
         throw new Error("missing Sitemap line (is PUBLIC_BASE_URL set for production?)");
       const parsedSitemap = new URL(sitemapUrl);
-      if (parsedSitemap.pathname.includes("//"))
-        throw new Error(`malformed sitemap URL "${sitemapUrl}" (PUBLIC_BASE_URL trailing slash?)`);
-      if (parsedSitemap.hostname !== "masrexach.marctonimas.com") {
+      if (
+        parsedSitemap.pathname !== "/sitemap-index.xml" ||
+        parsedSitemap.search ||
+        parsedSitemap.hash
+      )
+        throw new Error(`malformed sitemap URL "${sitemapUrl}" (expected /sitemap-index.xml)`);
+      if (parsedSitemap.protocol !== "https:" || parsedSitemap.origin !== new URL(base).origin) {
         throw new Error(`sitemap URL host mismatch "${sitemapUrl}"`);
       }
     }
@@ -137,7 +141,7 @@ async function main() {
   if (robotsTxtBody) {
     const expectedRobots = IS_STAGING_HOST
       ? "Disallow: /"
-      : "Sitemap: https://masrexach.marctonimas.com/sitemap-index.xml";
+      : `Sitemap: ${new URL(base).origin}/sitemap-index.xml`;
     if (!robotsTxtBody.includes(expectedRobots)) {
       console.log(
         `warn / robots.txt does not reflect this build yet (expected "${expectedRobots}", edge cache converging, not fatal)`,

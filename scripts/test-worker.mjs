@@ -2,11 +2,10 @@
 // Integration test for the built Worker. No Cloudflare account or email
 // credentials are used. Run after `pnpm build`, for each build environment.
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { promisify } from "node:util";
+import { runInNewContext } from "node:vm";
 import { createTestHarness } from "wrangler";
 
 const config = JSON.parse(await readFile("dist/server/wrangler.json", "utf8"));
@@ -98,13 +97,25 @@ try {
     assert.match(robots, /Disallow: \//);
     assert.doesNotMatch(robots, /Sitemap:/);
   } else {
-    assert.match(robots, /Sitemap: https:\/\/masrexach\.marctonimas\.com\/sitemap-index\.xml/);
-    const { stdout } = await promisify(execFile)(process.execPath, [
-      "scripts/smoke.mjs",
-      url.href,
-      process.env.GITHUB_SHA ?? "unknown",
-    ]);
-    process.stdout.write(stdout);
+    assert.match(robots, /Sitemap: https:\/\/masrexach\.com\/sitemap-index\.xml/);
+    // Run the real smoke CLI against the local Worker, retaining the public
+    // origin in argv so sitemap validation checks the actual production SEO.
+    await runInNewContext(await readFile("scripts/smoke.mjs", "utf8"), {
+      URL,
+      console,
+      setTimeout,
+      process: {
+        argv: [
+          "node",
+          "scripts/smoke.mjs",
+          "https://masrexach.com",
+          process.env.GITHUB_SHA ?? "unknown",
+        ],
+        env: {},
+        exit: (code) => assert.fail(`smoke exited with ${code}`),
+      },
+      fetch: (input) => server.fetch(new URL(input).pathname),
+    });
   }
   console.log(`Built Worker checks passed (${staging ? "staging" : "production"}).`);
 } finally {

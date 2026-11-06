@@ -13,4 +13,11 @@ describe("release configuration", () => {
       expect(workflow).not.toContain("secrets.CLOUDFLARE_ACCOUNT_ID");
     },
   );
+
+  it("targets the apex in production smoke and CI builds", () => {
+    expect(read(".github/workflows/deploy-production.yml")).toContain(
+      "node scripts/smoke.mjs https://masrexach.com",
+    );
+    expect(read(".github/workflows/ci.yml")).toContain("PUBLIC_BASE_URL: https://masrexach.com");
+  });
 });
