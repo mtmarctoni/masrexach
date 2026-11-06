@@ -13,7 +13,7 @@ const en: TranslationContent = {
     description:
       "Antoni Mas Rexach (Palma de Mallorca, 1953–2017), Majorcan painter: oils and acrylics of the island's landscape. Original paintings available.",
     kicker: "Palma de Mallorca · 1953 — 2017",
-    headline: "The <em>light</em> of Mallorca, turned into <em>painting</em>.",
+    headline: ["The ", { em: "light" }, " of Mallorca, turned into ", { em: "painting" }, "."],
     statement:
       "Antoni Mas Rexach devoted his life to painting his homeland: its fields, its villages, its light. Three decades of exhibitions endorse a body of work that is already part of the island's cultural landscape.",
     ctaCatalog: "View the paintings",
@@ -24,8 +24,11 @@ const en: TranslationContent = {
       "To look at his landscapes is to step into the island's timeless landscape — the one of a lifetime — painted with an approach of his own, yet deeply Majorcan.",
     ],
     finitaKicker: "A finite body of work",
-    finitaQuote:
-      "His work is closed: <em>he will paint no more</em>. Every available painting is a unique, unrepeatable piece. Once it finds a collector, it never returns.",
+    finitaQuote: [
+      "His work is closed: ",
+      { em: "he will paint no more" },
+      ". Every available painting is a unique, unrepeatable piece. Once it finds a collector, it never returns.",
+    ],
     featuredHeading: "Featured works",
     featuredCta: "All paintings",
     venuesLabel: "Work exhibited at",
