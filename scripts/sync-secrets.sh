@@ -1,22 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Sync the Worker's secrets from GitHub secrets to the Cloudflare Worker.
-#
-# Only the names in MANAGED_SECRETS are touched. GitHub's secrets context holds
-# every secret the job can see (repo, environment and org level), so syncing
-# "everything except a denylist" would push unrelated org secrets into the
-# Worker and delete Worker secrets whenever a GitHub secret moved scope. An
-# explicit list keeps both directions predictable:
+# Sync the managed Worker secrets (scripts/managed-secrets.sh) from GitHub
+# secrets to the Cloudflare Worker:
 #   - a managed name with a value in GitHub  -> created/updated on the Worker
 #   - a managed name missing/empty in GitHub -> deleted from the Worker
 #   - any other Worker secret                -> left alone (warned about)
 #
-# To add a secret: declare it in astro.config.mjs (env.schema), add it to
-# MANAGED_SECRETS below, then set it in the GitHub environment.
-MANAGED_SECRETS=(
-  RESEND_API_KEY
-)
+# CI deploys set secrets atomically with the code (deploy.sh passes
+# --secrets-file), which only adds and updates. CI then runs this script with
+# --prune to delete stale managed secrets; when there is nothing to delete it
+# makes no write, so no extra deployment is created. Without --prune it does a
+# full sync, for updating secrets without a deploy.
 #
 # Required env:
 #   SECRETS_CONTEXT  — ${{ toJSON(secrets) }} (JSON object of all available secrets)
@@ -28,31 +23,30 @@ MANAGED_SECRETS=(
 #                  node_modules/.bin is not on PATH in CI run steps)
 #
 # Usage:
-#   SECRETS_CONTEXT='{"KEY":"val",...}' ./scripts/sync-secrets.sh
-#   SECRETS_CONTEXT='{"KEY":"val",...}' ./scripts/sync-secrets.sh --env preview
+#   SECRETS_CONTEXT='{"KEY":"val",...}' ./scripts/sync-secrets.sh [--prune] [--env staging]
+
+# shellcheck source=scripts/managed-secrets.sh
+source "$(dirname "${BASH_SOURCE[0]}")/managed-secrets.sh"
 
 run_wrangler() {
-  # shellcheck disable=SC2086 — WRANGLER_BIN is intentionally word-split.
+  # shellcheck disable=SC2086 # WRANGLER_BIN is intentionally word-split.
   ${WRANGLER_BIN:-pnpm exec wrangler} --config dist/server/wrangler.json "$@"
 }
 
+PRUNE=false
 ENV_ARGS=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --env) ENV_ARGS+=("--env" "$2"); shift 2 ;;
+    --prune) PRUNE=true; shift ;;
     *) shift ;;
   esac
 done
 # Empty-array expansion under `set -u` breaks on bash 3.x (macOS); this form is safe.
 ENV_ARGS=(${ENV_ARGS[@]+"${ENV_ARGS[@]}"})
 
-MANAGED_JSON=$(printf '%s\n' "${MANAGED_SECRETS[@]}" | jq -R . | jq -sc .)
-
-# Managed secrets that have a value in GitHub.
-GITHUB_SECRETS=$(echo "$SECRETS_CONTEXT" | jq -c --argjson managed "$MANAGED_JSON" '
-  with_entries(select(.key as $k | $managed | index($k)))
-  | with_entries(select(.value | type == "string" and length > 0))
-')
+MANAGED_JSON=$(managed_secrets_names_json)
+GITHUB_SECRETS=$(echo "$SECRETS_CONTEXT" | managed_secrets_from_context)
 
 # Existing Worker secrets (may fail on first deploy or when none exist).
 EXISTING=$(run_wrangler secret list ${ENV_ARGS[@]+"${ENV_ARGS[@]}"} 2>/dev/null || echo '[]')
@@ -65,7 +59,7 @@ UNMANAGED=$(echo "$EXISTING" | jq -r --argjson managed "$MANAGED_JSON" \
 if [ -n "$UNMANAGED" ]; then
   echo "WARNING: the Worker has secrets this script does not manage (left untouched):" >&2
   while IFS= read -r name; do echo "  - $name" >&2; done <<<"$UNMANAGED"
-  echo "         Add them to MANAGED_SECRETS, or delete them with 'wrangler secret delete'." >&2
+  echo "         Add them to scripts/managed-secrets.sh, or delete them with 'wrangler secret delete'." >&2
 fi
 
 # Safety valve: no managed secret in context while the Worker has managed ones
@@ -84,13 +78,20 @@ if [ "$GITHUB_SECRETS" = "{}" ]; then
 fi
 
 # Build sync JSON:
-# - managed secrets with a GitHub value -> their values (create/update)
+# - managed secrets with a GitHub value -> their values (create/update), unless pruning
 # - managed secrets on the Worker but not in GitHub -> null (delete)
 SYNC_JSON=$(jq -n \
   --argjson github "$GITHUB_SECRETS" \
   --argjson existing "$EXISTING_MANAGED" \
-  'reduce $existing[] as $n ($github;
-     if has($n) then . else .[$n] = null end)')
+  --argjson prune "$PRUNE" \
+  '(if $prune then {} else $github end) as $base
+   | reduce $existing[] as $n ($base;
+       if $github | has($n) then . else .[$n] = null end)')
+
+if [ "$SYNC_JSON" = "{}" ]; then
+  echo "No stale secrets to remove."
+  exit 0
+fi
 
 echo "Syncing secrets to Cloudflare Worker..."
 echo "$SYNC_JSON" | jq -r 'to_entries | map(if .value == null then "  - \(.key) (delete)" else "  - \(.key) (set)" end)[]'
