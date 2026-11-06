@@ -50,15 +50,11 @@ export function statusLabels(dict: TranslationContent): Record<ArtworkStatus, st
   };
 }
 
-/** Path for a locale without the host, e.g. ("ca", "/biografia") → "/ca/biografia". */
+/** Public page path matching the directory URL served by the Worker and sitemap. */
 export function localizedPath(locale: Locale, path: string): string {
-  if (locale === defaultLocale) {
-    return path === "/" ? "/" : path;
-  }
-  const trimmed = path === "/" ? "" : path;
-  // Trailing slash matches @astrojs/sitemap output (build.format "directory"),
-  // keeping canonical/hreflang URLs identical to the sitemap entries.
-  return `/${locale}${trimmed}/`;
+  const trimmed = path.replace(/\/+$/, "");
+  const prefix = locale === defaultLocale ? "" : `/${locale}`;
+  return `${prefix}${trimmed}/`;
 }
 
 /** Absolute URL for a page in a given locale. */
