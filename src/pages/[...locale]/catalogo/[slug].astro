@@ -3,9 +3,17 @@ import { getImage } from "astro:assets";
 import type { Artwork } from "../../../data/artworks";
 import { adjacentArtworks, artworks } from "../../../data/artworks";
 import type { Locale } from "../../../i18n";
-import { getDict, localeRoutes, localizedPath, siteUrl, statusLabels } from "../../../i18n";
+import {
+  getDict,
+  localeRoutes,
+  localizedPath,
+  localizedUrl,
+  siteUrl,
+  statusLabels,
+} from "../../../i18n";
 import Base from "../../../layouts/Base.astro";
 import { artworkDescription } from "../../../lib/artwork-seo";
+import { artworkSchema } from "../../../lib/structured-data";
 
 export function getStaticPaths() {
   return artworks.flatMap((art) =>
@@ -44,24 +52,13 @@ const image = module
 const alt = `${art.title} — ${art.caption[locale]}`;
 const description = artworkDescription(art, locale);
 
-const schema = {
-  "@context": "https://schema.org",
-  "@type": "VisualArtwork",
-  name: art.title,
-  image: image ? `${siteUrl}${image.src}` : undefined,
-  artform: "Painting",
-  text: art.caption[locale],
-  creator: {
-    "@type": "Person",
-    name: "Antoni Mas Rexach",
-    birthDate: "1953-09-06",
-    deathDate: "2017-03-13",
-    birthPlace: {
-      "@type": "Place",
-      name: "Palma de Mallorca",
-    },
-  },
-};
+const schema = artworkSchema(
+  art,
+  locale,
+  siteUrl ? localizedUrl(locale, `/catalogo/${art.slug}`) : undefined,
+  siteUrl && image ? new URL(image.src, siteUrl).href : undefined,
+  siteUrl,
+);
 ---
 
 <Base
