@@ -205,6 +205,11 @@ describe("production deploy workflow", () => {
     );
     expect(checkout.with.ref).toBe(SHA);
     expect(step("deploy", (s) => s.name === "Build").env.BUILD_SHA).toBe(SHA);
+    // Releases cut before BUILD_SHA existed (v1.0.0) read only GITHUB_SHA, so
+    // the build command itself must set it to the release commit too.
+    expect(step("deploy", (s) => s.name === "Build").run).toBe(
+      'GITHUB_SHA="$BUILD_SHA" pnpm build',
+    );
     expect(read("astro.config.mjs")).toContain("process.env.BUILD_SHA ?? process.env.GITHUB_SHA");
   });
 

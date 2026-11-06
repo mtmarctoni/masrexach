@@ -112,8 +112,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # GITHUB_SHA here is main's triggering commit. Releases cut before
+      # BUILD_SHA existed (v1.0.0) stamp only GITHUB_SHA, so set it for the
+      # build command too; a step-level env entry cannot override GITHUB_*.
       - name: Build
-        run: pnpm build
+        run: GITHUB_SHA="$BUILD_SHA" pnpm build
         env:
           BUILD_SHA: ${{ needs.resolve.outputs.sha }}
           PUBLIC_BUILD_TYPE: ${{ vars.PUBLIC_BUILD_TYPE }}
