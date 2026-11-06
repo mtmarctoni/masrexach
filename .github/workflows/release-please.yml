@@ -1,0 +1,55 @@
+# Release PRs — maintained on every push to main.
+#
+# Release Please keeps one open release PR that bumps package.json and
+# CHANGELOG.md from the conventional commits merged since the last release.
+# Merging that PR is the production approval: Release Please then tags vX.Y.Z,
+# creates the GitHub release, and the deploy job below deploys that exact
+# commit. Ordinary pushes to main (including release-PR updates) never deploy
+# production. See docs/releases.md.
+#
+# It authenticates as the release GitHub App, not GITHUB_TOKEN: PRs and tags
+# created with GITHUB_TOKEN do not trigger other workflows, so the release PR
+# would never get CI. The token is scoped to this repository.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Release metadata only. Production deploys serialize separately on the
+# deploy-production group inside the called workflow, so a later push here
+# can never cancel a running or queued production deployment.
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Maintain release PR
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - name: Create App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
