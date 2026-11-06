@@ -60,3 +60,10 @@ Release Please owns these files. Do not change them in normal PRs:
 
 To force a specific version, add a `Release-As: x.y.z` footer to a commit
 instead, and only when the user asks.
+
+## Browser tools
+
+- Always use the Playwright skill for opening, inspecting, and controlling a browser.
+- Project-local skill: `playwright-cli` from `microsoft/playwright-cli`; instructions are in `.agents/skills/playwright-cli/SKILL.md`.
+- Do not use `terminal-browser`.
+- If the Playwright skill is unavailable, locate it or ask the user before proceeding with browser work; do not silently substitute another browser tool.
