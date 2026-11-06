@@ -37,7 +37,7 @@ jobs:
         run: pnpm build
         env:
           PUBLIC_BUILD_TYPE: Production
-          PUBLIC_BASE_URL: https://masrexach.marctonimas.com
+          PUBLIC_BASE_URL: https://masrexach.com
 
       - name: Lighthouse CI (mobile emulation)
         # Use the audited lockfile, including the patched Lighthouse engine.
