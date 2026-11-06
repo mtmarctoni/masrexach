@@ -12,6 +12,7 @@
     "build": "rm -rf node_modules/.vite && astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "verify": "bash scripts/verify.sh",
     "clean": "rm -rf node_modules/.vite dist",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -33,7 +34,7 @@
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec biome check --staged --no-errors-on-unmatched --files-ignore-unknown=true && bash scripts/pre-commit-gitleaks.sh",
-    "pre-push": "pnpm check:all"
+    "pre-push": "pnpm verify"
   },
   "dependencies": {
     "@astrojs/cloudflare": "~14.4.4",
