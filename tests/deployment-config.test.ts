@@ -31,8 +31,12 @@ const BASELINE_SHA = "c24b7008ec2ec775c6e0d26e1fcc3f7eeababeee";
 const PINNED = /^[\w.-]+\/[\w.-]+(\/[\w./-]+)?@[0-9a-f]{40}$/;
 
 describe("release please configuration", () => {
-  it("starts the root package at 1.0.0", () => {
-    expect(json(".release-please-manifest.json")).toEqual({ ".": "1.0.0" });
+  // Release PRs bump both files together, so pin the invariant, not a number.
+  it("tracks one root package whose version matches package.json", () => {
+    const manifest = json(".release-please-manifest.json");
+    expect(Object.keys(manifest)).toEqual(["."]);
+    expect(manifest["."]).toMatch(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
+    expect(manifest["."]).toBe(json("package.json").version);
   });
 
   it("uses the node strategy with unprefixed vX.Y.Z tags", () => {
