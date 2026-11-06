@@ -14,9 +14,8 @@
 # current secret and var safeguards.
 #
 # Builds without CLOUDFLARE_ENV so the adapter resolves the top level of
-# wrangler.jsonc: Worker `masrexach` on the custom domain masrexach.com
-# (retaining masrexach.marctonimas.com during validation). workers.dev and
-# preview URLs stay off. Staging deploys on every merge to main — see
+# wrangler.jsonc: Worker `masrexach` on the custom domain masrexach.com.
+# workers.dev and preview URLs stay off. Staging deploys on every merge to main — see
 # deploy-staging.yml. PR previews live on the staging Worker — see
 # deploy-preview.yml.
 

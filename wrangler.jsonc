@@ -2,10 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "masrexach",
   "compatibility_date": "2026-08-04",
-  "routes": [
-    { "pattern": "masrexach.com", "custom_domain": true },
-    { "pattern": "masrexach.marctonimas.com", "custom_domain": true }
-  ],
+  "routes": [{ "pattern": "masrexach.com", "custom_domain": true }],
   "workers_dev": false,
   "preview_urls": false,
   // Edge-enforced cap on contact-form submissions (5 per IP per minute,
