@@ -31,6 +31,12 @@ Worker count stays at two forever.
   merged `vars` / `secrets` contexts and need no changes. Preview uploads
   intentionally inherit the staging Worker's live vars/secrets via
   `--keep-vars`, so the `preview` environment only needs the Cloudflare creds.
+- Deploys run only through the GitHub workflows (`deploy-production.yml` by
+  `workflow_dispatch`, `deploy-staging.yml` on push to `main`). `deploy.sh` and
+  a full `sync-secrets.sh` refuse to run outside GitHub Actions: a local deploy
+  has no GitHub Variables, so it would drop the `CONTACT_*` vars. To undo a bad
+  deploy, use `wrangler rollback`. `ALLOW_LOCAL_DEPLOY=1` overrides the check
+  for a real emergency.
 - [ ] Optional: required reviewers on the `production` environment as an extra
   gate on top of `workflow_dispatch`.
 - [ ] DNS cutover for www.masrexach.com to Cloudflare; TLS termination via Cloudflare
