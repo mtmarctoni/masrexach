@@ -39,6 +39,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install social-card renderer browser
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Build (staging)
         run: pnpm build
         env:

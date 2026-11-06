@@ -5,6 +5,7 @@ import cloudflare from "@astrojs/cloudflare";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField, fontProviders } from "astro/config";
+import { ogCardsIntegration } from "./scripts/og/integration.ts";
 import { isIndexableUrl } from "./src/lib/seo.ts";
 
 // Build-time environment selector, injected by CI from GitHub environment
@@ -125,6 +126,7 @@ export default defineConfig({
     },
   },
   integrations: [
+    ogCardsIntegration(),
     // Sitemap only exists in production: it advertises indexable pages and is
     // referenced by robots.txt. Non-production robots.txt is Disallow: /, so no
     // sitemap. The filter drops every URL in the centralized noindex registry

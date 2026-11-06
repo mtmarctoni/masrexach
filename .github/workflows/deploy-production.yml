@@ -112,6 +112,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install social-card renderer browser
+        # Older release tags have no OG renderer or Playwright dependency.
+        if: ${{ hashFiles('scripts/og/render.ts') != '' }}
+        run: pnpm exec playwright install --with-deps chromium
+
       # GITHUB_SHA here is main's triggering commit. Releases cut before
       # BUILD_SHA existed (v1.0.0) stamp only GITHUB_SHA, so set it for the
       # build command too; a step-level env entry cannot override GITHUB_*.
