@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://github.com/mtmarctoni/masrexach/compare/v1.1.0...v1.2.0) (2026-11-06)
+
+
+### Features
+
+* **agents:** add playwright browser tooling ([755c2e6](https://github.com/mtmarctoni/masrexach/commit/755c2e6d54a23289f5137c9d5e6a70c6d47f9f2c))
+* **seo:** add localized sharing images ([5db2ceb](https://github.com/mtmarctoni/masrexach/commit/5db2cebb2e82c45361d987956451d810723234eb))
+
+
+### Bug Fixes
+
+* **deploy:** allow large artwork previews in search ([74fdd5b](https://github.com/mtmarctoni/masrexach/commit/74fdd5bbf7844605caa9ce3767e9ac7fbdb95027))
+* **seo:** update painting and exhibition search descriptions ([55e24a3](https://github.com/mtmarctoni/masrexach/commit/55e24a341e56cd0c1792035da972ac0b39a5551f))
+* **seo:** use a shared artist identity in painting metadata ([60f85ae](https://github.com/mtmarctoni/masrexach/commit/60f85ae62ce4cacfb0661db3c9db78d684f0482e))
+* **site:** use canonical page urls without redirect hops ([66d25aa](https://github.com/mtmarctoni/masrexach/commit/66d25aa97ac35b169819f0856c51f110c17baffa))
+
 ## [1.1.0](https://github.com/mtmarctoni/masrexach/compare/v1.0.0...v1.1.0) (2026-11-06)
 
 
