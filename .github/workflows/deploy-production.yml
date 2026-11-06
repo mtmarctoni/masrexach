@@ -53,7 +53,7 @@ jobs:
         run: ./scripts/deploy.sh
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           VARS_CONTEXT: ${{ toJSON(vars) }}
           SECRETS_CONTEXT: ${{ toJSON(secrets) }}
 
@@ -61,7 +61,7 @@ jobs:
         run: ./scripts/sync-secrets.sh
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           SECRETS_CONTEXT: ${{ toJSON(secrets) }}
 
       # Blocking. On the very first deploy the custom-domain certificate can
