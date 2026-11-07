@@ -7,6 +7,16 @@ describe.runIf(process.env.THUMBNAIL_VERIFY_BUILD === "1")("built thumbnails", (
       for (const path of ["", "catalogo/"]) {
         const html = await readFile(`dist/client/${prefix}${path}index.html`, "utf8");
         const images = [...html.matchAll(/<img\s[^>]*>/g)].map(([tag]) => tag);
+        if (!path) {
+          const hero = images[0];
+          expect(hero).toMatch(/srcset="[^"]+"/);
+          expect(hero).toMatch(/sizes="[^"]+"/);
+          expect(hero).toContain('loading="eager"');
+          expect(hero).toContain('fetchpriority="high"');
+          const widths = [...hero.matchAll(/ (\d+)w/g)].map(([, width]) => Number(width));
+          expect(widths.some((width) => width <= 330)).toBe(true);
+          expect(Math.max(...widths)).toBe(460);
+        }
         const thumbnails = path ? images : images.slice(1);
         expect(thumbnails.length).toBeGreaterThan(0);
         for (const tag of thumbnails) {
