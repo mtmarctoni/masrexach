@@ -35,3 +35,5 @@ tmp/
 
 # Local agent output
 .agents/autopilot/
+/.superpowers/
+/docs/superpowers/
