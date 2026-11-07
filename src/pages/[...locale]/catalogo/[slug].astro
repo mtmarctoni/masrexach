@@ -44,6 +44,13 @@ const image = module
   ? await getImage({
       src: module.default,
       width: Math.min(module.default.width, 960),
+      widths: [
+        ...new Set(
+          [240, 320, 400, 480, 640, 800, 960].map((width) =>
+            Math.min(width, module.default.width, 960),
+          ),
+        ),
+      ],
       quality: 80,
       format: "webp",
     })
@@ -88,6 +95,8 @@ const schema = artworkSchema(
         image ? (
           <img
             src={image.src}
+            srcset={image.srcSet.attribute}
+            sizes="(min-width: 548px) 458px, calc(100vw - 90px)"
             width={image.attributes.width}
             height={image.attributes.height}
             alt={alt}
