@@ -30,7 +30,7 @@ afterEach(() => {
 
 // The shell orchestration is real; external tools are replaced to test order,
 // build environments, and failure propagation without recursively running Vitest.
-function run(fail = "", missing = "", failBuildType = "") {
+function run(fail = "", missing = "", failBuildType = "", args = ["--full"]) {
   const dir = mkdtempSync(join(tmpdir(), "verify-test-"));
   dirs.push(dir);
   mkdirSync(join(dir, "scripts"));
@@ -43,6 +43,7 @@ function run(fail = "", missing = "", failBuildType = "") {
       join(dir, "bin", name),
       `#!/bin/sh
 call='${name}'
+if [ "$call" = node ] && [ "$1" = scripts/ci-selection.mjs ]; then echo 1; exit 0; fi
 if [ "$#" -gt 0 ]; then call="$call $*"; fi
 printf '%s|%s|%s|%s|%s\\n' "$call" "$PUBLIC_BUILD_TYPE" "$PUBLIC_BASE_URL" "$CLOUDFLARE_ENV" "$THUMBNAIL_VERIFY_BUILD" >> "$VERIFY_LOG"
 if [ "$call" = "$FAIL_COMMAND" ] && { [ -z "$FAIL_BUILD_TYPE" ] || [ "$PUBLIC_BUILD_TYPE" = "$FAIL_BUILD_TYPE" ]; }; then exit 42; fi
@@ -50,7 +51,7 @@ if [ "$call" = "$FAIL_COMMAND" ] && { [ -z "$FAIL_BUILD_TYPE" ] || [ "$PUBLIC_BU
       { mode: 0o755 },
     );
   }
-  const result = spawnSync("/bin/bash", [join(dir, "scripts/verify.sh")], {
+  const result = spawnSync("/bin/bash", [join(dir, "scripts/verify.sh"), ...args], {
     cwd: "/",
     encoding: "utf8",
     env: {
@@ -116,8 +117,29 @@ it.each(["pnpm build", "pnpm test:worker"])("blocks staging failure: %s", (comma
   );
 });
 
-it("wires the pre-push hook to the full gate", () => {
+it("wires the pre-push hook to the fast gate and exposes full verification", () => {
   const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   expect(pkg.scripts.verify).toBe("bash scripts/verify.sh");
+  expect(pkg.scripts["verify:full"]).toBe("bash scripts/verify.sh --full");
   expect(pkg["simple-git-hooks"]["pre-push"]).toBe("pnpm verify");
+});
+
+it("omits Lighthouse from the default pre-push gate", () => {
+  const result = run("", "", "", []);
+  expect(result.status, result.stderr).toBe(0);
+  expect(result.calls.map((line) => line.split("|")[0])).toEqual(
+    commands
+      .filter((command) => !command.startsWith("pnpm exec lhci"))
+      .map((command) => (command === "pnpm test" ? "pnpm test:changed" : command)),
+  );
+});
+
+it("propagates selective test failures in the default gate", () => {
+  expect(run("pnpm test:changed", "", "", []).status).toBe(42);
+});
+
+it("rejects unknown verification modes before running checks", () => {
+  const result = run("", "", "", ["--unknown"]);
+  expect(result.status).not.toBe(0);
+  expect(result.calls).toEqual([]);
 });

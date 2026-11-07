@@ -70,83 +70,91 @@ describe("original-asset card renderer", () => {
     expect(html).not.toContain('onerror="alert(1)"');
   });
 
-  it("fits portrait, square, wide, longest and accented titles without cropping", async () => {
-    const browser = await chromium.launch();
-    try {
-      const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
-      for (const path of [
-        "/catalogo/03-botellas",
-        "/catalogo/14-granja-esporlas",
-        "/catalogo/07-albufera",
-        "/catalogo/05-orient-100x40",
-        "/catalogo/19-trastos-granja-esporlas",
-        "/catalogo/17-nenufares",
-        "/",
-        "/biografia",
-      ]) {
-        for (const locale of ["es", "ca", "en"] as const) {
-          const card = resolveOgCard(locale, path);
-          const { html } = await prepareOgCard(card, { root });
-          await page.setContent(html);
-          await fitOgCard(page, card);
-          await page.evaluate(async () => {
-            await document.fonts.ready;
-            await Promise.all([...document.images].map((img) => img.decode()));
-          });
-          const bounds = await page.evaluate(() => {
-            const img = document.querySelector("img");
-            const copy = document.querySelector(".copy");
-            if (!img || !copy) throw new Error("Missing card content");
-            const rect = img.getBoundingClientRect();
-            return {
-              ratio: rect.width / rect.height,
-              naturalRatio: img.naturalWidth / img.naturalHeight,
-              right: rect.right,
-              bottom: rect.bottom,
-              left: rect.left,
-              top: rect.top,
-              textRight: copy.getBoundingClientRect().right,
-              textBottom: copy.getBoundingClientRect().bottom,
-              textOverflow: copy.scrollWidth > copy.clientWidth,
-            };
-          });
-          expect(bounds.ratio).toBeCloseTo(bounds.naturalRatio, 2);
-          // Include the white 8px frame inside the 60px canvas safe area.
-          expect(bounds.left).toBeGreaterThanOrEqual(648);
-          expect(bounds.top).toBeGreaterThanOrEqual(68);
-          expect(bounds.right).toBeLessThanOrEqual(1132);
-          expect(bounds.bottom).toBeLessThanOrEqual(562);
-          expect(bounds.textRight).toBeLessThanOrEqual(600);
-          expect(bounds.textBottom).toBeLessThanOrEqual(456);
-          expect(bounds.textOverflow).toBe(false);
+  it.skipIf(process.env.SKIP_OG_BROWSER_TESTS === "1")(
+    "fits portrait, square, wide, longest and accented titles without cropping",
+    async () => {
+      const browser = await chromium.launch();
+      try {
+        const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
+        for (const path of [
+          "/catalogo/03-botellas",
+          "/catalogo/14-granja-esporlas",
+          "/catalogo/07-albufera",
+          "/catalogo/05-orient-100x40",
+          "/catalogo/19-trastos-granja-esporlas",
+          "/catalogo/17-nenufares",
+          "/",
+          "/biografia",
+        ]) {
+          for (const locale of ["es", "ca", "en"] as const) {
+            const card = resolveOgCard(locale, path);
+            const { html } = await prepareOgCard(card, { root });
+            await page.setContent(html);
+            await fitOgCard(page, card);
+            await page.evaluate(async () => {
+              await document.fonts.ready;
+              await Promise.all([...document.images].map((img) => img.decode()));
+            });
+            const bounds = await page.evaluate(() => {
+              const img = document.querySelector("img");
+              const copy = document.querySelector(".copy");
+              if (!img || !copy) throw new Error("Missing card content");
+              const rect = img.getBoundingClientRect();
+              return {
+                ratio: rect.width / rect.height,
+                naturalRatio: img.naturalWidth / img.naturalHeight,
+                right: rect.right,
+                bottom: rect.bottom,
+                left: rect.left,
+                top: rect.top,
+                textRight: copy.getBoundingClientRect().right,
+                textBottom: copy.getBoundingClientRect().bottom,
+                textOverflow: copy.scrollWidth > copy.clientWidth,
+              };
+            });
+            expect(bounds.ratio).toBeCloseTo(bounds.naturalRatio, 2);
+            // Include the white 8px frame inside the 60px canvas safe area.
+            expect(bounds.left).toBeGreaterThanOrEqual(648);
+            expect(bounds.top).toBeGreaterThanOrEqual(68);
+            expect(bounds.right).toBeLessThanOrEqual(1132);
+            expect(bounds.bottom).toBeLessThanOrEqual(562);
+            expect(bounds.textRight).toBeLessThanOrEqual(600);
+            expect(bounds.textBottom).toBeLessThanOrEqual(456);
+            expect(bounds.textOverflow).toBe(false);
+          }
         }
+      } finally {
+        await browser.close();
       }
-    } finally {
-      await browser.close();
-    }
-  }, 30_000);
+    },
+    30_000,
+  );
 
-  it("renders public, hashed 1200 × 630 JPEGs within the size budget", async () => {
-    const output = join(root, "output");
-    const cards = [
-      resolveOgCard("es", "/"),
-      resolveOgCard("ca", "/biografia"),
-      resolveOgCard("en", "/catalogo/03-botellas"),
-    ];
-    const manifest = await renderOgCards(cards, output, { root });
-    for (const card of cards) {
-      const image = manifest[card.key];
-      expect(image.path).toMatch(/^\/assets\/og\/[a-z0-9-]+-[a-f0-9]{16}\.jpg$/);
-      expect(image.alt).toBe(card.alt);
-      const bytes = await readFile(join(output, image.path));
-      const metadata = await sharp(bytes).metadata();
-      expect([metadata.width, metadata.height, metadata.format, metadata.space]).toEqual([
-        1200,
-        630,
-        "jpeg",
-        "srgb",
-      ]);
-      expect(bytes.length).toBeLessThanOrEqual(500_000);
-    }
-  }, 30_000);
+  it.skipIf(process.env.SKIP_OG_BROWSER_TESTS === "1")(
+    "renders public, hashed 1200 × 630 JPEGs within the size budget",
+    async () => {
+      const output = join(root, "output");
+      const cards = [
+        resolveOgCard("es", "/"),
+        resolveOgCard("ca", "/biografia"),
+        resolveOgCard("en", "/catalogo/03-botellas"),
+      ];
+      const manifest = await renderOgCards(cards, output, { root });
+      for (const card of cards) {
+        const image = manifest[card.key];
+        expect(image.path).toMatch(/^\/assets\/og\/[a-z0-9-]+-[a-f0-9]{16}\.jpg$/);
+        expect(image.alt).toBe(card.alt);
+        const bytes = await readFile(join(output, image.path));
+        const metadata = await sharp(bytes).metadata();
+        expect([metadata.width, metadata.height, metadata.format, metadata.space]).toEqual([
+          1200,
+          630,
+          "jpeg",
+          "srgb",
+        ]);
+        expect(bytes.length).toBeLessThanOrEqual(500_000);
+      }
+    },
+    30_000,
+  );
 });

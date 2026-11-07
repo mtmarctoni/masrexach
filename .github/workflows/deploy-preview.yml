@@ -20,6 +20,20 @@ name: Deploy (preview)
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "pnpm-workspace.yaml"
+      - "tsconfig.json"
+      - "src/**"
+      - "public/**"
+      - "scripts/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "astro.config.*"
+      - "*.config.*"
+      - "wrangler.*"
+      - ".nvmrc"
+      - ".npmrc"
+      - ".github/workflows/deploy-preview.yml"
 
 permissions:
   contents: read

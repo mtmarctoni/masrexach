@@ -58,7 +58,9 @@ jobs:
         run: pnpm check
 
       - name: Unit tests (Vitest)
-        run: pnpm test
+        run: pnpm test:changed
+        env:
+          CI_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
 
       - name: Unused files, exports and dependencies (Knip)
         run: pnpm knip
