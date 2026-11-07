@@ -1,6 +1,7 @@
 ---
 import ContactForm from "../../components/ContactForm.astro";
 import { artworks } from "../../data/artworks";
+import { CONTACT_EMAIL } from "../../data/site";
 import { getDict, localeRoutes } from "../../i18n";
 import Base from "../../layouts/Base.astro";
 
@@ -8,14 +9,6 @@ export const getStaticPaths = localeRoutes;
 
 const { locale } = Astro.props;
 const dict = getDict(locale);
-
-const infoBlocks = [
-  {
-    title: dict.contact.phoneTitle,
-    value: "670 831 743",
-    href: "tel:+34670831743",
-  },
-];
 
 const artworkIndex = Object.fromEntries(
   artworks.map((art) => [art.slug, { title: art.title, caption: art.caption[locale] }]),
@@ -44,25 +37,14 @@ const artworkIndex = Object.fromEntries(
       </div>
 
       <aside class="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-        {
-          infoBlocks.map(({ title, value, href }) => (
-            <div class="mt-9 first:mt-0">
-              <h2 class="kicker text-ink-faint">
-                {title}
-              </h2>
-              {href ? (
-                <a
-                  href={href}
-                  class="mt-2 block text-sm leading-relaxed text-accent-strong underline decoration-accent underline-offset-4"
-                >
-                  {value}
-                </a>
-              ) : (
-                <p class="mt-2 text-sm leading-relaxed text-ink-soft">{value}</p>
-              )}
-            </div>
-          ))
-        }
+        <p class="text-sm leading-relaxed text-ink-soft">{dict.contact.invitation}</p>
+        <div class="mt-9">
+          <h2 class="kicker text-ink-faint">{dict.contact.form.email}</h2>
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            class="mt-2 block text-sm leading-relaxed text-accent-strong underline decoration-accent underline-offset-4"
+            >{CONTACT_EMAIL}</a>
+        </div>
       </aside>
     </div>
   </section>
