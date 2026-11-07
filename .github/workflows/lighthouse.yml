@@ -2,6 +2,22 @@ name: Lighthouse
 
 on:
   pull_request:
+    paths:
+      - "pnpm-workspace.yaml"
+      - "tsconfig.json"
+      - "src/**"
+      - "public/**"
+      - "scripts/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "astro.config.*"
+      - "*.config.*"
+      - ".nvmrc"
+      - ".npmrc"
+      - ".lighthouserc.json"
+      - "lighthouse-routine.cjs"
+      - ".github/workflows/lighthouse.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,7 +27,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release-validation:
+    uses: ./.github/workflows/release-validation.yml
+    with:
+      check_name: Lighthouse release validation
+
   lighthouse:
+    needs: release-validation
+    if: needs.release-validation.outputs.is_release != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -41,7 +64,14 @@ jobs:
 
       - name: Lighthouse CI (mobile emulation)
         # Use the audited lockfile, including the patched Lighthouse engine.
-        run: pnpm lighthouse
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            pnpm lighthouse
+          else
+            pnpm exec lhci autorun --config=lighthouse-routine.cjs
+          fi
+        env:
+          EVENT_NAME: ${{ github.event_name }}
 
       - name: Internal link check (non-blocking)
         uses: lycheeverse/lychee-action@v2.9.0

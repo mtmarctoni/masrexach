@@ -1,0 +1,51 @@
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { expect, it } from "vitest";
+import { parse } from "yaml";
+
+const workflow = (name: string) => parse(readFileSync(`.github/workflows/${name}.yml`, "utf8"));
+
+it.each(["lighthouse", "deploy-preview"])(
+  "filters optional %s jobs to deploy-relevant changes",
+  (name) => {
+    const paths = workflow(name).on.pull_request.paths;
+    for (const path of [
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      "src/**",
+      "public/**",
+      "scripts/**",
+      "package.json",
+      "pnpm-lock.yaml",
+      "astro.config.*",
+    ]) {
+      expect(paths).toContain(path);
+    }
+    expect(paths).not.toContain("docs/**");
+    expect(paths).toContain(`.github/workflows/${name}.yml`);
+  },
+);
+
+it("offers the configured full Lighthouse audit and shares Slow 4G settings with routine runs", () => {
+  const config = JSON.parse(readFileSync(".lighthouserc.json", "utf8"));
+  expect(config.ci.collect.settings.throttling.cpuSlowdownMultiplier).toBe(4);
+  expect(workflow("lighthouse").on).toHaveProperty("workflow_dispatch");
+  const require = createRequire(import.meta.url);
+  const routine = require("../lighthouse-routine.cjs");
+  expect(routine.ci.collect.url).toEqual([
+    "http://localhost/",
+    "http://localhost/catalogo/",
+    "http://localhost/catalogo/07-albufera/",
+  ]);
+  expect(config.ci.collect.url).toEqual(expect.arrayContaining(routine.ci.collect.url));
+  expect(routine.ci.collect.settings).toEqual(config.ci.collect.settings);
+  expect(routine.ci.assert).toEqual(config.ci.assert);
+  const auditStep = workflow("lighthouse").jobs.lighthouse.steps.find(
+    (step: { name: string }) => step.name === "Lighthouse CI (mobile emulation)",
+  );
+  expect(auditStep.run).toContain(
+    'if [ "$EVENT_NAME" = "workflow_dispatch" ]; then\n  pnpm lighthouse',
+  );
+  // Reading the routine configuration must not change the on-disk full audit.
+  expect(JSON.parse(readFileSync(".lighthouserc.json", "utf8"))).toEqual(config);
+});
