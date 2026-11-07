@@ -65,6 +65,8 @@ const featured = featuredArtworks().map((art) => ({
       <Image
         src={heroImageSrc}
         width={460}
+        widths={[240, 280, 330, 400, 460]}
+        sizes="(min-width: 1152px) 401.2px, (min-width: 1024px) calc(42.5vw - 88.4px), calc(100vw - 82px)"
         quality={80}
         format="webp"
         alt={heroArt ? `${heroArt.title} — ${heroArt.caption[locale]}` : dict.artwork.ogAlt}
