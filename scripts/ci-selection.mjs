@@ -17,7 +17,7 @@ export function needsBrowserTests(paths) {
   );
 }
 
-export function selectBrowserTests(base = process.env.CI_BASE_REF || "origin/main") {
+function selectBrowserTests(base = process.env.CI_BASE_REF || "origin/main") {
   try {
     // Include committed changes and local staged/unstaged changes; --no-renames
     // exposes both paths of a rename, including deleted renderer inputs.
