@@ -134,11 +134,12 @@ const es: TranslationContent = {
   contact: {
     title: "Contacto — Antoni Mas Rexach",
     description:
-      "Adquiere una obra original de Antoni Mas Rexach o resuelve cualquier duda sobre la obra: formulario de contacto o teléfono 670 831 743.",
+      "Adquiere una obra original de Antoni Mas Rexach o resuelve cualquier duda sobre la obra mediante el formulario de contacto.",
     heading: "Adquirir una obra",
     intro:
-      "Para adquirir una obra o resolver cualquier duda sobre su pintura, escribe mediante este formulario o llama al 670 831 743.",
-    phoneTitle: "Teléfono",
+      "Para adquirir una obra o resolver cualquier duda sobre su pintura, escribe mediante este formulario.",
+    invitation:
+      "Para consultas sobre obras, exposiciones o colaboraciones, ponte en contacto mediante el formulario o por correo electrónico.",
     form: {
       name: "Nombre",
       namePlaceholder: "Tu nombre",

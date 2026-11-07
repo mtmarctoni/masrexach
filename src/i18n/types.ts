@@ -100,7 +100,7 @@ export interface TranslationContent {
     description: string;
     heading: string;
     intro: string;
-    phoneTitle: string;
+    invitation: string;
     form: ContactFormStrings;
   };
   legal: {
