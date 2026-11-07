@@ -61,6 +61,15 @@ Release Please owns these files. Do not change them in normal PRs:
 To force a specific version, add a `Release-As: x.y.z` footer to a commit
 instead, and only when the user asks.
 
+## Artwork image performance
+
+- Before changing artwork card layouts, thumbnail sizing, or image loading priority,
+  read [docs/image-performance.md](docs/image-performance.md).
+- Keep `src/lib/thumbnail.ts` synchronized with the layout's heights, padding,
+  gaps, column counts, and breakpoints; verify both the homepage and catalogue.
+- Always run Lighthouse with mobile Slow 4G settings. Use repeated runs when
+  comparing performance changes; the settings are explicit in `.lighthouserc.json`.
+
 ## Browser tools
 
 - Always use the Playwright skill for opening, inspecting, and controlling a browser.
