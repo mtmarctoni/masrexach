@@ -32,6 +32,7 @@ run actionlint
 export PUBLIC_BUILD_TYPE=Production
 export PUBLIC_BASE_URL=https://masrexach.com
 run pnpm build
+THUMBNAIL_VERIFY_BUILD=1 run pnpm exec vitest run tests/thumbnail-output.test.ts tests/artwork-image-output.test.ts
 run pnpm test:worker
 # Deliberately avoid `lhci autorun`: it includes a public report upload.
 run pnpm exec lhci collect
