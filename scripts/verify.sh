@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
-# Full local pre-push gate. Never formats source, deploys, or uploads reports.
+# Local pre-push gate; --full includes browser tests and Lighthouse.
 set -euo pipefail
 
 cd "${BASH_SOURCE[0]%/*}/.."
+
+full=0
+if [[ $# -eq 1 && "$1" == "--full" ]]; then
+  full=1
+elif [[ $# -ne 0 ]]; then
+  echo "usage: pnpm verify [--full]" >&2
+  exit 2
+fi
 
 for tool in pnpm node git gitleaks osv-scanner actionlint; do
   if ! command -v "$tool" >/dev/null 2>&1; then
@@ -13,6 +21,7 @@ done
 
 # Do not inherit a staging/preview build selection from the caller's shell.
 unset CLOUDFLARE_ENV PUBLIC_BUILD_TYPE PUBLIC_BASE_URL
+unset SKIP_OG_BROWSER_TESTS
 
 run() {
   printf '\nChecking: %s\n' "$*"
@@ -22,7 +31,11 @@ run() {
 run pnpm exec biome ci .
 run pnpm astro:doctor
 run pnpm check
-run pnpm test
+if [[ "$full" == 1 ]]; then
+  run pnpm test
+else
+  run pnpm test:changed
+fi
 run pnpm knip
 run pnpm depcruise
 run gitleaks git --redact --no-banner --log-opts=--all
@@ -35,8 +48,10 @@ run pnpm build
 THUMBNAIL_VERIFY_BUILD=1 run pnpm exec vitest run tests/thumbnail-output.test.ts tests/artwork-image-output.test.ts
 run pnpm test:worker
 # Deliberately avoid `lhci autorun`: it includes a public report upload.
-run pnpm exec lhci collect
-run pnpm exec lhci assert
+if [[ "$full" == 1 ]]; then
+  run pnpm exec lhci collect
+  run pnpm exec lhci assert
+fi
 
 export CLOUDFLARE_ENV=staging
 export PUBLIC_BUILD_TYPE=Staging
