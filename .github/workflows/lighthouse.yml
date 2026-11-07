@@ -11,7 +11,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release-validation:
+    uses: ./.github/workflows/release-validation.yml
+    with:
+      check_name: Lighthouse release validation
+
   lighthouse:
+    needs: release-validation
+    if: needs.release-validation.outputs.is_release != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

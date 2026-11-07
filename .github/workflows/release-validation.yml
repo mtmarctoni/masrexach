@@ -1,0 +1,40 @@
+name: Release validation
+
+on:
+  workflow_call:
+    inputs:
+      check_name:
+        description: Unique check name for each calling workflow
+        type: string
+        default: Release validation
+    outputs:
+      is_release:
+        description: Whether this is a validated metadata-only release PR
+        value: ${{ jobs.validate.outputs.is_release }}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: ${{ inputs.check_name }}
+    runs-on: ubuntu-latest
+    outputs:
+      is_release: ${{ steps.validate.outputs.is_release || 'false' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: startsWith(github.head_ref, 'release-please--branches--main--components--')
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+
+      - name: Validate release diff using trusted base-branch code
+        id: validate
+        if: startsWith(github.head_ref, 'release-please--branches--main--components--')
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch origin "refs/pull/$PR_NUMBER/head"
+          node scripts/validate-release-pr.mjs "$BASE_SHA" "$HEAD_SHA"

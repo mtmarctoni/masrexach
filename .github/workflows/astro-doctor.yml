@@ -18,7 +18,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release-validation:
+    uses: ./.github/workflows/release-validation.yml
+    with:
+      check_name: Astro Doctor release validation
+
   scan:
+    needs: release-validation
+    if: needs.release-validation.outputs.is_release != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
