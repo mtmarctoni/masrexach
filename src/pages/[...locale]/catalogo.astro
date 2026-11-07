@@ -1,9 +1,10 @@
 ---
-import { getImage } from "astro:assets";
+import { Image } from "astro:assets";
 import type { Artwork } from "../../data/artworks";
 import { availableArtworks, soldArtworks } from "../../data/artworks";
 import { getDict, localeRoutes, localizedPath, statusLabels } from "../../i18n";
 import Base from "../../layouts/Base.astro";
+import { thumbnailOptions } from "../../lib/thumbnail";
 
 export const getStaticPaths = localeRoutes;
 
@@ -16,16 +17,16 @@ const imageModules = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true },
 );
 
-async function prepare(art: Artwork) {
+function prepare(art: Artwork) {
   const module = imageModules[`../../assets/images/artwork/${art.image}`];
-  const image = module
-    ? await getImage({ src: module.default, width: 720, quality: 72, format: "webp" })
-    : undefined;
+  const image = module?.default;
   return { art, image };
 }
 
-const available = await Promise.all(availableArtworks().map(prepare));
-const sold = await Promise.all(soldArtworks().map(prepare));
+// The first two artworks can enter the initial mobile viewport and become LCP.
+// Keep them eager/high-priority; the remaining non-featured works stay lazy.
+const available = availableArtworks().map(prepare);
+const sold = soldArtworks().map(prepare);
 ---
 
 <Base
@@ -52,17 +53,19 @@ const sold = await Promise.all(soldArtworks().map(prepare));
     </h2>
     <ul class="mt-8 columns-2 gap-6 lg:columns-3 lg:gap-7">
       {
-        available.map(({ art, image }) => (
+        available.map(({ art, image }, index) => (
           <li class="mb-7 break-inside-avoid">
             <a href={localizedPath(locale, `/catalogo/${art.slug}`)} class="group block">
               {image ? (
-                <img
-                  src={image.src}
-                  width={image.attributes.width}
-                  height={image.attributes.height}
+                <Image
+                  src={image}
+                  {...thumbnailOptions(image, "catalogue")}
+                  quality={72}
+                  format="webp"
                   alt={`${art.title} — ${art.caption[locale]}`}
                   class="h-auto w-full shadow-[0_10px_24px_-14px_rgb(33_29_23/0.45)] motion-safe:transition-shadow motion-safe:duration-300 motion-safe:group-hover:shadow-[0_18px_36px_-16px_rgb(33_29_23/0.55)]"
-                  loading={art.featured ? "eager" : "lazy"}
+                  loading={index < 2 || art.featured ? "eager" : "lazy"}
+                  fetchpriority={index < 2 ? "high" : undefined}
                   decoding="async"
                 />
               ) : (
@@ -96,10 +99,11 @@ const sold = await Promise.all(soldArtworks().map(prepare));
                 class="block opacity-75"
               >
                 {image ? (
-                  <img
-                    src={image.src}
-                    width={image.attributes.width}
-                    height={image.attributes.height}
+                  <Image
+                    src={image}
+                    {...thumbnailOptions(image, "catalogue")}
+                    quality={72}
+                    format="webp"
                     alt={`${art.title} — ${art.caption[locale]}`}
                     class="h-auto w-full shadow-[0_10px_24px_-14px_rgb(33_29_23/0.45)]"
                     loading="lazy"

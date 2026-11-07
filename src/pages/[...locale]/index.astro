@@ -5,6 +5,7 @@ import PersonJsonLd from "../../components/PersonJsonLd.astro";
 import { featuredArtworks, getArtwork } from "../../data/artworks";
 import { getDict, localeRoutes, localizedPath, statusLabels } from "../../i18n";
 import Base from "../../layouts/Base.astro";
+import { thumbnailOptions } from "../../lib/thumbnail";
 
 export const getStaticPaths = localeRoutes;
 
@@ -127,7 +128,7 @@ const featured = featuredArtworks().map((art) => ({
                 {image ? (
                   <Image
                     src={image}
-                    width={720}
+                    {...thumbnailOptions(image, "featured")}
                     quality={72}
                     format="webp"
                     alt={`${art.title} — ${art.caption[locale]}`}
