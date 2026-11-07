@@ -44,6 +44,21 @@ rebase merges, every commit on the branch counts.
 If the `production` environment gets required reviewers later, step 4 waits
 for an approval in the Actions tab before deploying.
 
+### Release PR checks
+
+Release PRs run a lightweight **Release validation** gate instead of application
+tests, builds, preview deployments, Astro Doctor, and Lighthouse. The gate checks
+the actual diff: only `CHANGELOG.md`, `.release-please-manifest.json`, and the
+version in `package.json` may change. Versions must match, the changelog must
+include the release heading, and JSON formatting and diff whitespace must pass.
+Unexpected changes fail validation; they do not silently bypass CI.
+
+Normal PRs and pushes to `main` keep their existing checks. Production still
+builds and smoke-tests the released commit. Make the CI workflow's
+`release-validation / Release validation` check required in branch protection
+alongside existing required checks. The expensive jobs report skipped on valid
+release PRs.
+
 Avoid merging a second release PR while a production deploy is still running.
 Queued deploys are not cancelled, but GitHub keeps only one pending run per
 concurrency group and does not guarantee order.
