@@ -96,6 +96,28 @@ Changing Tailwind's spacing scale, breakpoints, or the root font size can also
 invalidate these pixel equivalents. Do not copy these settings to a new layout
 without checking its geometry.
 
+## Homepage hero: separate responsive sizing
+
+The homepage hero uses its own `widths` and `sizes` directly on `<Image>` in
+`src/pages/[...locale]/index.astro`; do not use `thumbnailOptions()` for it.
+Its generated widths are 240, 280, 330, 400, and 460px, with WebP quality kept at
+80. The original is only 460px wide, so larger variants would not add real detail.
+
+Keep the hero's `sizes` synchronized with these layout assumptions:
+
+- Below 1024px, the figure fills the shared container. Subtract 48px outer padding
+  and 34px figure padding/borders: image width = `V - 82`.
+- At 1024px and above, the grid has an 80px gap and `1.15fr 0.85fr` columns.
+  The figure gets 42.5% of the space after container padding and the gap.
+  Image width = `0.425 × (V - 128) - 34`, or `42.5vw - 88.4px`.
+- At the 1152px container limit, the image width stops growing at 401.2px.
+
+Keep eager loading and high fetch priority. The browser may still select the
+460px original on high-density displays or wide tablet layouts; a remaining
+Lighthouse image-delivery warning is not by itself a reason to reduce resolution
+or compression quality. Responsive sizing primarily saves bytes where a smaller
+source can satisfy the display size and pixel density.
+
 ## Loading priority and fonts
 
 The catalogue's first two available artworks load eagerly with high fetch priority
@@ -122,8 +144,9 @@ rendering; repeat measurements before changing font preload policy.
    THUMBNAIL_VERIFY_BUILD=1 pnpm test
    ```
 
-   `tests/thumbnail-output.test.ts` checks responsive markup and initial catalogue
-   image priority in Spanish, Catalan, and English. It is opt-in because ordinary
+   `tests/thumbnail-output.test.ts` checks responsive hero/thumbnail markup, the
+   hero's resolution cap, and initial image priority in Spanish, Catalan, and
+   English. It is opt-in because ordinary
    unit tests must not depend on potentially stale build output.
 
 4. Use Playwright to check the homepage and catalogue on mobile, tablet, and
