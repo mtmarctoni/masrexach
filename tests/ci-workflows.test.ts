@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { expect, it } from "vitest";
 import { parse } from "yaml";
 
@@ -25,12 +26,26 @@ it.each(["lighthouse", "deploy-preview"])(
   },
 );
 
-it("offers manual full Lighthouse and retains five Slow 4G audit URLs", () => {
+it("offers the configured full Lighthouse audit and shares Slow 4G settings with routine runs", () => {
   const config = JSON.parse(readFileSync(".lighthouserc.json", "utf8"));
-  expect(config.ci.collect.url).toHaveLength(5);
   expect(config.ci.collect.settings.throttling.cpuSlowdownMultiplier).toBe(4);
   expect(workflow("lighthouse").on).toHaveProperty("workflow_dispatch");
-  const routine = readFileSync("lighthouse-routine.cjs", "utf8");
-  expect(routine).toContain('require("./.lighthouserc.json")');
-  expect(routine).toContain("http://localhost/catalogo/07-albufera/");
+  const require = createRequire(import.meta.url);
+  const routine = require("../lighthouse-routine.cjs");
+  expect(routine.ci.collect.url).toEqual([
+    "http://localhost/",
+    "http://localhost/catalogo/",
+    "http://localhost/catalogo/07-albufera/",
+  ]);
+  expect(config.ci.collect.url).toEqual(expect.arrayContaining(routine.ci.collect.url));
+  expect(routine.ci.collect.settings).toEqual(config.ci.collect.settings);
+  expect(routine.ci.assert).toEqual(config.ci.assert);
+  const auditStep = workflow("lighthouse").jobs.lighthouse.steps.find(
+    (step: { name: string }) => step.name === "Lighthouse CI (mobile emulation)",
+  );
+  expect(auditStep.run).toContain(
+    'if [ "$EVENT_NAME" = "workflow_dispatch" ]; then\n  pnpm lighthouse',
+  );
+  // Reading the routine configuration must not change the on-disk full audit.
+  expect(JSON.parse(readFileSync(".lighthouserc.json", "utf8"))).toEqual(config);
 });
