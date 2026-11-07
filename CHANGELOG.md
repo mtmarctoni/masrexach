@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/mtmarctoni/masrexach/compare/v1.2.0...v1.3.0) (2026-11-07)
+
+
+### Features
+
+* **site:** replace phone contact with the official email ([25a83da](https://github.com/mtmarctoni/masrexach/commit/25a83da31401397842c54620bb76ad032223c5e7))
+
+
+### Performance Improvements
+
+* **site:** use smaller artwork detail images on mobile ([a99b60b](https://github.com/mtmarctoni/masrexach/commit/a99b60b8f7fc08d8388c67046b54f5a41bace9e2))
+* **site:** use smaller artwork previews on home and catalogue pages ([2b52b71](https://github.com/mtmarctoni/masrexach/commit/2b52b71731f2fff0ad02ea230992b4dcccd021aa))
+* **site:** use smaller homepage hero images on smaller screens ([b3584a8](https://github.com/mtmarctoni/masrexach/commit/b3584a8a91888b41a3667d9aac84d15ed0b29f7f))
+
 ## [1.2.0](https://github.com/mtmarctoni/masrexach/compare/v1.1.0...v1.2.0) (2026-11-06)
 
 
