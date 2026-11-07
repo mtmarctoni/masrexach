@@ -29,7 +29,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release-validation:
+    uses: ./.github/workflows/release-validation.yml
+    with:
+      check_name: Preview release validation
+
   preview:
+    needs: release-validation
     name: Cloudflare preview version
     runs-on: ubuntu-latest
     # Dependabot-triggered runs receive no Actions secrets (repo- or
@@ -37,7 +43,7 @@ jobs:
     # so wrangler could not authenticate. Skip. A maintainer re-running the
     # failed run gets a preview, because the re-run executes under the
     # maintainer's identity.
-    if: github.event.pull_request.draft == false && github.actor != 'dependabot[bot]'
+    if: needs.release-validation.outputs.is_release != 'true' && github.event.pull_request.draft == false && github.actor != 'dependabot[bot]'
     environment: preview
     permissions:
       contents: read
