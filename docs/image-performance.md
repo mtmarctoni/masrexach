@@ -118,6 +118,64 @@ Lighthouse image-delivery warning is not by itself a reason to reduce resolution
 or compression quality. Responsive sizing primarily saves bytes where a smaller
 source can satisfy the display size and pixel density.
 
+## Artwork detail pages
+
+`src/pages/[...locale]/catalogo/[slug].astro` keeps `getImage()` and its
+default WebP URL at quality 80. It additionally generates widths 240, 320, 400,
+480, 640, 800, and 960px, capped at the original width and deduplicated. The
+default `src` and `VisualArtwork.image` still reference the largest variant;
+social-sharing cards are unchanged. Do not reuse thumbnail sizing here.
+
+The figure is at most 500px wide. Subtract 48px shared container padding and
+42px frame padding/borders: painted width = `min(V - 90, 458)`. Consequently
+`sizes` is `(min-width: 548px) 458px, calc(100vw - 90px)`. Keep this formula
+synchronized with the container, frame, and figure maximum. Preserve eager
+loading, high fetch priority, intrinsic dimensions, and uncropped aspect ratios.
+
+### Local measurements, November 7, 2026
+
+Three sequential production-build runs per case with Lighthouse 13.6.0,
+mobile simulated Slow 4G, 412px viewport and 1.75× pixel density:
+
+| Page            | Image bytes before → after   | Median LCP before → after (range)           |
+| --------------- | ---------------------------- | ------------------------------------------- |
+| Tiestos         | 123,002 → 86,552 (30% less)  | 2.402s (2.401–2.552) → 2.252s (2.251–2.252) |
+| Tronco olivera  | 194,008 → 102,666 (47% less) | 2.851s (2.707–2.852) → 2.401s (2.401–2.401) |
+| Granja Esporlas | 93,780 → 93,780              | 2.252s (2.252–2.402) → 2.401s (2.401–2.401) |
+| Albufera detail | 49,426 → 49,426              | 2.101s (1.951–2.102) → 2.102s (2.101–2.102) |
+| Biography       | 12,310 → 12,310              | 1.802s (1.801–1.802) → 1.801s (1.801–1.802) |
+
+Homepage LCP remained 0.902s; homepage/catalogue image resources were unchanged.
+Catalogue LCP varied between heading and image candidates, so its score variation
+is not attributed to this detail-page change. Detail images remained the LCP
+elements on the measured artwork pages. Tiny existing CLS values (below 0.00024)
+did not exceed baseline maxima; these are not literally zero. Smaller originals
+still use their largest source at this density. Compression warnings can remain.
+These local results do not measure production CDN latency or cache behavior.
+
+A three-run Granja recheck spanned 2.251–2.402s, overlapping its baseline;
+its unchanged image shows no repeatable regression. Fresh 390px, 1× browser
+contexts selected 22,790 bytes for Tiestos and 27,608 for Tronco, versus their
+123,002/194,008-byte default sources. This source-selection check is separate
+from Lighthouse timing; the baseline markup was reproduced by removing only
+`srcset` and `sizes` from the response.
+
+`tests/artwork-image-output.test.ts` checks all 75 localized detail pages and
+generated variants with Sharp, including bounds, aspect ratio, priority, alt text,
+and default schema URLs. Run production metadata assertions separately from the
+ordinary unit suite (whose environment tests assume no inherited build type):
+
+```sh
+PUBLIC_BUILD_TYPE=Production PUBLIC_BASE_URL=https://masrexach.com pnpm build
+THUMBNAIL_VERIFY_BUILD=1 pnpm test
+PUBLIC_BUILD_TYPE=Production THUMBNAIL_VERIFY_BUILD=1 pnpm exec vitest run tests/artwork-image-output.test.ts
+PUBLIC_BUILD_TYPE=Production pnpm test:og
+```
+
+The full `pnpm verify` gate runs both image-output suites after the production
+build, before staging overwrites it, and includes Tiestos and Tronco in Lighthouse.
+Biography remains unchanged because its audit showed no image-delivery savings.
+
 ## Loading priority and fonts
 
 The catalogue's first two available artworks load eagerly with high fetch priority
