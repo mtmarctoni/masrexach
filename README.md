@@ -58,4 +58,8 @@ The pre-push gate also needs Gitleaks, OSV Scanner and actionlint. Full verifica
 
 ## Rights and reuse
 
-No open-source license has been granted for this repository. Public availability does not grant permission to reuse its source code, paintings, photographs or written content. Rights remain with their respective holders; obtain permission before reuse.
+The original source code is available under the [MIT License](LICENSE).
+
+**The art and content are not included in that license.** Paintings, artwork reproductions, photographs, editorial text and branding remain reserved by their respective rights holders unless individually stated otherwise. Fonts and other third-party materials retain their own licenses.
+
+See [asset rights and exclusions](ASSET_RIGHTS.md) before reusing material from this repository.
