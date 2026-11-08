@@ -20,7 +20,7 @@ These exclusions apply regardless of file format or location: editorial content 
 
 ## Third-party materials
 
-Fonts, dependencies and other third-party materials remain subject to their own licenses, not this repository’s MIT grant. Check the applicable upstream license and preserve required notices when redistributing them. The bundled Fraunces and Instrument Sans fonts are third-party materials; this document does not replace their license notices.
+Fonts, dependencies and other third-party materials remain subject to their own licenses, not this repository’s MIT grant. Check the applicable upstream license and preserve required notices when redistributing them. The bundled Fraunces and Instrument Sans fonts use the SIL Open Font License 1.1; their copyright notices and license are included in [`src/assets/fonts/OFL.txt`](src/assets/fonts/OFL.txt).
 
 ## Identity and endorsement
 

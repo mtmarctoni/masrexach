@@ -4,6 +4,8 @@ The official website of Antoni Mas Rexach (1953–2017), a Majorcan painter whos
 
 **[Explore the website →](https://masrexach.com)**
 
+[![Desktop homepage of Antoni Mas Rexach’s official website, showing the artist’s introduction and paintings.](docs/repository/homepage.webp)](https://masrexach.com)
+
 ## Art, life and exhibitions
 
 - A painting catalogue with individual artwork pages.
