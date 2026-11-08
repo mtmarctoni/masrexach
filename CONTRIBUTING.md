@@ -1,6 +1,6 @@
 # Contributing
 
-Small, focused code fixes and clear bug reports are welcome. This repository maintains a specific artist’s official website; it is not a general-purpose portfolio template.
+This repository maintains a specific artist’s official website; it is not a general-purpose portfolio template. Contact [@mtmarctoni](https://github.com/mtmarctoni) through a repository issue for non-sensitive development questions, or email [mtmarctoni@protonmail.com](mailto:mtmarctoni@protonmail.com). Discuss proposed contributions before investing in implementation; review or acceptance is not guaranteed.
 
 ## Before making a change
 
@@ -12,7 +12,7 @@ Small, focused code fixes and clear bug reports are welcome. This repository mai
 
 Follow the [README](README.md#local-development) for Node, pnpm and development setup. Keep contact-form testing pointed at your own inbox; configured tests can send real email.
 
-Run relevant checks before submitting a pull request. The pre-push hook runs `pnpm verify`; its additional tool requirements and full browser/Lighthouse mode are described in the [verification guide](docs/ci-verification.md) and [security runbook](docs/security.md#local-verification-before-publication--2026-11-06). Do not bypass checks to submit a change.
+Run relevant checks before submitting a pull request. The pre-push hook runs `pnpm verify`; its additional tool requirements and full browser/Lighthouse mode are described in the [verification guide](docs/ci-verification.md) and [security runbook](docs/security.md#local-verification). Do not bypass checks to submit a change.
 
 For artwork layout, thumbnail sizing or image-loading changes, read [image performance](docs/image-performance.md) first and verify both the homepage and catalogue.
 

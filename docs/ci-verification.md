@@ -21,18 +21,20 @@ Both named modes clear inherited browser-skip flags and accept Vitest arguments,
 for example `pnpm test:fast tests/og-render.test.ts`.
 
 Run `pnpm verify:full` before high-risk layout, image, SEO or deployment changes:
-it forces all browser tests and audits all five Lighthouse URLs, without uploading
+it forces all browser tests and audits all seven URLs in [the Lighthouse configuration](../.lighthouserc.json), without uploading
 reports. Install Playwright Chromium and the security/workflow tools first as
-described in the existing security documentation.
+described in the [maintained setup instructions](security.md#local-verification).
 
 Optional preview and Lighthouse workflows skip documentation-only changes.
 Routine Lighthouse audits three representative layouts. Use the Lighthouse
-workflow's **Run workflow** action for the full five-URL audit. Both use identical
+workflow's **Run workflow** action for the full seven-URL audit. Both use identical
 mobile Slow 4G settings and assertions. If Lighthouse is currently a required
 branch-protection check, make it optional before relying on path filtering:
 GitHub leaves filtered required workflows pending.
 
-Observed baseline medians: Lighthouse 157 seconds, preview 90 seconds. Skipping
+## Historical timing observation
+
+Observed baseline medians recorded during the earlier CI review: Lighthouse 157 seconds, preview 90 seconds. Skipping
 both avoids roughly four runner-minutes per documentation-only update; this is
 an estimate, not a post-change measurement. Browser test selection saves only a
 small part of the roughly eight-second unit suite; it does not avoid Chromium

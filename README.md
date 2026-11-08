@@ -49,7 +49,7 @@ Keep `.dev.vars` private. Local values are not uploaded automatically, and testi
 | `pnpm verify`      | Run the local pre-push gate                                    |
 | `pnpm verify:full` | Include all browser tests and mobile Slow 4G Lighthouse audits |
 
-The pre-push gate also needs Gitleaks, OSV Scanner and actionlint. Full verification needs Chrome or Chromium for Lighthouse. See the [setup requirements](docs/security.md#local-verification-before-publication--2026-11-06) and [verification guide](docs/ci-verification.md) before running it.
+The pre-push gate also needs Gitleaks, OSV Scanner and actionlint. Full verification needs Chrome or Chromium for Lighthouse. See the [setup requirements](docs/security.md#local-verification) and [verification guide](docs/ci-verification.md) before running it.
 
 ## Project guides
 
