@@ -21,7 +21,7 @@ The implementation includes responsive artwork images, locally hosted fonts, gen
 
 ## Local development
 
-Use Node.js **22.23.4** (see [`.nvmrc`](.nvmrc)) and pnpm **11.17.0** (see [`package.json`](package.json)).
+Use Node.js **26.13.0** (see [`.nvmrc`](.nvmrc)) and pnpm **11.17.0** (see [`package.json`](package.json)).
 
 ```sh
 pnpm install --frozen-lockfile
