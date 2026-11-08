@@ -6,6 +6,8 @@ on:
       - "pnpm-workspace.yaml"
       - "tsconfig.json"
       - "src/**"
+      # License notices do not change the rendered site; font binaries still do.
+      - "!src/assets/fonts/OFL.txt"
       - "public/**"
       - "scripts/**"
       - "package.json"
@@ -75,6 +77,8 @@ jobs:
 
       - name: Internal link check (non-blocking)
         uses: lycheeverse/lychee-action@v2.9.0
+        # fail: false covers broken links, not action setup/download failures.
+        continue-on-error: true
         with:
           # base must be the site docroot (dist/client) so root-relative links
           # like /ca/ resolve to real files instead of reporting false 404s.
