@@ -46,6 +46,7 @@ export PUBLIC_BUILD_TYPE=Production
 export PUBLIC_BASE_URL=https://masrexach.com
 run pnpm build
 THUMBNAIL_VERIFY_BUILD=1 run pnpm exec vitest run tests/thumbnail-output.test.ts tests/artwork-image-output.test.ts
+FONT_VERIFY_BUILD=1 run pnpm exec vitest run tests/font-notices.test.ts
 run pnpm test:worker
 # Deliberately avoid `lhci autorun`: it includes a public report upload.
 if [[ "$full" == 1 ]]; then
@@ -57,6 +58,7 @@ export CLOUDFLARE_ENV=staging
 export PUBLIC_BUILD_TYPE=Staging
 export PUBLIC_BASE_URL=https://masrexach-staging.marctonimas.com
 run pnpm build
+FONT_VERIFY_BUILD=1 run pnpm exec vitest run tests/font-notices.test.ts
 run pnpm test:worker
 
 printf '\nAll pre-push checks passed.\n'
