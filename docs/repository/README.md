@@ -7,7 +7,11 @@ These images document the website and are excluded from the source-code MIT lice
 
 ## GitHub social preview
 
-In the repository’s **Settings → General → Social preview**, upload `social-preview.jpg`. Adding the image to Git does not activate it as GitHub’s repository preview. Keep repository visibility unchanged.
+Upload is deferred while the repository is private. GitHub allows a first social-preview upload only for public repositories; a private repository can update an image only if one was uploaded previously. Do not change visibility just to enable this option.
+
+If publication is approved after the sensitive-data audit, upload `social-preview.jpg` under **Settings → General → Social preview**. Adding the image to Git does not activate it as GitHub’s repository preview.
+
+See [GitHub’s social-preview documentation](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview).
 
 ## Font notices
 
