@@ -17,10 +17,12 @@ const commands = [
   "actionlint",
   "pnpm build",
   "pnpm exec vitest run tests/thumbnail-output.test.ts tests/artwork-image-output.test.ts",
+  "pnpm exec vitest run tests/font-notices.test.ts",
   "pnpm test:worker",
   "pnpm exec lhci collect",
   "pnpm exec lhci assert",
   "pnpm build",
+  "pnpm exec vitest run tests/font-notices.test.ts",
   "pnpm test:worker",
 ];
 
@@ -45,7 +47,7 @@ function run(fail = "", missing = "", failBuildType = "", args = ["--full"]) {
 call='${name}'
 if [ "$call" = node ] && [ "$1" = scripts/ci-selection.mjs ]; then echo 1; exit 0; fi
 if [ "$#" -gt 0 ]; then call="$call $*"; fi
-printf '%s|%s|%s|%s|%s\\n' "$call" "$PUBLIC_BUILD_TYPE" "$PUBLIC_BASE_URL" "$CLOUDFLARE_ENV" "$THUMBNAIL_VERIFY_BUILD" >> "$VERIFY_LOG"
+printf '%s|%s|%s|%s|%s|%s\\n' "$call" "$PUBLIC_BUILD_TYPE" "$PUBLIC_BASE_URL" "$CLOUDFLARE_ENV" "$THUMBNAIL_VERIFY_BUILD" "$FONT_VERIFY_BUILD" >> "$VERIFY_LOG"
 if [ "$call" = "$FAIL_COMMAND" ] && { [ -z "$FAIL_BUILD_TYPE" ] || [ "$PUBLIC_BUILD_TYPE" = "$FAIL_BUILD_TYPE" ]; }; then exit 42; fi
 `,
       { mode: 0o755 },
@@ -79,10 +81,15 @@ it("runs every read-only check with explicit production/staging build environmen
   expect(result.status, result.stderr).toBe(0);
   expect(result.calls.map((line) => line.split("|")[0])).toEqual(commands);
   expect(result.calls[10].split("|")[4]).toBe("1");
-  for (const line of result.calls.slice(9, 14)) {
+  const fontChecks = result.calls.filter((line) =>
+    line.startsWith("pnpm exec vitest run tests/font-notices.test.ts|"),
+  );
+  expect(fontChecks).toHaveLength(2);
+  for (const line of fontChecks) expect(line.split("|")[5]).toBe("1");
+  for (const line of result.calls.slice(9, 15)) {
     expect(line.split("|").slice(1, 4)).toEqual(["Production", "https://masrexach.com", ""]);
   }
-  for (const line of result.calls.slice(14)) {
+  for (const line of result.calls.slice(15)) {
     expect(line.split("|").slice(1, 4)).toEqual([
       "Staging",
       "https://masrexach-staging.marctonimas.com",
@@ -109,13 +116,16 @@ it.each(["pnpm", "node", "git", "gitleaks", "osv-scanner", "actionlint"])(
   },
 );
 
-it.each(["pnpm build", "pnpm test:worker"])("blocks staging failure: %s", (command) => {
-  const result = run(command, "", "Staging");
-  expect(result.status).toBe(42);
-  expect(result.calls.map((line) => line.split("|")[0])).toEqual(
-    commands.slice(0, commands.lastIndexOf(command) + 1),
-  );
-});
+it.each(["pnpm build", "pnpm exec vitest run tests/font-notices.test.ts", "pnpm test:worker"])(
+  "blocks staging failure: %s",
+  (command) => {
+    const result = run(command, "", "Staging");
+    expect(result.status).toBe(42);
+    expect(result.calls.map((line) => line.split("|")[0])).toEqual(
+      commands.slice(0, commands.lastIndexOf(command) + 1),
+    );
+  },
+);
 
 it("wires the pre-push hook to the fast gate and exposes full verification", () => {
   const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
