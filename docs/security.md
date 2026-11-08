@@ -158,9 +158,10 @@ Reference: [GitHub secret-scanning availability](https://docs.github.com/en/code
 
 The pre-push hook runs `pnpm verify` (`scripts/verify.sh`). It stops the push
 on the first failed check or missing required executable. The gate runs Biome
-CI, Astro Doctor, typechecking, Vitest, Knip, dependency-cruiser, Gitleaks over
-all locally available Git history, OSV, actionlint, production build/Worker
-tests, Lighthouse collect/assert, and staging build/Worker tests.
+CI, Astro Doctor, typechecking, change-selected Vitest coverage, Knip,
+dependency-cruiser, Gitleaks over all locally available Git history, OSV,
+actionlint, and production and staging build/Worker tests. `pnpm verify:full`
+additionally forces all browser tests and runs Lighthouse collect/assert.
 
 Setup on each machine:
 
@@ -169,8 +170,10 @@ Setup on each machine:
    step installs hooks. After changing hook configuration in an existing
    checkout, run `pnpm exec simple-git-hooks` to refresh them.
 3. Install `gitleaks`, `osv-scanner`, and `actionlint` on PATH (on macOS:
-   `brew install gitleaks osv-scanner actionlint`). Lighthouse also needs a
-   working Chrome/Chromium installation; use `CHROME_PATH` if not auto-detected.
+   `brew install gitleaks osv-scanner actionlint`). Install Playwright Chromium
+   with `pnpm exec playwright install chromium` for builds and browser tests.
+   Full verification runs Lighthouse, which also needs a working Chrome/Chromium
+   installation; use `CHROME_PATH` if not auto-detected.
 4. Run `pnpm verify` to test setup without pushing.
 
 The gate does not auto-format/fix source, install missing tools, deploy, send
@@ -215,5 +218,4 @@ before using the refreshed shared hook.
   history scan succeeded.
 - No commit, push, deployment, account change, or auto-merge was performed.
 
-Further improvements are tracked in the
-[security improvement plan](superpowers/plans/2026-11-06-security-improvements.md).
+Outstanding improvements are listed in the remaining-actions sections above.
