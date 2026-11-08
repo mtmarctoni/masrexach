@@ -5,6 +5,28 @@ import { parse } from "yaml";
 
 const workflow = (name: string) => parse(readFileSync(`.github/workflows/${name}.yml`, "utf8"));
 
+it("excludes the font license after including source paths in Lighthouse triggers", () => {
+  const paths: string[] = workflow("lighthouse").on.pull_request.paths;
+  expect(paths).toContain("!src/assets/fonts/OFL.txt");
+  expect(paths.indexOf("!src/assets/fonts/OFL.txt")).toBeGreaterThan(paths.indexOf("src/**"));
+  // Keep the exception narrow: real font, content and image changes still trigger audits.
+  expect(paths.filter((path) => path.startsWith("!"))).toEqual(["!src/assets/fonts/OFL.txt"]);
+});
+
+it("keeps optional link-check setup failures non-blocking but Lighthouse failures blocking", () => {
+  const steps = workflow("lighthouse").jobs.lighthouse.steps;
+  const links = steps.find(
+    (step: { name: string }) => step.name === "Internal link check (non-blocking)",
+  );
+  expect(links["continue-on-error"]).toBe(true);
+  expect(links.with.fail).toBe(false);
+  const audit = steps.find(
+    (step: { name: string }) => step.name === "Lighthouse CI (mobile emulation)",
+  );
+  expect(audit["continue-on-error"]).not.toBe(true);
+  expect(workflow("lighthouse").jobs.lighthouse["continue-on-error"]).not.toBe(true);
+});
+
 it.each(["lighthouse", "deploy-preview"])(
   "filters optional %s jobs to deploy-relevant changes",
   (name) => {
