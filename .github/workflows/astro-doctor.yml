@@ -32,7 +32,7 @@ jobs:
         with:
           fetch-depth: 0 # required for diff-only mode
 
-      - uses: santi020k/astro-doctor@cf4cc7b684f151afc569a4dc97cdcf93205bb995 # v1
+      - uses: santi020k/astro-doctor@69a859a26a22de46a0da6b71cd1e894434d80c1f # v1
         with:
           diff-only: true
           comment: true
