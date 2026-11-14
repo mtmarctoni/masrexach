@@ -1,9 +1,28 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { expect, it } from "vitest";
 import { parse } from "yaml";
 
 const workflow = (name: string) => parse(readFileSync(`.github/workflows/${name}.yml`, "utf8"));
+
+it("pins all external actions and keeps untrusted PR triggers secret-free", () => {
+  for (const file of readdirSync(".github/workflows").filter((file) => file.endsWith(".yml"))) {
+    const config = parse(readFileSync(`.github/workflows/${file}`, "utf8"));
+    expect(config.on, file).not.toHaveProperty("pull_request_target");
+    for (const job of Object.values(config.jobs) as {
+      uses?: string;
+      secrets?: unknown;
+      steps?: { uses?: string }[];
+    }[]) {
+      expect(job.secrets, file).not.toBe("inherit");
+      for (const action of [job, ...(job.steps ?? [])]) {
+        if (action.uses && !action.uses.startsWith("./")) {
+          expect(action.uses, file).toMatch(/@[a-f0-9]{40}$/);
+        }
+      }
+    }
+  }
+});
 
 it("excludes the font license after including source paths in Lighthouse triggers", () => {
   const paths: string[] = workflow("lighthouse").on.pull_request.paths;
