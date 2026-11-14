@@ -10,6 +10,8 @@
 # GHSA-4qv8-2p9j-2685, GHSA-f72v-6w45-q472), pinned exactly by miniflare via
 # wrangler and @cloudflare/vite-plugin. Both dev/build-only.
 overrides:
+  # astro2tsx's WASM loader uses emnapi core 1.x; runtime 2 beta breaks imports.
+  "@napi-rs/wasm-runtime@1.2.4>@emnapi/runtime": 1.11.3
   # 2026-11-06: fix glob cancellation bypass (GHSA-3g3m-2fjr-6pw4)
   # and minimatch pattern amplification (GHSA-g3hv-75wg-m249) in
   # Astro Doctor / ESLint. Leave LHCI's unaffected legacy majors alone.
