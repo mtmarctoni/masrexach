@@ -31,7 +31,7 @@ function run(
   }: {
     github: Record<string, string>;
     worker?: string[];
-    vars?: Record<string, string>;
+    vars?: Record<string, unknown>;
     env?: Record<string, string>;
   },
 ) {
@@ -71,6 +71,7 @@ esac
   const deployArgsPath = join(dir, "deploy-args");
   return {
     status: result.status,
+    stdout: result.stdout,
     stderr: result.stderr,
     bulk: readJson(join(dir, "bulk.json")),
     uploaded: readJson(join(dir, "secrets.json")),
@@ -124,6 +125,90 @@ describe("sync-secrets.sh", () => {
 });
 
 describe("deploy.sh", () => {
+  // Characterizes Wrangler's real output: config vars are visible, CLI vars
+  // are hidden. No remote API calls or actual deployment occur in a dry run.
+  it("hides CLI runtime variables in Wrangler's binding summary", () => {
+    const dir = mkdtempSync(join(tmpdir(), "wrangler-output-test-"));
+    dirs.push(dir);
+    writeFileSync(
+      join(dir, "worker.mjs"),
+      'export default { fetch() { return new Response("ok"); } };',
+    );
+    writeFileSync(
+      join(dir, "wrangler.json"),
+      JSON.stringify({ name: "output-test", main: "worker.mjs", compatibility_date: "2026-08-04" }),
+    );
+    const value = "synthetic-private-recipient@example.com";
+    const result = spawnSync(
+      process.execPath,
+      [
+        scriptPath("../node_modules/wrangler/bin/wrangler.js"),
+        "deploy",
+        "--dry-run",
+        "--config",
+        join(dir, "wrangler.json"),
+        "--var",
+        `CONTACT_TO_EMAIL:${value}`,
+      ],
+      { encoding: "utf8", env: { ...process.env, CI: "true", WRANGLER_SEND_METRICS: "false" } },
+    );
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).toContain("CONTACT_TO_EMAIL");
+    expect(result.stdout).toContain("(hidden)");
+    expect(result.stdout + result.stderr).not.toContain(value);
+  }, 30_000);
+
+  it("logs runtime variable names without values", () => {
+    const vars = {
+      CONTACT_FROM_EMAIL: "Synthetic Sender <sender@example.com>",
+      CONTACT_TO_EMAIL: "private-recipient@example.com",
+    };
+    const { status, stdout, stderr, deployArgs } = run("deploy.sh", [], {
+      github: allSecrets,
+      vars,
+    });
+    expect(status).toBe(0);
+    for (const [key, value] of Object.entries(vars)) {
+      expect(deployArgs).toContain(`${key}:${value}`);
+      expect(stdout).toContain(key);
+      expect(stdout + stderr).not.toContain(value);
+    }
+  });
+
+  it("does not deploy unrelated GitHub variables", () => {
+    const { status, deployArgs, stdout, stderr } = run("deploy.sh", [], {
+      github: allSecrets,
+      vars: { CONTACT_TO_EMAIL: "owner@example.com", INTERNAL_SETTING: "private-config" },
+    });
+    expect(status).toBe(0);
+    expect(deployArgs).toContain("CONTACT_TO_EMAIL:owner@example.com");
+    expect(deployArgs).not.toContain("INTERNAL_SETTING");
+    expect(stdout + stderr).not.toContain("private-config");
+  });
+
+  it("never overwrites a populated secret with a runtime variable", () => {
+    const { status, deployArgs, stderr } = run("deploy.sh", [], {
+      github: { ...allSecrets, CONTACT_TO_EMAIL: "secret@example.com" },
+      vars: { CONTACT_TO_EMAIL: "plain@example.com", CONTACT_FROM_EMAIL: "from@example.com" },
+    });
+    expect(status).toBe(0);
+    expect(deployArgs).not.toContain("CONTACT_TO_EMAIL:");
+    expect(deployArgs).toContain("CONTACT_FROM_EMAIL:from@example.com");
+    expect(stderr).toContain("same name");
+  });
+
+  it.each(["", "first\nsecond", 12, null, { private: true }])(
+    "ignores an unsupported runtime variable value %j",
+    (value) => {
+      const { status, deployArgs } = run("deploy.sh", [], {
+        github: allSecrets,
+        vars: { CONTACT_TO_EMAIL: value },
+      });
+      expect(status).toBe(0);
+      expect(deployArgs).not.toContain("--var");
+    },
+  );
+
   it("uploads only managed secrets with the deploy and removes the file", () => {
     const { status, uploaded, deployArgs, leftovers } = run("deploy.sh", [], {
       github: allSecrets,
