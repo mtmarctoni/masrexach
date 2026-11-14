@@ -15,10 +15,8 @@ set -euo pipefail
 # managed secret is left to `sync-secrets.sh --prune`, which CI runs after this.
 # Secrets not passed are inherited from the previous deployment.
 #
-# PUBLIC_* variables are excluded: those are build-time (baked into the static
-# output via .env / import.meta.env), not runtime Worker vars. CLOUDFLARE_*,
-# RELEASE_APP_* (the release GitHub App) and GITHUB_TOKEN are workflow
-# infrastructure, never app config.
+# Only CONTACT_FROM_EMAIL and CONTACT_TO_EMAIL are runtime Worker vars.
+# Everything else is build-time or workflow infrastructure, never app config.
 #
 # Any variable whose name collides with a secret is dropped. Verified live:
 # `wrangler deploy --var NAME:x` silently overwrites — destroys — an existing
@@ -76,7 +74,7 @@ if [ -n "${VARS_CONTEXT:-}" ]; then
     VAR_ARGS+=("--var" "$line")
   done < <(echo "$VARS_CONTEXT" | jq -r '
     to_entries[]
-    | select(.key | ascii_upcase | (startswith("CLOUDFLARE_") or startswith("RELEASE_APP_") or . == "GITHUB_TOKEN" or startswith("PUBLIC_")) | not)
+    | select(.key == "CONTACT_FROM_EMAIL" or .key == "CONTACT_TO_EMAIL")
     # --var uses KEY:VALUE and the deploy command is one shell line, so skip
     # multi-line values (none expected for runtime config like email addresses).
     | select(.value | type == "string" and length > 0 and (contains("\n") | not))
@@ -86,7 +84,9 @@ fi
 
 if [ "${#VAR_ARGS[@]}" -gt 0 ]; then
   echo "Injecting GitHub Variables as Worker vars:"
-  printf '  - %s\n' "${VAR_ARGS[@]}" | grep -v -- '--var' || true
+  for arg in "${VAR_ARGS[@]}"; do
+    [ "$arg" = "--var" ] || printf '  - %s\n' "${arg%%:*}"
+  done
 fi
 
 # Managed secrets go in a private temp file (JSON, so no $VAR expansion),
@@ -104,4 +104,6 @@ if [ "$MANAGED_VALUES" != "{}" ]; then
 fi
 
 # Empty-array expansion is unsafe under `set -u` on bash 3.x (macOS local runs).
+# Wrangler hides CLI --var values in its binding summary (unlike config vars).
+# Do not move these values into wrangler.json or enable debug logging in CI.
 run_wrangler deploy ${VAR_ARGS[@]+"${VAR_ARGS[@]}"} ${SECRET_ARGS[@]+"${SECRET_ARGS[@]}"} "$@"
