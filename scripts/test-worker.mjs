@@ -53,6 +53,28 @@ try {
   assert.equal(health.headers.get("Cache-Control"), "no-store");
   assert.equal(health.headers.get("X-Robots-Tag"), "noindex");
 
+  // Exercise actual routing, not just the redirect handler. In particular the
+  // section root and slashless paths must not require an intermediate hop.
+  for (const [path, destination] of [
+    ["/portfolio-item/nenufares/", "/catalogo/nenufares/"],
+    ["/portfolio-item/311", "/catalogo/fuente-y-canal/"],
+    ["/portfolio-item", "/catalogo/"],
+    ["/portfolio-item/", "/catalogo/"],
+    ["/portfolio-item/unknown", "/catalogo/"],
+    ["/portfolio-item/unknown/nested/", "/catalogo/"],
+    ["/portfolio-item/unknown/?utm_source=google", "/catalogo/?utm_source=google"],
+  ]) {
+    const response = await server.fetch(path, { redirect: "manual" });
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get("Location"), destination, path);
+    const target = await server.fetch(destination, { redirect: "manual" });
+    assert.equal(target.status, 200, destination);
+  }
+  for (const path of ["/portfolio-item-spam/", "/missing-page/"]) {
+    const response = await server.fetch(path, { redirect: "manual" });
+    assert.equal(response.status, 404, path);
+  }
+
   const { artworks } = await import("../src/data/artworks.ts");
   // All 75 previously published catalogue URLs must reach a real page in one
   // hop. Also exercise slashless requests, HEAD, and query preservation.
@@ -86,6 +108,7 @@ try {
     assert.equal(sitemap.status, 200);
     const xml = await sitemap.text();
     assert.doesNotMatch(xml, /\/catalogo\/\d{2}-/);
+    assert.doesNotMatch(xml, /\/portfolio-item\//);
     for (const art of artworks) {
       for (const prefix of ["", "/ca", "/en"]) {
         assert.ok(
