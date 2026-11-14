@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/mtmarctoni/masrexach/compare/v1.3.0...v1.3.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **site:** restore old wordpress painting links ([c89fb5a](https://github.com/mtmarctoni/masrexach/commit/c89fb5aace0cc2b2dd1f687c24c8d4e39041923d))
+* **site:** use painting names in artwork urls ([dd752bc](https://github.com/mtmarctoni/masrexach/commit/dd752bc772c404c25ed795038d61ab9314144e2b))
+
 ## [1.3.0](https://github.com/mtmarctoni/masrexach/compare/v1.2.0...v1.3.0) (2026-11-07)
 
 
