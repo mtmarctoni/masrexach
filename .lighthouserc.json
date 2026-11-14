@@ -7,9 +7,9 @@
         "http://localhost/ca/",
         "http://localhost/en/",
         "http://localhost/catalogo/",
-        "http://localhost/catalogo/07-albufera/",
-        "http://localhost/catalogo/01-tiestos/",
-        "http://localhost/catalogo/06-tronco-olivera/"
+        "http://localhost/catalogo/albufera/",
+        "http://localhost/catalogo/tiestos-oleo/",
+        "http://localhost/catalogo/tronco-olivera/"
       ],
       "numberOfRuns": 1,
       "settings": {

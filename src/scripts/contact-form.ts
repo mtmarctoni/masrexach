@@ -38,12 +38,17 @@ export function initContactForm(): void {
   let prefillSlug = "";
   if (artworkInput) {
     try {
-      const slug = new URLSearchParams(window.location.search).get("obra") ?? "";
+      const requestedSlug = new URLSearchParams(window.location.search).get("obra") ?? "";
+      const aliases = JSON.parse(form.dataset.contactArtworkAliases ?? "{}") as Record<
+        string,
+        string
+      >;
+      const slug = Object.hasOwn(aliases, requestedSlug) ? aliases[requestedSlug] : requestedSlug;
       const index = JSON.parse(form.dataset.contactArtworks ?? "{}") as Record<
         string,
         { title?: string; caption?: string }
       >;
-      const entry = slug ? index[slug] : undefined;
+      const entry = slug && Object.hasOwn(index, slug) ? index[slug] : undefined;
       if (slug && entry) {
         prefillSlug = slug;
         artworkInput.value = slug;

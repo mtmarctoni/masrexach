@@ -4,6 +4,7 @@ import { artworks } from "../../data/artworks";
 import { CONTACT_EMAIL } from "../../data/site";
 import { getDict, localeRoutes } from "../../i18n";
 import Base from "../../layouts/Base.astro";
+import { numberedArtworkAliases } from "../../lib/legacy-artwork-redirects";
 
 export const getStaticPaths = localeRoutes;
 
@@ -33,7 +34,7 @@ const artworkIndex = Object.fromEntries(
 
     <div class="mt-12 grid gap-14 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <div class="max-w-2xl">
-        <ContactForm locale={locale} artworkIndex={artworkIndex} />
+        <ContactForm locale={locale} artworkIndex={artworkIndex} artworkAliases={numberedArtworkAliases()} />
       </div>
 
       <aside class="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">

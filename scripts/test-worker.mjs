@@ -53,6 +53,49 @@ try {
   assert.equal(health.headers.get("Cache-Control"), "no-store");
   assert.equal(health.headers.get("X-Robots-Tag"), "noindex");
 
+  const { artworks } = await import("../src/data/artworks.ts");
+  // All 75 previously published catalogue URLs must reach a real page in one
+  // hop. Also exercise slashless requests, HEAD, and query preservation.
+  for (const art of artworks) {
+    const oldSlug = art.image.replace(/\.jpg$/, "");
+    for (const prefix of ["", "/ca", "/en"]) {
+      const destination = `${prefix}/catalogo/${art.slug}/`;
+      for (const slash of ["", "/"]) {
+        for (const method of ["GET", "HEAD"]) {
+          const path = `${prefix}/catalogo/${oldSlug}${slash}?utm_source=google`;
+          const response = await server.fetch(path, { method, redirect: "manual" });
+          assert.equal(response.status, 301, path);
+          assert.equal(response.headers.get("Location"), `${destination}?utm_source=google`, path);
+        }
+      }
+      const target = await server.fetch(destination, { redirect: "manual" });
+      assert.equal(target.status, 200, destination);
+      const html = await target.text();
+      assert.ok(html.includes(`/catalogo/${art.slug}/`), `clean URL missing: ${destination}`);
+      assert.ok(!html.includes(`/catalogo/${oldSlug}/`), `old URL in page: ${destination}`);
+      const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+      if (canonical) assert.equal(new URL(canonical).pathname, destination);
+    }
+  }
+  for (const path of ["/catalogo/99-unknown/", "/fr/catalogo/17-nenufares/"]) {
+    const response = await server.fetch(path, { redirect: "manual" });
+    assert.equal(response.status, 404, `${path}: ${await response.text()}`);
+  }
+  if (!staging) {
+    const sitemap = await server.fetch("/sitemap-0.xml");
+    assert.equal(sitemap.status, 200);
+    const xml = await sitemap.text();
+    assert.doesNotMatch(xml, /\/catalogo\/\d{2}-/);
+    for (const art of artworks) {
+      for (const prefix of ["", "/ca", "/en"]) {
+        assert.ok(
+          xml.includes(`${prefix}/catalogo/${art.slug}/`),
+          `missing sitemap URL: ${art.slug}`,
+        );
+      }
+    }
+  }
+
   for (const path of ["/", "/ca/"]) {
     const page = await server.fetch(path);
     assert.equal(page.headers.get("X-Content-Type-Options"), "nosniff", path);

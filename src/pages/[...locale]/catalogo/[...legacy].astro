@@ -1,0 +1,16 @@
+---
+import { numberedArtworkDestination } from "../../../lib/legacy-artwork-redirects";
+import NotFound from "../../404.astro";
+
+export const prerender = false;
+
+// Static current artwork pages take precedence over this runtime rest route.
+// A real route is necessary: middleware alone cannot intercept removed static
+// paths when Cloudflare's asset layer serves the missing-page response.
+const destination = numberedArtworkDestination(Astro.url);
+if (destination) return Astro.redirect(destination, 301);
+
+Astro.response.status = 404;
+---
+
+<NotFound />

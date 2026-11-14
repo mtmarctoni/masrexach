@@ -31,7 +31,7 @@ describe("artwork structured data", () => {
   it.each(["es", "ca", "en"] as const)(
     "embeds the same complete artist definition in %s",
     (locale) => {
-      const page = `${origin}/${locale}/catalogo/01-tiestos/`;
+      const page = `${origin}/${locale}/catalogo/tiestos-oleo/`;
       const schema = artworkSchema(artworks[0], locale, page, photo, origin);
       expect(schema).toMatchObject({
         "@type": "VisualArtwork",
