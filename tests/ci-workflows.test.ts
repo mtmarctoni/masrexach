@@ -24,6 +24,18 @@ it("pins all external actions and keeps untrusted PR triggers secret-free", () =
   }
 });
 
+it("limits credential-bearing previews to trusted same-repository PRs", () => {
+  const config = workflow("deploy-preview");
+  const condition: string = config.jobs.preview.if;
+  expect(condition).toContain("github.event.pull_request.head.repo.full_name == github.repository");
+  expect(condition).toContain("github.event.pull_request.draft == false");
+  expect(condition).toContain("github.actor != 'dependabot[bot]'");
+  expect(condition).toContain("needs.release-validation.outputs.is_release != 'true'");
+  expect(condition).not.toContain("||");
+  expect(config.permissions).toEqual({ contents: "read" });
+  expect(config.jobs.preview.permissions).toEqual({ contents: "read", "pull-requests": "write" });
+});
+
 it("excludes the font license after including source paths in Lighthouse triggers", () => {
   const paths: string[] = workflow("lighthouse").on.pull_request.paths;
   expect(paths).toContain("!src/assets/fonts/OFL.txt");
