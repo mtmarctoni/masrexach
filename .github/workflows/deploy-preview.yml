@@ -12,8 +12,8 @@
 # Worker does not exist yet, this workflow bootstraps it with a one-time
 # deploy before returning to version uploads on later pushes.
 # Dependabot PRs are skipped (GitHub withholds Actions secrets from Dependabot
-# runs, so wrangler could not authenticate); a maintainer re-run produces a
-# preview.
+# runs, so wrangler could not authenticate). Rerunning does not grant secrets.
+# Fork PRs run secret-free checks, never this credential-bearing upload.
 
 name: Deploy (preview)
 
@@ -53,11 +53,9 @@ jobs:
     name: Cloudflare preview version
     runs-on: ubuntu-latest
     # Dependabot-triggered runs receive no Actions secrets (repo- or
-    # environment-level — GitHub treats dependency bumps as untrusted code),
-    # so wrangler could not authenticate. Skip. A maintainer re-running the
-    # failed run gets a preview, because the re-run executes under the
-    # maintainer's identity.
-    if: needs.release-validation.outputs.is_release != 'true' && github.event.pull_request.draft == false && github.actor != 'dependabot[bot]'
+    # environment-level — GitHub treats dependency bumps as untrusted code).
+    # Only trusted same-repository PRs may upload code using staging bindings.
+    if: needs.release-validation.outputs.is_release != 'true' && github.event.pull_request.draft == false && github.actor != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
     environment: preview
     permissions:
       contents: read
