@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import heroImageSrc from "../../assets/images/artwork/07-albufera.jpg";
 import PersonJsonLd from "../../components/PersonJsonLd.astro";
-import { featuredArtworks, getArtwork } from "../../data/artworks";
+import { artworks, featuredArtworks } from "../../data/artworks";
 import { getDict, localeRoutes, localizedPath, statusLabels } from "../../i18n";
 import Base from "../../layouts/Base.astro";
 import { thumbnailOptions } from "../../lib/thumbnail";
@@ -13,7 +13,7 @@ const { locale } = Astro.props;
 const dict = getDict(locale);
 const labels = statusLabels(dict);
 
-const heroArt = getArtwork("07-albufera");
+const heroArt = artworks.find((art) => art.id === 7);
 
 const imageModules = import.meta.glob<{ default: ImageMetadata }>(
   "../../assets/images/artwork/*.jpg",

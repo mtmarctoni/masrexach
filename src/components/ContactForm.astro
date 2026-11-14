@@ -11,9 +11,11 @@ interface Props {
   locale: Locale;
   /** slug -> { title, caption } for the ?obra= prefill (current locale). */
   artworkIndex: Record<string, ArtworkIndexEntry>;
+  /** Historical slug -> current slug for previously shared enquiry links. */
+  artworkAliases: Record<string, string>;
 }
 
-const { locale, artworkIndex } = Astro.props;
+const { locale, artworkIndex, artworkAliases } = Astro.props;
 const dict = getDict(locale);
 const f = dict.contact.form;
 ---
@@ -31,6 +33,7 @@ const f = dict.contact.form;
     submit: f.submit,
   })}
   data-contact-artworks={JSON.stringify(artworkIndex)}
+  data-contact-artwork-aliases={JSON.stringify(artworkAliases)}
   class="grid gap-5"
   novalidate
 >

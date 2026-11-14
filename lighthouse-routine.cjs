@@ -3,6 +3,6 @@ const config = require("./.lighthouserc.json");
 config.ci.collect.url = [
   "http://localhost/",
   "http://localhost/catalogo/",
-  "http://localhost/catalogo/07-albufera/",
+  "http://localhost/catalogo/albufera/",
 ];
 module.exports = config;

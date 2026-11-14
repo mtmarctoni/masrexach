@@ -17,9 +17,9 @@ describe("canonical page paths", () => {
     ["es", "/catalogo/", "/catalogo/"],
     ["ca", "/catalogo/", "/ca/catalogo/"],
     ["en", "/catalogo/", "/en/catalogo/"],
-    ["es", "/catalogo/01-tiestos", "/catalogo/01-tiestos/"],
-    ["ca", "/catalogo/01-tiestos", "/ca/catalogo/01-tiestos/"],
-    ["en", "/catalogo/01-tiestos", "/en/catalogo/01-tiestos/"],
+    ["es", "/catalogo/tiestos-oleo", "/catalogo/tiestos-oleo/"],
+    ["ca", "/catalogo/tiestos-oleo", "/ca/catalogo/tiestos-oleo/"],
+    ["en", "/catalogo/tiestos-oleo", "/en/catalogo/tiestos-oleo/"],
   ] as const)("links %s %s directly to the directory URL", (locale, path, expected) => {
     expect(localizedPath(locale, path)).toBe(expected);
     expect(localizedPath(locale, path)).not.toContain("//");

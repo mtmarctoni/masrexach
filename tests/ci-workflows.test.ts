@@ -88,7 +88,7 @@ it("offers the configured full Lighthouse audit and shares Slow 4G settings with
   expect(routine.ci.collect.url).toEqual([
     "http://localhost/",
     "http://localhost/catalogo/",
-    "http://localhost/catalogo/07-albufera/",
+    "http://localhost/catalogo/albufera/",
   ]);
   expect(config.ci.collect.url).toEqual(expect.arrayContaining(routine.ci.collect.url));
   expect(routine.ci.collect.settings).toEqual(config.ci.collect.settings);

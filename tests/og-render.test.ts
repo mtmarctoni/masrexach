@@ -62,7 +62,7 @@ describe("original-asset card renderer", () => {
 
   it("escapes titles as text, never injected HTML", async () => {
     const card = {
-      ...resolveOgCard("en", "/catalogo/07-albufera"),
+      ...resolveOgCard("en", "/catalogo/albufera"),
       title: '<img src=x onerror="alert(1)">',
     };
     const { html } = await prepareOgCard(card, { root });
@@ -77,12 +77,12 @@ describe("original-asset card renderer", () => {
       try {
         const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
         for (const path of [
-          "/catalogo/03-botellas",
-          "/catalogo/14-granja-esporlas",
-          "/catalogo/07-albufera",
-          "/catalogo/05-orient-100x40",
-          "/catalogo/19-trastos-granja-esporlas",
-          "/catalogo/17-nenufares",
+          "/catalogo/botellas",
+          "/catalogo/granja-esporlas",
+          "/catalogo/albufera",
+          "/catalogo/orient-panoramico",
+          "/catalogo/trastos-granja-esporlas",
+          "/catalogo/nenufares",
           "/",
           "/biografia",
         ]) {
@@ -137,7 +137,7 @@ describe("original-asset card renderer", () => {
       const cards = [
         resolveOgCard("es", "/"),
         resolveOgCard("ca", "/biografia"),
-        resolveOgCard("en", "/catalogo/03-botellas"),
+        resolveOgCard("en", "/catalogo/botellas"),
       ];
       const manifest = await renderOgCards(cards, output, { root });
       for (const card of cards) {

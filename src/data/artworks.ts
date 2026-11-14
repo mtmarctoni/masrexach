@@ -2,7 +2,7 @@ export type ArtworkStatus = "available" | "sold" | "nfs";
 
 export interface Artwork {
   id: number;
-  /** Unique URL slug, derived from the image basename, e.g. "07-albufera". */
+  /** Stable public URL slug, independent of the title and image filename. */
   slug: string;
   title: string;
   caption: { es: string; ca: string; en: string };
@@ -14,15 +14,16 @@ export interface Artwork {
   featured: boolean;
 }
 
-type ArtworkBase = Omit<Artwork, "slug" | "image" | "status" | "featured">;
+type ArtworkBase = Omit<Artwork, "image" | "status" | "featured">;
 
 const a = (
   id: number,
   title: string,
+  slug: string,
   captionEs: string,
   captionCa: string,
   captionEn: string,
-): ArtworkBase => ({ id, title, caption: { es: captionEs, ca: captionCa, en: captionEn } });
+): ArtworkBase => ({ id, title, slug, caption: { es: captionEs, ca: captionCa, en: captionEn } });
 
 const artworkImages = new Map<number, string>([
   [1, "01-tiestos.jpg"],
@@ -60,6 +61,7 @@ const base: ArtworkBase[] = [
   a(
     1,
     "Tiestos",
+    "tiestos-oleo",
     "Óleo sobre tablilla 18x13 cm.",
     "Oli sobre tabil·la 18x13 cm.",
     "Oil on board 18x13 cm.",
@@ -67,6 +69,7 @@ const base: ArtworkBase[] = [
   a(
     2,
     "Orient",
+    "orient-cuadrado",
     "Óleo sobre tela 60 x 60 cm.",
     "Oli sobre tela 60 x 60 cm.",
     "Oil on canvas 60 x 60 cm.",
@@ -74,6 +77,7 @@ const base: ArtworkBase[] = [
   a(
     3,
     "Botellas",
+    "botellas",
     "Óleo sobre tabla 55 x 20 cm.",
     "Oli sobre taula 55 x 20 cm.",
     "Oil on panel 55 x 20 cm.",
@@ -81,6 +85,7 @@ const base: ArtworkBase[] = [
   a(
     4,
     "Fonollasa",
+    "fonollasa",
     "Óleo sobre tela 61 x 50 cm.",
     "Oli sobre tela 61 x 50 cm.",
     "Oil on canvas 61 x 50 cm.",
@@ -88,6 +93,7 @@ const base: ArtworkBase[] = [
   a(
     5,
     "Orient",
+    "orient-panoramico",
     "Óleo sobre tela 100 x 40 cm.",
     "Oli sobre tela 100 x 40 cm.",
     "Oil on canvas 100 x 40 cm.",
@@ -95,6 +101,7 @@ const base: ArtworkBase[] = [
   a(
     6,
     "Tronco olivera",
+    "tronco-olivera",
     "Óleo sobre tela 65 x 54 cm.",
     "Oli sobre tela 65 x 54 cm.",
     "Oil on canvas 65 x 54 cm.",
@@ -102,6 +109,7 @@ const base: ArtworkBase[] = [
   a(
     7,
     "Albufera",
+    "albufera",
     "Òleo sobre tela 92 x 92 cm.",
     "Oli sobre tela 92 x 92 cm.",
     "Oil on canvas 92 x 92 cm.",
@@ -109,6 +117,7 @@ const base: ArtworkBase[] = [
   a(
     8,
     "Paisaje mallorquín",
+    "paisaje-mallorquin",
     "Óleo sobre tela 80 x 30 cm.",
     "Oli sobre tela 80 x 30 cm.",
     "Oil on canvas 80 x 30 cm.",
@@ -116,6 +125,7 @@ const base: ArtworkBase[] = [
   a(
     9,
     "Rincón casa",
+    "rincon-casa",
     "Óleo sobre tela 80 x 30 cm.",
     "Oli sobre tela 80 x 30 cm.",
     "Oil on canvas 80 x 30 cm.",
@@ -123,6 +133,7 @@ const base: ArtworkBase[] = [
   a(
     10,
     "Tiesto en estanque",
+    "tiesto-en-estanque",
     "Óleo sobre tablilla 23x19 cm.",
     "Oli sobre tabil·la 23x19 cm.",
     "Oil on board 23x19 cm.",
@@ -130,6 +141,7 @@ const base: ArtworkBase[] = [
   a(
     11,
     "Fuente y canal",
+    "fuente-y-canal",
     "Óleo sobre tela 61x50 cm.",
     "Oli sobre tela 61x50 cm.",
     "Oil on canvas 61x50 cm.",
@@ -137,6 +149,7 @@ const base: ArtworkBase[] = [
   a(
     12,
     "Son Angelats – Soller",
+    "son-angelats-soller",
     "Acrílico sobre papel 20x15 cm.",
     "Acrílic sobre paper 20x15 cm.",
     "Acrylic on paper 20x15 cm.",
@@ -144,6 +157,7 @@ const base: ArtworkBase[] = [
   a(
     13,
     "Silla y granadas",
+    "silla-y-granadas",
     "Óleo sobre tela 61x50 cm.",
     "Oli sobre tela 61x50 cm.",
     "Oil on canvas 61x50 cm.",
@@ -151,6 +165,7 @@ const base: ArtworkBase[] = [
   a(
     14,
     "Granja Esporlas",
+    "granja-esporlas",
     "Óleo sobre tela 30x80 cm.",
     "Oli sobre tela 30x80 cm.",
     "Oil on canvas 30x80 cm.",
@@ -158,6 +173,7 @@ const base: ArtworkBase[] = [
   a(
     15,
     "Iglesia Valldemossa",
+    "iglesia-valldemossa",
     "Acrílico sobre tablilla 14x19 cm.",
     "Acrílic sobre tabil·la 14x19 cm.",
     "Acrylic on board 14x19 cm.",
@@ -165,6 +181,7 @@ const base: ArtworkBase[] = [
   a(
     16,
     "Tiestos",
+    "tiestos-acrilico",
     "Acrílico sobre tablilla 18 x 13 cm.",
     "Acrílic sobre tabil·la 18 x 13 cm.",
     "Acrylic on board 18 x 13 cm.",
@@ -172,6 +189,7 @@ const base: ArtworkBase[] = [
   a(
     17,
     "Nenúfares",
+    "nenufares",
     "Óleo sobre tela 92 x 92 cm.",
     "Oli sobre tela 92 x 92 cm.",
     "Oil on canvas 92 x 92 cm.",
@@ -179,6 +197,7 @@ const base: ArtworkBase[] = [
   a(
     18,
     "Amapolas",
+    "amapolas",
     "Óleo sobre tela 46 x 38 cm.",
     "Oli sobre tela 46 x 38 cm.",
     "Oil on canvas 46 x 38 cm.",
@@ -186,6 +205,7 @@ const base: ArtworkBase[] = [
   a(
     19,
     "Trastos Granja Esporlas",
+    "trastos-granja-esporlas",
     "Óleo sobre tela 73 x 60 cm.",
     "Oli sobre tela 73 x 60 cm.",
     "Oil on canvas 73 x 60 cm.",
@@ -193,6 +213,7 @@ const base: ArtworkBase[] = [
   a(
     20,
     "Esporlas",
+    "esporlas",
     "Óleo sobre tela 55 x 46 cm.",
     "Oli sobre tela 55 x 46 cm.",
     "Oil on canvas 55 x 46 cm.",
@@ -200,6 +221,7 @@ const base: ArtworkBase[] = [
   a(
     21,
     "RINCÓN JARDÍN",
+    "rincon-jardin",
     "Óleo sobre tela 60 x 60 cm.",
     "Oli sobre tela 60 x 60 cm.",
     "Oil on canvas 60 x 60 cm.",
@@ -207,6 +229,7 @@ const base: ArtworkBase[] = [
   a(
     22,
     "CIPRESES EN EL LAGO",
+    "cipreses-en-el-lago",
     "Óleo sobre tela 40 x 100 cm.",
     "Oli sobre tela 40 x 100 cm.",
     "Oil on canvas 40 x 100 cm.",
@@ -214,6 +237,7 @@ const base: ArtworkBase[] = [
   a(
     23,
     "CASA Y BUGAMBILIA",
+    "casa-y-bugambilia",
     "Óleo sobre tela 61 x 50 cm.",
     "Oli sobre tela 61 x 50 cm.",
     "Oil on canvas 61 x 50 cm.",
@@ -221,6 +245,7 @@ const base: ArtworkBase[] = [
   a(
     24,
     "BADALUC",
+    "badaluc",
     "Óleo sobre tela 60 x 60 cm.",
     "Oli sobre tela 60 x 60 cm.",
     "Oil on canvas 60 x 60 cm.",
@@ -228,6 +253,7 @@ const base: ArtworkBase[] = [
   a(
     25,
     "ATARDECER",
+    "atardecer",
     "Óleo sobre tela 73 x 60 cm.",
     "Oli sobre tela 73 x 60 cm.",
     "Oil on canvas 73 x 60 cm.",
@@ -242,7 +268,6 @@ export const artworks: Artwork[] = base.map((art) => {
   return {
     ...art,
     image,
-    slug: image.replace(/\.jpg$/, ""),
     status: "available",
     featured: FEATURED_IDS.has(art.id),
   };
