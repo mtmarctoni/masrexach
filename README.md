@@ -53,6 +53,7 @@ The pre-push gate also needs Gitleaks, OSV Scanner and actionlint. Full verifica
 
 ## Project guides
 
+- [Architecture and current features](docs/architecture.md)
 - [Contributing](CONTRIBUTING.md)
 - [Reporting a vulnerability](SECURITY.md)
 - [Verification and test selection](docs/ci-verification.md)

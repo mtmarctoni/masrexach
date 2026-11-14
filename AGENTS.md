@@ -1,5 +1,9 @@
 # Agent instructions
 
+Read [docs/architecture.md](docs/architecture.md) for current features, source
+locations, trust boundaries, and carried-forward owner decisions. Retired plans
+in Git history are not current implementation instructions.
+
 ## Commits and releases
 
 Commit messages decide the production version. Release Please reads the
