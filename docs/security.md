@@ -73,6 +73,24 @@ configured required branch checks remain the server-side backstop.
 
 ## Secret scanning and limitations
 
+### Public repository preparation
+
+Review Git history, commit identities, PR discussions, release attachments,
+Actions logs/artifacts, original image metadata, and artwork publication rights
+before changing visibility. Deleting a file from the current tree does not
+remove its history, and making the repository private again cannot recall copies.
+
+`deploy.sh` allowlists only `CONTACT_FROM_EMAIL` and `CONTACT_TO_EMAIL` as runtime
+vars and logs names only. Keep their values out of public logs even when they
+are not authentication secrets; see [deployment logging](releases.md#runtime-configuration-and-public-logs).
+Historical logs require a separate review and owner-approved cleanup.
+
+Fork PRs run without deployment secrets and cannot upload previews. Dependabot
+PRs also skip preview uploads; a maintainer rerun does not grant them secrets.
+Same-repository preview code is trusted code and can access the staging Worker's
+bindings: keep staging credentials separate from production and review changes
+before allowing a preview when contributors are not fully trusted.
+
 The staged pre-commit Gitleaks scan warns and succeeds if Gitleaks is missing;
 the pre-push gate requires it. Local history scans cover available refs, not
 deleted branches, logs, issues, or every possible secret format. CI scanning

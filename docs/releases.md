@@ -86,6 +86,21 @@ Rollback caveats:
   from `main`, not from the old release, so old releases still get the current
   secret and var safeguards.
 
+## Runtime configuration and public logs
+
+`deploy.sh` forwards only `CONTACT_FROM_EMAIL` and `CONTACT_TO_EMAIL` from
+GitHub Variables as runtime Worker vars. New runtime variables must be explicitly
+added to its allowlist. Build-time `PUBLIC_*` values and workflow credentials are
+not forwarded. Populated same-name secrets take precedence over vars.
+
+Deployment summaries log variable names, not values. Values stay in CLI `--var`
+arguments, which the pinned Wrangler version hides in its binding summary; a
+local dry-run regression test checks that behavior. Do not move contact values
+into committed Wrangler config or enable debug logging in deployment jobs.
+Confirm the complete logs after an approved deployment before publication.
+Existing logs are not sanitized retroactively: review them separately before
+making the repository public.
+
 ## The release GitHub App
 
 Release Please authenticates as a GitHub App instead of `GITHUB_TOKEN`. PRs
@@ -111,25 +126,12 @@ The App credentials never reach the Worker: `deploy.sh` skips `RELEASE_APP_*`
 variables, only the secrets in `scripts/managed-secrets.sh` are uploaded, and
 the production deploy receives secrets explicitly, never `secrets: inherit`.
 
-## One-time activation
+## Historical bootstrap
 
-Do these in order, after this branch is reviewed. Each step is a manual,
-owner-approved action.
+Release automation has already been activated; published releases and tags exist.
+Do not recreate the baseline tag or require production to report the original
+bootstrap commit. Use the normal release and rollback procedures above.
 
-1. **Recheck production.** `curl -s https://masrexach.com/api/health` must
-   report commit `c24b7008ec2ec775c6e0d26e1fcc3f7eeababeee`. If it reports
-   anything else, stop: the baseline in `release-please-config.json`
-   (`bootstrap-sha`) must be reconfirmed first.
-2. **Tag the baseline without deploying.** Create tag `v1.0.0` and a GitHub
-   release at that commit:
-   `gh release create v1.0.0 --target c24b7008ec2ec775c6e0d26e1fcc3f7eeababeee --title v1.0.0 --notes "Baseline: the site as deployed on 2026-11-06."`
-   This triggers no workflow.
-3. **Merge this branch** to `main`. Staging deploys. The **Release** workflow
-   runs and should authenticate as the App and open the first release PR,
-   listing only commits after the baseline.
-4. **Check the release PR**: CI ran on it (proving App authentication), the
-   version is what you expect, and the changelog starts after `v1.0.0`.
-5. Merge it when you want the first versioned production deploy.
-
-After the first release PR is merged, Release Please ignores `bootstrap-sha`.
-It can be removed from `release-please-config.json` later.
+`bootstrap-sha` in `release-please-config.json` was the initial history boundary.
+Release Please ignores it after the first release PR; removing it is optional
+maintenance, not a prerequisite for releasing or making the repository public.
