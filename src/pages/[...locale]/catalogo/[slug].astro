@@ -90,7 +90,7 @@ const schema = artworkSchema(
   </nav>
 
   <figure class="mx-auto mt-14 w-full max-w-[500px]">
-    <div class="rounded-sm border border-border bg-white p-5 pb-0 shadow-[0_24px_48px_-24px_rgb(33_29_23/0.28)]">
+    <div class="rounded-sm border border-border bg-white p-5 shadow-[0_24px_48px_-24px_rgb(33_29_23/0.28)]">
       {
         image ? (
           <img
@@ -100,7 +100,7 @@ const schema = artworkSchema(
             width={image.attributes.width}
             height={image.attributes.height}
             alt={alt}
-            class="h-auto w-full"
+            class="block h-auto w-full"
             loading="eager"
             decoding="async"
             fetchpriority="high"
