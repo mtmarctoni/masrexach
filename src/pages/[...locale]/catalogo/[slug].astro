@@ -1,5 +1,6 @@
 ---
 import { getImage } from "astro:assets";
+import ArtworkFrame from "../../../components/ArtworkFrame.astro";
 import type { Artwork } from "../../../data/artworks";
 import { adjacentArtworks, artworks } from "../../../data/artworks";
 import type { Locale } from "../../../i18n";
@@ -90,17 +91,17 @@ const schema = artworkSchema(
   </nav>
 
   <figure class="mx-auto mt-14 w-full max-w-[500px]">
-    <div class="rounded-sm border border-border bg-white p-5 shadow-[0_24px_48px_-24px_rgb(33_29_23/0.28)]">
+    <ArtworkFrame>
       {
         image ? (
           <img
             src={image.src}
             srcset={image.srcSet.attribute}
-            sizes="(min-width: 548px) 458px, calc(100vw - 90px)"
+            sizes="(min-width: 548px) 448px, calc(100vw - 100px)"
             width={image.attributes.width}
             height={image.attributes.height}
             alt={alt}
-            class="block h-auto w-full"
+            class="h-auto w-full"
             loading="eager"
             decoding="async"
             fetchpriority="high"
@@ -109,7 +110,7 @@ const schema = artworkSchema(
           <span class="block aspect-square w-full" aria-hidden="true" />
         )
       }
-    </div>
+    </ArtworkFrame>
 
     <figcaption class="mx-auto mt-7 max-w-md text-center">
       <h1 class="font-display text-3xl font-semibold tracking-tight text-ink">
