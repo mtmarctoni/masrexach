@@ -15,6 +15,8 @@ describe.runIf(process.env.THUMBNAIL_VERIFY_BUILD === "1")("built artwork images
         );
         expect(attrs.srcset).toBeTruthy();
         expect(attrs.sizes).toBeTruthy();
+        expect(attrs.sizes).toBe("(min-width: 548px) 448px, calc(100vw - 100px)");
+        expect(html.match(/class="artwork-frame__rail /g)).toHaveLength(4);
         expect(attrs.alt).toBe(`${art.title} — ${art.caption[locale]}`);
         expect(attrs.loading).toBe("eager");
         expect(attrs.fetchpriority).toBe("high");
