@@ -127,10 +127,16 @@ default `src` and `VisualArtwork.image` still reference the largest variant;
 social-sharing cards are unchanged. Do not reuse thumbnail sizing here.
 
 The figure is at most 500px wide. Subtract 48px shared container padding and
-42px frame padding/borders: painted width = `min(V - 90, 458)`. Consequently
-`sizes` is `(min-width: 548px) 458px, calc(100vw - 90px)`. Keep this formula
+52px frame inset: painted width = `min(V - 100, 448)`. Consequently
+`sizes` is `(min-width: 548px) 448px, calc(100vw - 100px)`. Keep this formula
 synchronized with the container, frame, and figure maximum. Preserve eager
 loading, high fetch priority, intrinsic dimensions, and uncropped aspect ratios.
+
+`src/components/ArtworkFrame.astro` supplies four 21px mitred oak rails and a
+5px black floating gap, with equal 26px insets on every side. Local horizontal
+and vertical SVG grain assets use `preserveAspectRatio="none"`: this is required
+to fill the narrow rail backgrounds without untextured, letterboxed sections.
+Translucent lighting leaves the grain visible on the bevels and inner lip.
 
 ### Local measurements, November 7, 2026
 
