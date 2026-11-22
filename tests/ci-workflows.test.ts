@@ -30,6 +30,7 @@ it("limits credential-bearing previews to trusted same-repository PRs", () => {
   expect(condition).toContain("github.event.pull_request.head.repo.full_name == github.repository");
   expect(condition).toContain("github.event.pull_request.draft == false");
   expect(condition).toContain("github.actor != 'dependabot[bot]'");
+  expect(condition).toContain("github.event.pull_request.user.login != 'dependabot[bot]'");
   expect(condition).toContain("needs.release-validation.outputs.is_release != 'true'");
   expect(condition).not.toContain("||");
   expect(config.permissions).toEqual({ contents: "read" });
@@ -58,26 +59,36 @@ it("keeps optional link-check setup failures non-blocking but Lighthouse failure
   expect(workflow("lighthouse").jobs.lighthouse["continue-on-error"]).not.toBe(true);
 });
 
-it.each(["lighthouse", "deploy-preview"])(
-  "filters optional %s jobs to deploy-relevant changes",
-  (name) => {
-    const paths = workflow(name).on.pull_request.paths;
-    for (const path of [
-      "pnpm-workspace.yaml",
-      "tsconfig.json",
-      "src/**",
-      "public/**",
-      "scripts/**",
-      "package.json",
-      "pnpm-lock.yaml",
-      "astro.config.*",
-    ]) {
-      expect(paths).toContain(path);
-    }
-    expect(paths).not.toContain("docs/**");
-    expect(paths).toContain(`.github/workflows/${name}.yml`);
-  },
-);
+it("reports the required preview check even for Actions-only and documentation-only PRs", () => {
+  const config = workflow("deploy-preview");
+  expect(config.on.pull_request).not.toHaveProperty("paths");
+  expect(config.on.pull_request).not.toHaveProperty("paths-ignore");
+  expect(config.on.pull_request.types).toEqual([
+    "opened",
+    "synchronize",
+    "reopened",
+    "ready_for_review",
+  ]);
+  expect(config.jobs.preview.name).toBe("Cloudflare preview version");
+});
+
+it("filters optional Lighthouse jobs to deploy-relevant changes", () => {
+  const paths = workflow("lighthouse").on.pull_request.paths;
+  for (const path of [
+    "pnpm-workspace.yaml",
+    "tsconfig.json",
+    "src/**",
+    "public/**",
+    "scripts/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    "astro.config.*",
+  ]) {
+    expect(paths).toContain(path);
+  }
+  expect(paths).not.toContain("docs/**");
+  expect(paths).toContain(".github/workflows/lighthouse.yml");
+});
 
 it("offers the configured full Lighthouse audit and shares Slow 4G settings with routine runs", () => {
   const config = JSON.parse(readFileSync(".lighthouserc.json", "utf8"));
