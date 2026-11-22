@@ -94,6 +94,9 @@ are separate Workers; PR previews are versions of the staging Worker, inheriting
 its bindings. Only trusted same-repository, non-draft, non-Dependabot PRs may
 upload previews. Builds execute repository code, so a same-repository preview is
 not a sandbox for untrusted contributors. Never share production keys with it.
+The preview workflow runs for every PR change so its required check is always
+reported; excluded PRs skip the upload job rather than leave a missing check
+pending. Dependabot author and triggering actor are both excluded.
 
 Merges to main deploy staging and maintain the Release Please PR. Merging the
 release PR creates a release and deploys that exact commit to production. Manual

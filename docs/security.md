@@ -87,6 +87,9 @@ Historical logs require a separate review and owner-approved cleanup.
 
 Fork PRs run without deployment secrets and cannot upload previews. Dependabot
 PRs also skip preview uploads; a maintainer rerun does not grant them secrets.
+The workflow has no PR path filters so the required preview check is reported
+even for Actions-only or documentation-only changes. Exclusions are job-level
+skips; both the PR author and triggering actor are checked for Dependabot.
 Same-repository preview code is trusted code and can access the staging Worker's
 bindings: keep staging credentials separate from production and review changes
 before allowing a preview when contributors are not fully trusted.
