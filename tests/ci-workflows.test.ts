@@ -72,6 +72,17 @@ it("reports the required preview check even for Actions-only and documentation-o
   expect(config.jobs.preview.name).toBe("Cloudflare preview version");
 });
 
+it("fails staging deployment when verification of the deployed commit fails", () => {
+  const job = workflow("deploy-staging").jobs.deploy;
+  const smoke = job.steps.find((step: { name?: string }) => step.name === "Smoke test");
+  expect(smoke).toBeDefined();
+  expect(smoke.run).toBe(
+    'node scripts/smoke.mjs https://masrexach-staging.marctonimas.com "$GITHUB_SHA"',
+  );
+  expect(smoke["continue-on-error"]).not.toBe(true);
+  expect(job["continue-on-error"]).not.toBe(true);
+});
+
 it("filters optional Lighthouse jobs to deploy-relevant changes", () => {
   const paths = workflow("lighthouse").on.pull_request.paths;
   for (const path of [
