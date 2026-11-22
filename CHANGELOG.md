@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.0](https://github.com/mtmarctoni/masrexach/compare/v1.3.1...v1.4.0) (2026-11-22)
+
+
+### Features
+
+* **site:** show paintings in textured floating oak frames ([b35e29d](https://github.com/mtmarctoni/masrexach/commit/b35e29de02a4420d58c537468809586309280221))
+
+
+### Bug Fixes
+
+* **site:** keep equal spacing around paintings ([c7175b6](https://github.com/mtmarctoni/masrexach/commit/c7175b6ebe676aa99877c2017b714ae87d0130db))
+* **site:** make the floating gap around paintings black ([0e1b861](https://github.com/mtmarctoni/masrexach/commit/0e1b86136d6362e6b6f3e379c9656171ba9491f0))
+
 ## [1.3.1](https://github.com/mtmarctoni/masrexach/compare/v1.3.0...v1.3.1) (2026-11-14)
 
 
