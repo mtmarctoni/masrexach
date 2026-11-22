@@ -53,14 +53,14 @@ is not a guaranteed real-time paging service.
 
 - [x] Owner confirms Email and On GitHub preferences (2026-11-06).
 - [ ] Owner verifies the destination email is monitored; actual alert delivery
-  remains untested.
+      remains untested.
 - [x] Review repository alert auto-triage/dismissal rules in
-  [repository security settings](https://github.com/mtmarctoni/masrexach/settings/security_analysis).
-  Owner confirmed no auto-triage rules automatically dismiss alerts
-  (2026-11-06); this is owner-confirmed, not API-verified.
+      [repository security settings](https://github.com/mtmarctoni/masrexach/settings/security_analysis).
+      Owner confirmed no auto-triage rules automatically dismiss alerts
+      (2026-11-06); this is owner-confirmed, not API-verified.
 - [ ] Confirm actual notification delivery using a genuine alert or a supported
-  test facility if available. No delivery test was performed; no open alert is
-  currently available for this purpose.
+      test facility if available. No delivery test was performed; no open alert is
+      currently available for this purpose.
 
 ### When a vulnerability appears
 
@@ -130,18 +130,18 @@ ever leaked.
 ### Remaining actions
 
 - [x] Install Gitleaks locally (`brew install gitleaks`) and verify it on PATH.
-  Installed 8.30.1 with owner approval on 2026-11-06. GUI clients or other
-  environments with a different PATH must also be able to find the binary.
+      Installed 8.30.1 with owner approval on 2026-11-06. GUI clients or other
+      environments with a different PATH must also be able to find the binary.
 - [ ] Decide whether the missing-scanner hook should fail closed instead of
-  warning. Any change needs regression tests for clean, leaking, and missing-
-  scanner cases and a documented setup path for contributors.
+      warning. Any change needs regression tests for clean, leaking, and missing-
+      scanner cases and a documented setup path for contributors.
 - [ ] Harden CI scanning in a scoped follow-up: avoid incomplete PR commit
-  enumeration, select an explicit scanner version, and ensure independent
-  secret checks run even if dependency installation/OSV fails. Verify normal,
-  fork, and Dependabot PRs without granting write tokens or deployment secrets.
+      enumeration, select an explicit scanner version, and ensure independent
+      secret checks run even if dependency installation/OSV fails. Verify normal,
+      fork, and Dependabot PRs without granting write tokens or deployment secrets.
 - [ ] Revisit hosted push protection only if GitHub shows an eligible option;
-  do not buy a plan, transfer ownership, or make this repository public merely
-  to enable it without explicit approval.
+      do not buy a plan, transfer ownership, or make this repository public merely
+      to enable it without explicit approval.
 
 ### Responding to an exposed credential
 
