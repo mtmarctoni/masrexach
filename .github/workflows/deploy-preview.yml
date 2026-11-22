@@ -1,4 +1,4 @@
-# PR preview — every non-draft PR gets a Cloudflare preview URL.
+# PR preview — trusted, non-draft, non-release PRs get a Cloudflare preview URL.
 #
 # Builds with CLOUDFLARE_ENV=staging (same Worker as staging), then
 # `wrangler versions upload` uploads the build as a new version of the
@@ -14,26 +14,14 @@
 # Dependabot PRs are skipped (GitHub withholds Actions secrets from Dependabot
 # runs, so wrangler could not authenticate). Rerunning does not grant secrets.
 # Fork PRs run secret-free checks, never this credential-bearing upload.
+# Always trigger the workflow: path-filtered workflows leave required checks
+# pending. Ineligible PRs report the preview job as skipped instead.
 
 name: Deploy (preview)
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - "pnpm-workspace.yaml"
-      - "tsconfig.json"
-      - "src/**"
-      - "public/**"
-      - "scripts/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "astro.config.*"
-      - "*.config.*"
-      - "wrangler.*"
-      - ".nvmrc"
-      - ".npmrc"
-      - ".github/workflows/deploy-preview.yml"
 
 permissions:
   contents: read
@@ -55,7 +43,8 @@ jobs:
     # Dependabot-triggered runs receive no Actions secrets (repo- or
     # environment-level — GitHub treats dependency bumps as untrusted code).
     # Only trusted same-repository PRs may upload code using staging bindings.
-    if: needs.release-validation.outputs.is_release != 'true' && github.event.pull_request.draft == false && github.actor != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    # Check the PR author too, so maintainer-triggered runs cannot opt it in.
+    if: needs.release-validation.outputs.is_release != 'true' && github.event.pull_request.draft == false && github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
     environment: preview
     permissions:
       contents: read
