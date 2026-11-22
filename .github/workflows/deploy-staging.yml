@@ -66,8 +66,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           SECRETS_CONTEXT: ${{ toJSON(secrets) }}
 
-      # Non-blocking: on the very first deploy the custom-domain certificate
-      # can still be provisioning when this runs; later deploys are immediate.
+      # Verification failures fail this deployment job. The smoke script retries
+      # health checks to allow for Worker version propagation.
       - name: Smoke test
         run: node scripts/smoke.mjs https://masrexach-staging.marctonimas.com "$GITHUB_SHA"
-        continue-on-error: true
