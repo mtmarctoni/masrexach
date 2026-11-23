@@ -40,25 +40,25 @@
     "pre-push": "pnpm verify"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "~14.4.8",
-    "@astrojs/sitemap": "^3.7.5",
-    "astro": "~7.4.12"
+    "@astrojs/cloudflare": "~14.4.9",
+    "@astrojs/sitemap": "^3.7.6",
+    "astro": "~7.4.13"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "@biomejs/biome": "^2.6.7",
+    "@biomejs/biome": "^2.6.8",
     "@lhci/cli": "^0.16.1",
     "@santi020k/astro-doctor": "^1.7.0",
     "@tailwindcss/vite": "^4.3.5",
-    "dependency-cruiser": "^18.7.2",
-    "knip": "^6.45.1",
-    "playwright": "1.65.0",
+    "dependency-cruiser": "^18.8.0",
+    "knip": "^6.47.0",
+    "playwright": "1.65.1",
     "sharp": "0.35.5",
     "simple-git-hooks": "^2.14.0",
     "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3",
-    "vitest": "^5.1.0",
-    "wrangler": "^4.162.0",
+    "vitest": "^5.1.1",
+    "wrangler": "^4.166.0",
     "yaml": "^2.9.1"
   }
 }
